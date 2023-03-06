@@ -1,0 +1,14 @@
+Envoi et reception depuis un serveur :
+	https://bousk.developpez.com/cours/reseau-c++/TCP/05-envoi-reception-serveur/
+
+Premier pas avec TCP :
+	https://bousk.developpez.com/cours/reseau-c++/TCP/01-premiers-pas/
+
+Mode connecte en cpp :
+	https://www.frameip.com/c-mode-connecte/
+
+Cours programation reseau :
+	https://www.developpez.net/forums/d1585590/c-cpp/cpp/cours-programmation-reseau/
+
+Pour les socket :
+	http://sdz.tdct.org/sdz/les-sockets.html

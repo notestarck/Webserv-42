@@ -1,0 +1,313 @@
+Everything in C++ 98.
+
+execve :
+	Charge et exécute les nouveaux processus enfant.
+	
+	intptr_t _execve(
+		const char *cmdname,
+		const char *const *argv,
+		const char *const *envp
+	);
+
+	cmdname
+		Chemin d’accès du fichier à exécuter.
+	
+	argv
+		Tableau de pointeurs vers les paramètres.
+	
+	envp
+		Tableau de pointeurs vers les paramètres d'environnement.
+
+dup et dup2 :
+	Crée un second descripteur de fichier pour un fichier ouvert (dup),
+	ou réaffecte un descripteur de fichier (dup2).
+
+	int dup( int fd );
+	int dup2( int fd1, int fd2 );
+
+	fd, fd1
+		Descripteurs de fichier qui font référence à un fichier ouvert.
+
+	fd2
+		Un descripteur de fichier.
+
+	Return
+		dup retourne un nouveau descripteur de fichier.
+		dup2 retourne la valeur 0 en cas de réussite.
+		Si une erreur se produit, chaque fonction retourne -1 et définit errno.
+
+pipe :
+	Crée un canal pour la lecture et l’écriture.
+
+	int pipe(
+		int *pfds,
+		unsigned int psize,
+		int textmode
+	);
+
+	pfds
+		Pointeur vers un tableau de deux int pour contenir les descripteurs de fichier de lecture et d’écriture.
+	
+	psize
+		Quantité de mémoire à réserver.
+	
+	textmode
+		Mode de Fichier.
+
+	Return :
+		Retourne 0 en cas de réussite. Retourne -1 pour indiquer une erreur.
+		En cas d’erreur, errno prend l’une de ces valeurs :
+			EMFILE, qui indique qu’aucun autre descripteur de fichier n’est disponible.
+			ENFILE, qui indique un dépassement de capacité positif de table de fichiers système.
+			EINVAL, qui indique que soit le tableau pfds est un pointeur Null, soit qu’une valeur non valide a été transmise pour textmode.
+
+strerror :
+	Obtient une chaîne de message d'erreur système (strerror)
+	ou met en forme une chaîne de message d'erreur fournie par l'utilisateur (_strerror)
+
+	char * strerror(int errnum );
+	char * _strerror(const char *strErrMsg );
+
+	errnum
+		Numéro d’erreur.
+
+	strErrMsg
+		Message fourni par l'utilisateur.
+
+	return :
+		Toutes ces fonctions retournent un pointeur vers une chaîne de message d’erreur,
+		dans une mémoire tampon de stockage locale de thread appartenant au runtime.
+		Les appels ultérieurs sur le même thread peuvent remplacer cette chaîne.
+
+gai_strerror :
+	La fonction gai_strerror aide à imprimer les messages d’erreur
+	en fonction des erreurs EAI_* retournées par la fonction getaddrinfo .
+	Notez que la fonction gai_strerror n’est pas thread sécurisé.
+
+	char * gai_strerrorA( [in] int ecode );
+
+	[in] ecode
+		Code d’erreur dans la liste des codes d’erreur getaddrinfo disponibles.
+		Pour obtenir une liste complète des codes d’erreur, consultez la fonction getaddrinfo
+	
+	return :
+		Retourne un pointeur vers une chaîne contenant le message d’erreur.
+
+errno :
+	Cette variable contient le code de la dernière erreur ayant était déclenchée dans le système.
+	Comme errno contient la valeur du dernier appel qui le définit, cette valeur peut être modifiée par les appels suivants.
+	Les appels de bibliothèque au moment de l’exécution qui sont définis errno sur une erreur ne sont pas effacés errno en cas de réussite.
+	Supprimez toujours errno en appelant _set_errno(0) juste avant un appel qui peut le déclencher, puis vérifiez-le immédiatement après celui-ci.
+	
+	En cas d’erreur, errno n’est pas nécessairement défini sur la même valeur que le code d’erreur retourné par un appel système.
+
+fork :
+	La fonction crée un nouveau processus, qui est une duplication du programme d’appel original.
+	Ce dernier processus est appelé parent et un processus nouvellement créé - child.
+	Ces deux processus peuvent être considérés comme les deux threads s’exécutant dans des espaces mémoire séparés.
+
+	Autrement dit, l’appel à fork crée un processus copie conforme du processus appelant.
+
+	return :
+		soit 0, auquel cas nous sommes dans le processus fils
+		soit un nombre supérieur à 0, auquel cas nous sommes dans le processus parent, et le nombre correspond au PID du processus fils
+		soit -1 si il a été impossible de créer un nouveau processus
+
+htons :
+	La fonction htons() convertit l’entier court non signé de l'hote en ordre d'octet reseau TCP/IP.
+
+	uint16_t htons(uint16_t hostshort);
+
+	hostshort
+		Nombre 16 bits dans l’ordre d’octet de l’hôte.
+
+	return :
+		La fonction htons retourne la valeur dans l’ordre d’octet du réseau TCP/IP.
+
+htonl :
+	La fonction htonl convertit un u_long de l’hôte en ordre d’octet réseau TCP/IP.
+
+	uint32_t htonl(uint32_t hostlong);
+
+	hostlong
+		Nombre 32 bits dans l’ordre d’octet de l’hôte.
+
+	return :
+		La fonction htonl retourne la valeur dans l’ordre d’octet réseau de TCP/IP.
+
+ntohs :
+	Convertit un entier court non signé netshort depuis l’ordre des octets du réseau vers celui de l’hôte.
+
+	uint16_t ntohs(uint16_t netshort);
+
+	netshort
+		A 16-bit number in TCP/IP network byte order.
+
+	return :
+		The ntohs function returns the value in host byte order. If the netshort parameter is already in host byte order,
+		then this function will reverse it. It is up to the application to determine if the byte order must be reversed.
+
+ntohl :
+	La fonction ntohl convertit un u_long de l’ordre de réseau TCP/IP en ordre d’octet hôte 
+
+	uint32_t ntohl(uint32_t netlong);
+
+	netlong
+		Numéro 32 bits dans l’ordre d’octet du réseau TCP/IP.
+
+	return :
+		La fonction ntohl retourne la valeur fournie dans le paramètre netlong avec l’ordre d’octet inversé.
+		Si netlong est déjà dans l’ordre d’octet de l’hôte, cette fonction l’inverse.
+		Il est à l’application de déterminer si l’ordre d’octet doit être inversé.
+
+select & poll :
+	L’appel-système select(), comme son homologue poll(),
+	sert à attendre passivement qu’une condition soit réalisée
+	sur un ou plusieurs descripteurs de fichier que l’on peut surveiller simultanément.
+	https://www.blaess.fr/christophe/2013/12/27/comprendre-le-fonctionnement-de-select/
+
+epoll (epoll_create, epoll_ctl, epoll_wait) :
+	Notifications d'événements d'entrées-sorties 
+
+	http://manpagesfr.free.fr/man/man7/epoll.7.html	
+
+kqueue (kqueue, kevent) :
+
+socket :
+	http://sdz.tdct.org/sdz/les-sockets.html
+	http://manpagesfr.free.fr/man/man2/socket.2.html
+
+accept :
+	Accepter une connexion sur une socket
+	http://manpagesfr.free.fr/man/man2/accept.2.html
+
+	int accept(int sockfd, struct sockaddr *adresse, socklen_t *longueur);
+
+	L'appel système accept() est employé avec les sockets utilisant un protocole en mode connecté (SOCK_STREAM et SOCK_SEQPACKET).
+	Il extrait la première connexion de la file des connexions en attente de la socket sockfd à l'écoute, crée une nouvelle socket connectée,
+	et renvoie un nouveau descripteur de fichier qui fait référence à cette socket.
+	La nouvelle socket n'est pas en état d'écoute. La socket originale sockfd n'est pas modifiée par l'appel système.
+
+	return :
+		S'il réussit, accept() renvoie un entier non négatif, constituant un descripteur pour la nouvelle socket.
+		S'il échoue, l'appel renvoie -1 et errno contient le code d'erreur.  
+
+listen :
+	La fonction d’écoute place un socket dans un état dans lequel il écoute une connexion entrante.
+
+	int WSAAPI listen( [in] SOCKET s, [in] int    backlog);
+
+	[in] s
+		Descripteur identifiant un socket lié et non connecté.
+	[in] backlog
+		Longueur maximale de la file d’attente des connexions en attente. Si la valeur est SOMAXCONN,
+		le fournisseur de services sous-jacent responsable des sockets définit le backlog sur une valeur maximale raisonnable.
+		Si la valeur est SOMAXCONN_HINT(N) (où N est un nombre), la valeur du backlog est N, ajustée pour être comprise dans la plage (200, 65535).
+		Notez que SOMAXCONN_HINT pouvez être utilisé pour définir le backlog sur une valeur supérieure à possible avec SOMAXCONN.
+	
+	return :
+		Si aucune erreur ne se produit, l’écoute retourne zéro. Sinon, une valeur de SOCKET_ERROR est retournée et un code d’erreur
+		spécifique peut être récupéré en appelant WSAGetLastError.
+
+send :
+	La fonction d’envoi envoie des données sur un socket connecté.
+
+	ssize_t send(int s, const void *buf, size_t len, int flags);
+
+	s
+		Descripteur identifiant un socket connecté.
+	
+	buf
+		Pointeur vers une mémoire tampon contenant les données à transmettre.
+	
+	len
+		Longueur, en octets, des données dans la mémoire tampon pointées par le paramètre buf .
+	
+	flags
+		Ensemble d’indicateurs qui spécifient la façon dont l’appel est effectué.
+		Ce paramètre est construit à l’aide de l’opérateur OR au niveau du bit avec l’une des valeurs suivantes.
+	
+	return :
+		Si aucune erreur ne se produit, send retourne le nombre total d’octets envoyés, qui peut être inférieur
+		au nombre demandé à être envoyé dans le paramètre len .
+		Sinon, une valeur de SOCKET_ERROR est retournée et un code d’erreur spécifique peut être récupéré en appelant WSAGetLastError.
+
+recv :
+	La fonction recv reçoit les données d’un socket connecté ou d’un socket sans connexion lié.
+
+	ssize_t recv(int s, void *buf, ssize_t len, int flags);
+
+	s
+		Descripteur qui identifie un socket connecté.
+	
+	*buf
+		Pointeur vers la mémoire tampon pour recevoir les données entrantes.
+	
+	len
+		Longueur, en octets, de la mémoire tampon pointée par le paramètre buf .
+	
+	flags
+		Ensemble d’indicateurs qui influencent le comportement de cette fonction. Consultez la section Notes ci-dessous.
+
+	return :
+		Si aucune erreur ne se produit, recv retourne le nombre d’octets reçus et la mémoire tampon pointée
+		par le paramètre buf contiendra ces données reçues.
+		Si la connexion a été correctement fermée, la valeur de retour est égale à zéro.
+
+bind :
+	La fonction bind associe une adresse locale à un socket.
+
+	int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+
+	s
+		Descripteur identifiant un socket indépendant.
+	
+	name
+		Pointeur vers une structure sockaddr de l’adresse locale à affecter au socket lié.
+	
+	namelen
+		Longueur, en octets, de la valeur pointée par le paramètre name .
+	
+	return :
+		Si aucune erreur ne se produit, la liaison retourne zéro.
+		Sinon, elle retourne SOCKET_ERROR et un code d’erreur spécifique peut être récupéré en appelant WSAGetLastError.
+
+connect :
+	La fonction de connexion établit une connexion à un socket spécifié.
+
+	int connect( SOCKET s, const sockaddr *name, int namelen );
+
+	s
+		Descripteur identifiant un socket non connecté.
+	
+	name
+		Pointeur vers la structure sockaddr vers laquelle la connexion doit être établie.
+	
+	namelen
+		Longueur, en octets, de la structure sockaddr pointée par le paramètre de nom .
+	
+	return :
+		Si aucune erreur ne se produit, la connexion retourne zéro.
+		Sinon, elle retourne SOCKET_ERROR et un code d’erreur spécifique peut être récupéré en appelant WSAGetLastError.
+
+getaddrinfo && freeaddrinfo:
+	getaddrinfo, freeaddrinfo, gai_strerror - Traduction d'adresses et de services réseau.
+
+	http://manpagesfr.free.fr/man/man3/getaddrinfo.3.html
+	https://learn.microsoft.com/fr-fr/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfo
+
+setsockopt && getsockname :
+	Lire et écrire les options d'une socket
+ 	
+	int getsockopt(int sockfd, int level, int optname,
+            void *optval, socklen_t *optlen);
+    int setsockopt(int sockfd, int level, int optname,
+            const void *optval, socklen_t optlen);
+
+	https://manpages.ubuntu.com/manpages/bionic/fr/man2/setsockopt.2.html
+
+getprotobyname :
+	http://manpagesfr.free.fr/man/man3/getprotoent.3.html
+
+fcnt :
+	http://manpagesfr.free.fr/man/man2/fcntl.2.html
