@@ -6,7 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/03/03 15:11:33 by estarck          ###   ########.fr        #
+#    Updated: 2023/03/09 10:15:24 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,8 @@ NAME		=	webserv
 INCLUDES	=	-I./include
 
 SDIR		=	./srcs
-_SRCS		=	main.cpp			
+_SRCS		=	main.cpp \
+				ParsConfig/ParsConfig.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin
