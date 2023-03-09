@@ -7,6 +7,7 @@
 #include <vector>
 #include <fstream>
 
+
 #define localhost "127.0.0.1"
 using namespace std;
 
@@ -16,7 +17,7 @@ class ParsConfig
         class Location
         {
             public :
-                Location(string allow, string root, string index);
+                Location(string url, string allow, string root, string index);
                 Location(const Location &srcs);
                 ~Location();
 
@@ -27,6 +28,7 @@ class ParsConfig
 
             private :
                 Location();
+                string _url;
                 string _allow;
                 string _root;
                 string _index;
@@ -39,7 +41,12 @@ class ParsConfig
         ParsConfig & operator=(const ParsConfig &srcs);
 
         //Getteur
-        unsigned int getPort() const;
+        string              getIp() const;
+        unsigned int        getPort() const;
+        string              getNameServer() const;
+        string              getRoot() const;
+        string              getErrorPage(int code) const;
+        //vector<Location *>  getLocation() const;
 
         //Setteur
         void    setIp(string ip);
@@ -47,7 +54,7 @@ class ParsConfig
         void    setNameServer(string nameServer);
         void    setRoot(string root);
         void    setErrorPage(int error, string page);
-        void    setLocation(string allow, string root, string index);
+        void    setLocation(string url);
 
     private :
         ParsConfig();

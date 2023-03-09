@@ -1,31 +1,40 @@
 #include "../../include/ParsConfig/ParsConfig.hpp"
+#include <sstream>
 
 /*************************** Class ParsConfig ****************************/
 
 ParsConfig::ParsConfig(ifstream &file_config, int indexServer) :
 	_ip(localhost)
 {
-	string 	line;
+	string	line;
 	string	key;
 	string	value;
+	stringstream ss;
 
 	while(getline(file_config, line) && line != "}")
 	{
-		file_config >> key;
-		file_config >> value;
+		ss.clear();
+		if (line.empty())
+			continue;
+        ss << line;
+		ss >> key;
+		ss >> value;
 		if (key == "listen")
 			setPort(stoi(value.substr(0, value.size() - 1)));
-			//setPort(stoi(line.substr(key.size() + 1)));
-		//else if (key == "host")
-		//	setIp();
-		//else if (key == "server_name")
-		//	setNameServer();
-		//else if (key == "root")
-		//	setRoot();
-		//else if (key == "error_page")
-		//	setIp();
-		//else if (key == "location")
-		//	setIp();
+		else if (key == "host")
+			setIp(value.substr(0, value.size() - 1));
+		else if (key == "server_name")
+			setNameServer(value.substr(0, value.size() - 1));
+		else if (key == "root")
+			setRoot(value.substr(0, value.size() - 1));
+		else if (key == "error_page")
+		{
+			string s_value;
+			ss >> s_value;
+			setErrorPage(stoi(value), s_value.substr(0, s_value.size() - 1));
+		}
+		else if (key == "location")
+			setLocation(value);
 	}
 }
 
@@ -41,27 +50,59 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 	return (*this);
 }
 
-unsigned int ParsConfig::getPort() const
+unsigned int	ParsConfig::getPort() const
 { return (_port); }
 
-void    ParsConfig::setIp(string ip)
-{}
+string    ParsConfig::getIp() const
+{ return (_ip); }
 
-void    ParsConfig::setPort(unsigned int port)
+string          ParsConfig::getNameServer() const
+{ return (_name_server); }
+
+string          ParsConfig::getRoot() const
+{ return (_root); }
+
+string    ParsConfig::getErrorPage(int code) const
 {
-	_port = port;
+	map<int, string>::const_iterator	it = _error_page.find(code);
+	if (it == _error_page.end())
+	{
+		cerr << "Error page_error" << endl;
+		exit (-2);
+	}
+	return (it->second);
 }
 
+//vector<Location *>	ParsConfig::getLocation() const
+//{ return (&_location); }
+
+
+void    ParsConfig::setIp(string ip)
+{ _ip = ip; }
+
+void    ParsConfig::setPort(unsigned int port)
+{ _port = port; }
+
 void    ParsConfig::setNameServer(string nameServer)
-{}
+{ _name_server = nameServer; }
 
 void    ParsConfig::setRoot(string root)
-{}
+{ _root = root; }
+
+void    ParsConfig::setErrorPage(int error, string page)
+{ 
+	_error_page.insert(make_pair(error, page)); }
+
+void    ParsConfig::setLocation(string url)
+{ 
+	//cout << "Location : " << url << endl;
+}
 
 
 /*************************** Class Location ****************************/
 
-ParsConfig::Location::Location(string allow, string root, string index) :
+ParsConfig::Location::Location(string url, string allow, string root, string index) :
+	_url(url),
 	_allow(allow),
 	_root(root),
 	_index(index)
