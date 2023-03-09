@@ -10,16 +10,18 @@
 #include <fcntl.h>
 #include "Servers.hpp"
 
+#define MAX_REQUEST_SIZE 2048
 
 class Clients {
 
 private:
-
+    int socket;
+    int rec_size;
 public:
 
     socklen_t address_length;
     struct sockaddr_storage address;
-    int socket;
+    char requet[MAX_REQUEST_SIZE + 1];
 
     ~Clients();
     Clients();
@@ -27,11 +29,13 @@ public:
     Servers *server;
 
 void set_socket(int val);
+int set_rec_size(int size);
 
 int get_socket() const;
+int get_rec_size() const;
 
 const char  *get_address() const;
-
+const char *get_port() const;
 void request();
 
 };

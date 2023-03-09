@@ -48,3 +48,23 @@ const char  *Clients::get_address() const {
     return "1";
 
 }
+
+
+const char *Clients::get_port() const{
+    static char buffer[100];
+    getnameinfo((struct sockaddr *)&address, address_length,
+                0, 0, buffer, sizeof(buffer), NI_NUMERICHOST);
+    return buffer;
+
+
+}
+
+int Clients::get_rec_size() const {
+    return rec_size;
+
+}
+
+int Clients::set_rec_size(int size) {
+    rec_size = size;
+
+}

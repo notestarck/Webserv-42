@@ -116,14 +116,30 @@ void Master::recive() {
 
 
         if (FD_ISSET(clients[i].get_socket(), &reads)) {
-            int s = clients[i].get_socket();
-            //std::cout << s << std::endl;
-            // *buf donnees recues
-            // len taille max
-            // flags a 0
-            char buf[4096];
-            int r = recv(s, &buf, 4096, 0);
-            std::cout << buf << std::endl;
+
+            if(MAX_REQUEST_SIZE == clients[i].get_rec_size())
+            {
+                send_error(400, clients[i]);
+                //destroy client
+            }
+            int r = recv(clients[i].get_socket(), clients[i].requet + clients[i].get_rec_size(), MAX_REQUEST_SIZE - clients[i].get_rec_size(), 0);
+            clients[i].set_rec_size(clients[i].get_rec_size()) + r);
+            if(clients[i].get_rec_size() > MAX_REQUEST_SIZE)
+            {
+                send_error(413, clients[i]);
+                //destroy client
+            }
+            if(r < 0)
+            {
+                send_error(500, clients[i]); // lol
+                i--;
+            }
+            if(r == 0)
+            {
+                i--;
+            }
+
+
 
         }
     }
@@ -138,7 +154,7 @@ void Master::sendr() {
             int s = clients[i].get_socket();
             char *buf[4096];
 
-            std::string a = "HTTP/1.1 200 OK";
+            std::string a = "HTTP/1.1 200 OK /r/n/r/nOK";
             int i = send(s, &a, 4096, 0);
             std::cout << "maeesage envoee" << std::endl;
 
