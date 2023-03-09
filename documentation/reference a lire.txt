@@ -12,3 +12,6 @@ Cours programation reseau :
 
 Pour les socket :
 	http://sdz.tdct.org/sdz/les-sockets.html
+
+HTTP :
+	https://www.pierre-giraud.com/http-reseau-securite-cours/requete-reponse-session/
