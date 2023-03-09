@@ -46,9 +46,16 @@ int main(int argc, char **argv)
 
     vector<ParsConfig *>::iterator it = my_config.begin();
     for (int i = 0; i + it < my_config.end(); i++)
-    {
         ParsConfig *tmp = my_config.at(i);
-        cout << tmp->getPort() << endl;
+    
+    it = my_config.begin();
+    for (int i = 0; i + it < my_config.end(); i++)
+    {
+        cout << "listen : " << my_config.at(i)->getPort() << endl;
+        cout << "ip : " << my_config.at(i)->getIp() << endl;
+        cout << "Name server : " << my_config.at(i)->getNameServer() << endl;
+        cout << "Root : " << my_config[i]->getRoot() << endl;
+        cout << "Error : " << my_config[i]->getErrorPage(404) << endl << endl;
     }
 
     // Creer vector<Server> mon_server(my_config);
