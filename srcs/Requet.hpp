@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <map>
-
+#include <sstream>
 
 class Requet{
 private:
@@ -21,7 +21,7 @@ Requet(int i);
 ~Requet();
 
 int parse(std::string request);
-bool is_method(const std::string method);
+bool is_not_method(const std::string method);
 
 bool check_protocol(std::map<std::string, std::string>::mapped_type &test);
 
