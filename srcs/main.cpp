@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
     if(argc > 2)
         return 0;
-    std::cout << "*************************\n";
+    std::cout << "**************************\n";
     std::cout << "*            WEBSERV     *\n";
     std::cout << "**************************\n";
 
@@ -40,8 +40,8 @@ int main(int argc, char **argv)
 
 
         master.accept_socket();
-        master.recive();
-        master.sendr();
+        //master.recive();
+        //master.sendr();
 
         //taitement requetes
     }
