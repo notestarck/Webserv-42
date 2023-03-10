@@ -17,11 +17,12 @@ class ParsConfig
         class Location
         {
             public :
-                Location(string url, string allow, string root, string index);
+                Location(ifstream &file_config, string url);
                 Location(const Location &srcs);
                 ~Location();
 
                 Location & operator=(const Location &srcs);
+                const string & getUrl() const;
                 const string & getAllow() const;
                 const string & getRoot() const;
                 const string & getIndex() const;
@@ -45,16 +46,22 @@ class ParsConfig
         unsigned int        getPort() const;
         string              getNameServer() const;
         string              getRoot() const;
+        string              getIndex() const;
         string              getErrorPage(int code) const;
-        //vector<Location *>  getLocation() const;
+        string              getLocationUrl(size_t size) const;
+        string              getLocationAllow(string url) const;
+        string              getLocationRoot(string url) const;
+        string              getLocationIndex(string url) const;
+        size_t              getNbrLocation() const;
 
         //Setteur
         void    setIp(string ip);
         void    setPort(unsigned int port);
         void    setNameServer(string nameServer);
         void    setRoot(string root);
+        void    setIndex(string index);
         void    setErrorPage(int error, string page);
-        void    setLocation(string url);
+        void    setLocation(ifstream &file_config, string url);
 
     private :
         ParsConfig();
@@ -62,8 +69,10 @@ class ParsConfig
         unsigned int        _port;
         string              _name_server;
         string              _root;
+        string              _index;
         map<int, string>    _error_page;
         vector<Location *>  _location;
+        size_t              _nbrLocation;
 };// class ParsConfig
 
 #endif /* _PARSCONFIG_HPP_ */
