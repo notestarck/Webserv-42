@@ -1,0 +1,14 @@
+L'algorithme de Nagle est un algorithme de contrôle de congestion utilisé dans les réseaux TCP/IP.
+Son objectif est d'améliorer l'efficacité du réseau en réduisant le nombre de paquets envoyés sur le réseau.
+En pratique, l'algorithme de Nagle permet de regrouper plusieurs petits paquets de données en un seul paquet
+plus grand avant de les envoyer sur le réseau. Cela permet de réduire le nombre de paquets envoyés,
+ce qui peut réduire la congestion du réseau et améliorer les performances.
+
+Cependant, l'algorithme de Nagle peut également introduire un certain temps de latence,
+en particulier pour les applications qui envoient de petites quantités de données.
+Pour cette raison, il peut être judicieux de désactiver l'algorithme de Nagle dans certains cas,
+par exemple pour les applications qui nécessitent une communication en temps réel ou qui envoient
+de petites quantités de données fréquemment.
+
+La désactivation de l'algorithme de Nagle peut être effectuée en utilisant
+l'option TCP_NODELAY avec la fonction setsockopt(), comme mentionné précédemment.
