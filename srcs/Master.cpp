@@ -119,26 +119,43 @@ void Master::recive() {
 
             if(MAX_REQUEST_SIZE == clients[i].get_rec_size())
             {
-                send_error(400, clients[i]);
+                //send_error(400, clients[i]);
                 //destroy client
             }
             int r = recv(clients[i].get_socket(), clients[i].requet + clients[i].get_rec_size(), MAX_REQUEST_SIZE - clients[i].get_rec_size(), 0);
-            clients[i].set_rec_size(clients[i].get_rec_size()) + r);
+            clients[i].set_rec_size(clients[i].get_rec_size() + r);
             if(clients[i].get_rec_size() > MAX_REQUEST_SIZE)
             {
-                send_error(413, clients[i]);
+                //send_error(413, clients[i]);
                 //destroy client
             }
             if(r < 0)
             {
-                send_error(500, clients[i]); // lol
+                //send_error(500, clients[i]); // lol
                 i--;
             }
             if(r == 0)
             {
                 i--;
             }
+            else
+            {
+                Requet req = Requet(clients[i].get_socket());
+                int code;
+                if((code = req.parse(clients[i].requet)))
+                std::cout <<"parse requette" << std:: endl;
+                std::cout << code << "code retour" << std::endl;
+                {
 
+
+                }
+                std::string port = req.headers["Host"].substr(req.headers["Host"].find(':') + 1);
+                if(servers[req.headers["Host"]])
+                    clients[i].server = servers[req.headers["Host"]];
+                else
+                    break;
+
+            }
 
 
         }
