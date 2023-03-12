@@ -12,6 +12,10 @@ Clients::~Clients(){}
 Clients::Clients(Servers *server){
     this->server = server;
     address_length = sizeof(struct sockaddr_storage);
+    clear_requet();
+    gettimeofday(&last_get_time, NULL);
+    memset(requet, 0, MAX_REQUEST_SIZE + 1 );
+
 
 }
 
@@ -64,7 +68,14 @@ int Clients::get_rec_size() const {
 
 }
 
-int Clients::set_rec_size(int size) {
+void Clients::set_rec_size(int size) {
     rec_size = size;
 
+}
+
+void Clients::clear_requet()
+{
+    rec_size = 0;
+    for(int i = 0; i < MAX_REQUEST_SIZE; i++)
+        requet[i] = '\0';
 }

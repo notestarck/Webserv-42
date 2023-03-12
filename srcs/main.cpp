@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
 
         master.accept_socket();
-        //master.recive();
+        master.recive();
         //master.sendr();
 
         //taitement requetes

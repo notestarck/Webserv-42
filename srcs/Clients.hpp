@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <fcntl.h>
+#include <sys/time.h>
 #include "Servers.hpp"
 
 #define MAX_REQUEST_SIZE 2048
@@ -17,6 +18,7 @@ class Clients {
 private:
     int socket;
     int rec_size;
+    timeval last_get_time;
 public:
 
     socklen_t address_length;
@@ -29,14 +31,15 @@ public:
     Servers *server;
 
 void set_socket(int val);
-int set_rec_size(int size);
+void set_rec_size(int size);
 
 int get_socket() const;
 int get_rec_size() const;
 
 const char  *get_address() const;
 const char *get_port() const;
-void request();
+
+void clear_requet();
 
 };
 

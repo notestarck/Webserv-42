@@ -17,6 +17,7 @@
 #include <map>
 #include "Clients.hpp"
 #include "Servers.hpp"
+#include "Requet.hpp"
 
 class Master {
 private:
