@@ -6,7 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/03/10 13:38:00 by estarck          ###   ########.fr        #
+#    Updated: 2023/03/13 08:27:41 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,9 @@ NAME		=	webserv
 INCLUDES	=	-I./include
 
 SDIR		=	./srcs
-_SRCS		=	test_parsConfig.cpp \
-				ParsConfig/ParsConfig.cpp
+_SRCS		=	main.cpp \
+				ParsConfig.cpp \
+				Server.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin
@@ -25,7 +26,7 @@ OBJS		=	$(patsubst %,$(ODIR)/%,$(_OBJS))
 
 # Commands bash
 RM			=	rm -f
-MKODIR		=	if [ -d $(ODIR) ]; then :; else mkdir $(ODIR) && mkdir $(ODIR)/ParsConfig; fi
+MKODIR		=	if [ -d $(ODIR) ]; then :; else mkdir $(ODIR); fi
 RMODIR		=	if [ -d $(ODIR) ]; then rm -rf $(ODIR); else :; fi
 
 # Message
