@@ -35,6 +35,7 @@ class ParsConfig
                 string _index;
         };// class Locartion
 
+        ParsConfig();
         ParsConfig(ifstream &file_config, int indexServer);
         ParsConfig(const ParsConfig &srcs);
         ~ParsConfig();
@@ -64,14 +65,13 @@ class ParsConfig
         void    setLocation(ifstream &file_config, string url);
 
     private :
-        ParsConfig();
         string              _ip;
         unsigned int        _port;
         string              _name_server;
         string              _root;
         string              _index;
         map<int, string>    _error_page;
-        vector<Location *>  _location;
+        vector<Location>    _location;
         size_t              _nbrLocation;
 };// class ParsConfig
 
