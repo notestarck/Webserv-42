@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 14:07:20 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/13 14:59:46 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 Server::Server(ParsConfig &server) :
 	_server(server),
 	_sockError(0),
+	_maxConnection(10),
 	_recsize(sizeof(_sin))
 {
 	creatSocket();
@@ -27,13 +28,19 @@ Server::Server(const Server &srcs)
 { *this = srcs; }
 
 Server::~Server()
-{
-	//a voir s'il faut le mettre ici.
-	//close(_idSocket);
-}
+{ close(_sock); }
 
 Server & Server::operator=(const Server &srcs)
-{ return (*this); }
+{ 
+	if (this != &srcs)
+	{
+		_sockError = srcs._sockError;
+		_server = srcs._server;
+		_sock = srcs._sock;
+		_sin = srcs._sin;
+		_recsize = srcs._recsize;
+	}
+return (*this); }
 
 void Server::creatSocket()
 {
@@ -58,7 +65,7 @@ void Server::linkSocket()
 	_sin.sin_addr.s_addr = convertIp(_server.getIp()); //Pour une estd::coute sur std::coutes les adresses htonl(INADDR_ANY)
 	_sin.sin_family = AF_INET;
 	_sockError = bind(_sock, (sockaddr*)&_sin, _recsize);
-	if (_sockError == -1)
+	if (_sockError == SOCKET_ERROR)
 	{
 		std::cerr << "\033[1;31mError : linkSocket\033[0m" << std::endl;
 		exit(-5);
@@ -68,8 +75,8 @@ void Server::linkSocket()
 in_addr_t Server::convertIp(const std::string &str)
 {
 	std::vector<std::string>	octets;
-    std::stringstream	ss(str);
-    std::string			token;
+    std::stringstream			ss(str);
+    std::string					token;
 
     while (getline(ss, token, '.'))
         octets.push_back(token);
@@ -101,19 +108,20 @@ in_addr_t Server::convertIp(const std::string &str)
 
 void	Server::listenTCP()
 {
-	_sockError = listen(_sock, 10);
-	if (_sockError == -1)
+	_sockError = listen(_sock, _maxConnection);
+	if (_sockError == SOCKET_ERROR)
 		std::cerr << "\033[31mError : listenTCP()\033[0m" << std::endl;
 	std::cout << "\033[33mlistenTCP() - Ecoute du port " << _server.getPort() << "\033[0m" << std::endl;
 }
 
-//void	Server::acceptConnect()
-//{
-//	_csock = accept(_sock, (sockaddr*)&_csin, &_crecsize);
-//	std::cout << "Un client se connecte sur le port : " << _server.getPort() << " - avec la socket " << _csock << " de " << inet_ntoa(_csin.sin_addr) << ":" << htons(_csin.sin_port) << std::endl;
-//}
-
 SOCKET	Server::getSocket()
-{
-	return (_sock);
-}
+{ return (_sock); }
+
+bool	Server::hasCapacity() const
+{ return (_currentConnection < _maxConnection); }
+
+void	Server::inrementCurrentConnection()
+{ ++_currentConnection; }
+
+void	Server::decrementCurrentConnection()
+{ --_currentConnection; }

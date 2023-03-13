@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 13:51:31 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/13 14:58:10 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -42,19 +43,20 @@ class Server
 
 		SOCKET		getSocket();
 
+		bool hasCapacity() const;
+		void inrementCurrentConnection();
+		void decrementCurrentConnection();
 	private :
 	//	Server();
 		int			_sockError;
 		ParsConfig	_server;
+		int			_currentConnection;
+		int			_maxConnection;
+
     	/* Socket et contexte d'adressage du serveur */
 		SOCKET		_sock;
 		sockaddr_in	_sin;
 		socklen_t	_recsize;
-
-    	/* Socket et contexte d'adressage du client */
-		//SOCKET		_csock;
-		//sockaddr_in	_csin;
-		//socklen_t	_crecsize;
 
 		void		creatSocket();
 		void		paramSocket();
@@ -62,9 +64,6 @@ class Server
 		in_addr_t	convertIp(const std::string &str);
 		void		listenTCP();
 
-		
-	
-	
-};// class Server
+};//class Server
 
 #endif /* _SERVER_HPP_ */
