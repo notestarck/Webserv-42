@@ -6,12 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 06:23:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 14:06:47 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/13 15:09:08 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/ParsConfig.hpp"
 #include "../include/Server.hpp"
+#include "../include/Client.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -72,42 +73,8 @@ int main(int argc, char ** argv)
 	    my_server.push_back(tmp);
 	}
 
-		int			_csock;
-		sockaddr_in	_csin;
-		socklen_t	_crecsize = (sizeof(_csin));
-		
 	//Acceptation des connexions.
-	fd_set	read_fds;
-	int		max_fd = -1;
-	
-	FD_ZERO(&read_fds);
-	for(int i = 0; i < nbr_server; i++)
-	{
-		FD_SET(my_server[i]->getSocket(), &read_fds);
-		if (my_server[i]->getSocket() > max_fd)
-			max_fd = my_server[i]->getSocket();
-	}
-
-	while(42)
-	{
-		fd_set	tmp_fds = read_fds;
-		if (select(max_fd + 1, &tmp_fds, nullptr, nullptr, nullptr) < 0)
-		{
-			std::cerr << "Failed to select" << std::endl;
-			exit(-7);
-		}
-		for(int i = 0; i < nbr_server; i++)
-		{
-			if (FD_ISSET(my_server[i]->getSocket(), &tmp_fds))
-			{
-				int client_fd = accept(my_server[i]->getSocket(), nullptr, nullptr);
-				if(client_fd < 0)
-					std::cerr << "Failed to accept connection on port " << my_config[i]->getPort() << std::endl;
-				else
-				std::cout << "Accepted connection on port " << my_config[i]->getPort() << std::endl;
-			}
-		}
-	}
+	Client	my_client(nbr_server, my_config, my_server);
 
 	
 	//delete my_server<Server *>
