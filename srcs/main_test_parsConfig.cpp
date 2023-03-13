@@ -1,4 +1,5 @@
 #include "../include/ParsConfig/ParsConfig.hpp"
+#include "../include/Server.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -46,10 +47,6 @@ int main(int argc, char **argv)
 
     vector<ParsConfig *>::iterator it = my_config.begin();
     for (int i = 0; i + it < my_config.end(); i++)
-        ParsConfig *tmp = my_config.at(i);
-    
-    it = my_config.begin();
-    for (int i = 0; i + it < my_config.end(); i++)
     {
         cout << "\n---------- New Server -----------\n" << endl;
         cout << "\033[33mlisten : \033[0m" << my_config.at(i)->getPort() << endl;
@@ -57,7 +54,7 @@ int main(int argc, char **argv)
         cout << "\033[33mName server : \033[0m" << my_config.at(i)->getNameServer() << endl;
         cout << "\033[33mRoot : \033[0m" << my_config[i]->getRoot() << endl;
         cout << "\033[33mIndex : \033[0m" << my_config[i]->getIndex() << endl;
-        cout << "\033[33mError : \033[0m" << my_config[i]->getErrorPage(404) << endl;
+        cout << "\033[33mError : \033[0m" << my_config[i]->getErrorPage(500) << endl;
         cout << "\n\033[34m- Location -\033[0m" << endl;
         for(size_t j = 0; j < my_config[i]->getNbrLocation(); j++)
         {
