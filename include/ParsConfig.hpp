@@ -9,70 +9,69 @@
 
 
 #define localhost "127.0.0.1"
-using namespace std;
 
 class ParsConfig
 {
-    public :
-        class Location
-        {
-            public :
-                Location(ifstream &file_config, string url);
-                Location(const Location &srcs);
-                ~Location();
+	public :
+		class Location
+		{
+			public :
+				Location(std::ifstream &file_config, std::string url);
+				Location(const Location &srcs);
+				~Location();
 
-                Location & operator=(const Location &srcs);
-                const string & getUrl() const;
-                const string & getAllow() const;
-                const string & getRoot() const;
-                const string & getIndex() const;
+				Location & operator=(const Location &srcs);
+				const std::string & getUrl() const;
+				const std::string & getAllow() const;
+				const std::string & getRoot() const;
+				const std::string & getIndex() const;
 
-            private :
-                Location();
-                string _url;
-                string _allow;
-                string _root;
-                string _index;
-        };// class Locartion
+			private :
+				Location();
+				std::string _url;
+				std::string _allow;
+				std::string _root;
+				std::string _index;
+		};// class Locartion
 
-        ParsConfig();
-        ParsConfig(ifstream &file_config, int indexServer);
-        ParsConfig(const ParsConfig &srcs);
-        ~ParsConfig();
+		ParsConfig();
+		ParsConfig(std::ifstream &file_config, int indexServer);
+		ParsConfig(const ParsConfig &srcs);
+		~ParsConfig();
 
-        ParsConfig & operator=(const ParsConfig &srcs);
+		ParsConfig & operator=(const ParsConfig &srcs);
 
-        //Getteur
-        string              getIp() const;
-        unsigned int        getPort() const;
-        string              getNameServer() const;
-        string              getRoot() const;
-        string              getIndex() const;
-        string              getErrorPage(int code) const;
-        string              getLocationUrl(size_t size) const;
-        string              getLocationAllow(string url) const;
-        string              getLocationRoot(string url) const;
-        string              getLocationIndex(string url) const;
-        size_t              getNbrLocation() const;
+		//Getteur
+		std::string              getIp() const;
+		unsigned int             getPort() const;
+		std::string              getNameServer() const;
+		std::string              getRoot() const;
+		std::string              getIndex() const;
+		std::string              getErrorPage(int code) const;
+		std::string              getLocationUrl(size_t size) const;
+		std::string              getLocationAllow(std::string url) const;
+		std::string              getLocationRoot(std::string url) const;
+		std::string              getLocationIndex(std::string url) const;
+		size_t              getNbrLocation() const;
 
-        //Setteur
-        void    setIp(string ip);
-        void    setPort(unsigned int port);
-        void    setNameServer(string nameServer);
-        void    setRoot(string root);
-        void    setIndex(string index);
-        void    setErrorPage(int error, string page);
-        void    setLocation(ifstream &file_config, string url);
+		//Setteur
+		void    setIp(std::string ip);
+		void    setPort(unsigned int port);
+		void    setNameServer(std::string nameServer);
+		void    setRoot(std::string root);
+		void    setIndex(std::string index);
+		void    setErrorPage(int error, std::string page);
+		void    setLocation(std::ifstream &file_config, std::string url);
 
-    private :
-        string              _ip;
-        unsigned int        _port;
-        string              _name_server;
-        string              _root;
-        string              _index;
-        map<int, string>    _error_page;
-        vector<Location>    _location;
-        size_t              _nbrLocation;
+	private :
+		std::string              	_ip;
+		unsigned int           		_port;
+		std::string             	_name_server;
+		std::string            		_root;
+		std::string           		_index;
+		std::map<int, std::string>	_error_page;
+		std::vector<Location>	    _location;
+		size_t              		_nbrLocation;
 };// class ParsConfig
 
 #endif /* _PARSCONFIG_HPP_ */

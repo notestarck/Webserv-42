@@ -6,20 +6,20 @@
 ParsConfig::ParsConfig()
 {}
 
-ParsConfig::ParsConfig(ifstream &file_config, int indexServer) :
+ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
 	_port(80),
 	_ip(localhost),
 	_name_server("default_name"),
 	_index("index.html"),
 	_nbrLocation(0)
 {
-	string	line;
+	std::string	line;
 
 	while(getline(file_config, line) && line != "}")
 	{
-		string	key;
-		string	value;
-		stringstream ss;
+		std::string	key;
+		std::string	value;
+		std::stringstream ss;
 
 		if (line.empty())
 			continue;
@@ -38,7 +38,7 @@ ParsConfig::ParsConfig(ifstream &file_config, int indexServer) :
 			setIndex(value.substr(0, value.size() - 1));
 		else if (key == "error_page")
 		{
-			string s_value;
+			std::string s_value;
 			ss >> s_value;
 			setErrorPage(stoi(value), s_value.substr(0, s_value.size() - 1));
 		}
@@ -77,75 +77,75 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 unsigned int	ParsConfig::getPort() const
 { return (_port); }
 
-string    ParsConfig::getIp() const
+std::string    ParsConfig::getIp() const
 { return (_ip); }
 
-string          ParsConfig::getNameServer() const
+std::string          ParsConfig::getNameServer() const
 { return (_name_server); }
 
-string          ParsConfig::getRoot() const
+std::string          ParsConfig::getRoot() const
 { return (_root); }
 
-string			ParsConfig::getIndex() const
+std::string			ParsConfig::getIndex() const
 { return (_index); }
 
-string    ParsConfig::getErrorPage(int code) const
+std::string    ParsConfig::getErrorPage(int code) const
 {
-	map<int, string>::const_iterator	it = _error_page.find(code);
+	std::map<int, std::string>::const_iterator	it = _error_page.find(code);
 	if (it == _error_page.end())
 	{
-		cerr << "\033[1;31mError page_error\033[0m" << endl;
+		std::cerr << "\033[1;31mError page_error\033[0m" << std::endl;
 		exit (-2);
 	}
 	return (it->second);
 }
 
-string	ParsConfig::getLocationUrl(size_t pos) const
+std::string	ParsConfig::getLocationUrl(size_t pos) const
 {
 	if (pos >= _location.size())
 	{
-		cerr << "\033[1;31mgetLocationUrl : Bad size !\033[0m" << endl;
+		std::cerr << "\033[1;31mgetLocationUrl : Bad size !\033[0m" << std::endl;
 		exit (-4);
 	} 
 	return (_location[pos].getUrl()); }
 
-string	ParsConfig::getLocationAllow(string url) const
+std::string	ParsConfig::getLocationAllow(std::string url) const
 {
-	for(vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
 		if(it->getUrl() == url)
 			return (it->getAllow());
 	}
-	cerr << "\033[1;31mgetLocationAllow : url don't exist ! \033[0m" << endl;
+	std::cerr << "\033[1;31mgetLocationAllow : url don't exist ! \033[0m" << std::endl;
 	exit (-3);
 }
 
-string	ParsConfig::getLocationRoot(string url) const
+std::string	ParsConfig::getLocationRoot(std::string url) const
 {
-	for(vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
 		if(it->getUrl() == url)
 			return (it->getRoot());
 	}
-	cerr << "\033[1;31mgetLocationRoot : url don't exist ! \033[0m" << endl;
+	std::cerr << "\033[1;31mgetLocationRoot : url don't exist ! \033[0m" << std::endl;
 	exit (-3);
 }
 
-string	ParsConfig::getLocationIndex(string url) const
+std::string	ParsConfig::getLocationIndex(std::string url) const
 {
-	for(vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
 		if(it->getUrl() == url)
 			return (it->getIndex());
 	}
-	cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << endl;
+	std::cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << std::endl;
 	exit (-3);
 }
 
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
 
-void    ParsConfig::setIp(string ip)
+void    ParsConfig::setIp(std::string ip)
 {
 	if (ip == "localhost")
 	{
@@ -158,19 +158,19 @@ void    ParsConfig::setIp(string ip)
 void    ParsConfig::setPort(unsigned int port)
 { _port = port; }
 
-void    ParsConfig::setNameServer(string nameServer)
+void    ParsConfig::setNameServer(std::string nameServer)
 { _name_server = nameServer; }
 
-void    ParsConfig::setRoot(string root)
+void    ParsConfig::setRoot(std::string root)
 { _root = root; }
 
-void	ParsConfig::setIndex(string index)
+void	ParsConfig::setIndex(std::string index)
 { _index = index; }
 
-void    ParsConfig::setErrorPage(int error, string page)
+void    ParsConfig::setErrorPage(int error, std::string page)
 { _error_page.insert(make_pair(error, page)); }
 
-void    ParsConfig::setLocation(ifstream &file_config, string url)
+void    ParsConfig::setLocation(std::ifstream &file_config, std::string url)
 {
 	int i = 0;
 	Location tmp(file_config, url);
@@ -181,7 +181,7 @@ void    ParsConfig::setLocation(ifstream &file_config, string url)
 		_location[i] = tmp;
 	else
 	{
-		vector<Location>::const_iterator it = _location.end();
+		std::vector<Location>::const_iterator it = _location.end();
 		_location.insert(it, tmp);
 		_nbrLocation += 1;
 	}
@@ -190,16 +190,16 @@ void    ParsConfig::setLocation(ifstream &file_config, string url)
 
 /*************************** Class Location ****************************/
 
-ParsConfig::Location::Location(ifstream &file_config, string url) :
+ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 	_url(url)
 {
-	string			line;
+	std::string			line;
 
 	while(getline(file_config, line))
 	{
-		stringstream	ss;
-		string			key;
-		string			value;
+		std::stringstream	ss;
+		std::string			key;
+		std::string			value;
 
 		ss << line;
 		if (line.empty())
@@ -239,14 +239,14 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 	return (*this);
 }
 
-const string & ParsConfig::Location::getUrl() const
+const std::string & ParsConfig::Location::getUrl() const
 { return (_url); }
 
-const string & ParsConfig::Location::getAllow() const
+const std::string & ParsConfig::Location::getAllow() const
 { return (_allow); }
 
-const string & ParsConfig::Location::getRoot() const
+const std::string & ParsConfig::Location::getRoot() const
 { return (_root); }
 
-const string & ParsConfig::Location::getIndex() const
+const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }

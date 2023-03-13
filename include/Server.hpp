@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 09:50:11 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/13 13:51:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@
 
 typedef int SOCKET;
 
-using namespace std;
 
 class Server
 {
@@ -41,7 +40,7 @@ class Server
 
 		Server & operator=(const Server &srcs);
 
-		void		acceptConnect();
+		SOCKET		getSocket();
 
 	private :
 	//	Server();
@@ -53,14 +52,14 @@ class Server
 		socklen_t	_recsize;
 
     	/* Socket et contexte d'adressage du client */
-		SOCKET		_csock;
-		sockaddr_in	_csin;
-		socklen_t	_crecsize;
+		//SOCKET		_csock;
+		//sockaddr_in	_csin;
+		//socklen_t	_crecsize;
 
 		void		creatSocket();
 		void		paramSocket();
 		void		linkSocket();
-		in_addr_t	convertIp(const string &str);
+		in_addr_t	convertIp(const std::string &str);
 		void		listenTCP();
 
 		
