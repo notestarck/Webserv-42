@@ -1,7 +1,10 @@
-#include "../../include/ParsConfig/ParsConfig.hpp"
+#include "../include/ParsConfig.hpp"
 #include <sstream>
 
 /*************************** Class ParsConfig ****************************/
+
+ParsConfig::ParsConfig()
+{}
 
 ParsConfig::ParsConfig(ifstream &file_config, int indexServer) :
 	_port(80),
@@ -52,13 +55,7 @@ ParsConfig::ParsConfig(const ParsConfig &srcs)
 { *this = srcs; }
 
 ParsConfig::~ParsConfig()
-{
-	for (size_t i = 0; i < _nbrLocation; i++)
-	{
-    	delete _location[i];
-    	_location[i] = nullptr;
-	}
-}
+{}
 
 ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 {
@@ -70,12 +67,8 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		_root = srcs._root;
 		for (size_t i = 0; i < _error_page.size(); i++)
 			_error_page.at(i) = srcs._error_page.at(i);
-		for (size_t i = 0; i < _nbrLocation; i++)
-		{
-    		delete _location[i];
-    		_location[i] = nullptr;
-		}
-		_location = srcs._location;
+		for (size_t i = 0; i < srcs._location.size(); i++)
+			_location.push_back(srcs._location[i]);
 		_nbrLocation = srcs._nbrLocation;
 	}
 	return (*this);
@@ -107,45 +100,45 @@ string    ParsConfig::getErrorPage(int code) const
 	return (it->second);
 }
 
-string	ParsConfig::getLocationUrl(size_t size) const
+string	ParsConfig::getLocationUrl(size_t pos) const
 {
-	if (size >= _location.size())
+	if (pos >= _location.size())
 	{
 		cerr << "\033[1;31mgetLocationUrl : Bad size !\033[0m" << endl;
 		exit (-4);
 	} 
-	return (_location[size]->getUrl()); }
+	return (_location[pos].getUrl()); }
 
 string	ParsConfig::getLocationAllow(string url) const
 {
-	for(int i = 0; i != _location.size(); i++)
+	for(vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
-		if(_location[i]->getUrl() == url)
-			return (_location[i]->getAllow());
+		if(it->getUrl() == url)
+			return (it->getAllow());
 	}
-	cerr << "\033[1;31mgetLocationAllow : url don't exist ! \033\[0m" << endl;
+	cerr << "\033[1;31mgetLocationAllow : url don't exist ! \033[0m" << endl;
 	exit (-3);
 }
 
 string	ParsConfig::getLocationRoot(string url) const
 {
-	for(int i = 0; i != _location.size(); i++)
+	for(vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
-		if(_location[i]->getUrl() == url)
-			return (_location[i]->getRoot());
+		if(it->getUrl() == url)
+			return (it->getRoot());
 	}
-	cerr << "\033[1;31mgetLocationRoot : url don't exist ! \033\[0m" << endl;
+	cerr << "\033[1;31mgetLocationRoot : url don't exist ! \033[0m" << endl;
 	exit (-3);
 }
 
 string	ParsConfig::getLocationIndex(string url) const
 {
-	for(int i = 0; i != _location.size(); i++)
+	for(vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
-		if(_location[i]->getUrl() == url)
-			return (_location[i]->getIndex());
+		if(it->getUrl() == url)
+			return (it->getIndex());
 	}
-	cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033\[0m" << endl;
+	cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << endl;
 	exit (-3);
 }
 
@@ -180,19 +173,16 @@ void    ParsConfig::setErrorPage(int error, string page)
 void    ParsConfig::setLocation(ifstream &file_config, string url)
 {
 	int i = 0;
-	Location *tmp = new Location(file_config, url);
+	Location tmp(file_config, url);
 
-	while (i != _location.size() &&_location[i]->getUrl() != url)
+	while (i != _location.size() && _location[i].getUrl() != url)
 		i++;
 	if (i != _location.size())
-	{
-		delete _location[i];
-    	_location[i] = nullptr;
 		_location[i] = tmp;
-	}
 	else
 	{
-		_location.push_back(tmp);
+		vector<Location>::const_iterator it = _location.end();
+		_location.insert(it, tmp);
 		_nbrLocation += 1;
 	}
 }
@@ -241,6 +231,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 {
 	if (this != &srcs)
 	{
+		_url = srcs._url;
 		_allow = srcs._allow;
 		_root = srcs._root;
 		_index = srcs._index;
