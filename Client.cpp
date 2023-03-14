@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 14:24:11 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 15:11:26 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/14 09:54:55 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,20 @@ Client::~Client()
 {}
 
 Client & Client::operator=(const Client &srcs)
-{ return (*this); }
+{
+	if (this == &srcs)
+	{
+		_csock = srcs._csock;
+		_csin = srcs._csin;
+		_crecsize = srcs._crecsize;
+		_readFds = srcs._readFds;
+		_maxFd = srcs._maxFd;
+		_nbrServer = srcs._nbrServer;
+		_config = srcs._config;
+		_server = srcs._server;
+	}
+	return (*this);
+}
 
 void Client::acceptConnection()
 {

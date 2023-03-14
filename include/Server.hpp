@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 14:58:10 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/14 10:31:51 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Server
 		bool hasCapacity() const;
 		void inrementCurrentConnection();
 		void decrementCurrentConnection();
+
 	private :
 	//	Server();
 		int			_sockError;

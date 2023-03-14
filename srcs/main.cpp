@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 06:23:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 15:09:08 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/14 10:48:17 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,10 @@ int main(int argc, char ** argv)
 	}
 
 	//Acceptation des connexions.
-	Client	my_client(nbr_server, my_config, my_server);
+	//Old client : Client	my_client(nbr_server, my_config, my_server);
+	std::vector<Client> client;
+	fd_set	_setFd;
+	
 
 	
 	//delete my_server<Server *>
