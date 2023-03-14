@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/14 10:31:51 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/14 13:01:09 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,11 @@ class Server
 
 		Server & operator=(const Server &srcs);
 
-		SOCKET		getSocket();
+		SOCKET			getSocket() const;
+		unsigned int	getPort() const;
 
 		bool hasCapacity() const;
-		void inrementCurrentConnection();
+		void incrementCurrentConnection();
 		void decrementCurrentConnection();
 
 	private :

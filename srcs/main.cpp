@@ -6,13 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/13 06:23:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/14 10:48:17 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/14 12:33:16 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/ParsConfig.hpp"
 #include "../include/Server.hpp"
-#include "../include/Client.hpp"
+#include "../include/Master.hpp"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/select.h>
@@ -75,10 +75,7 @@ int main(int argc, char ** argv)
 
 	//Acceptation des connexions.
 	//Old client : Client	my_client(nbr_server, my_config, my_server);
-	std::vector<Client> client;
-	fd_set	_setFd;
-	
-
+	Master start_connect(my_server);
 	
 	//delete my_server<Server *>
 	for (int i = 0; i < nbr_server; i++)

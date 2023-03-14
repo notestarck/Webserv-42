@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 14:59:46 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/14 13:01:16 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,13 +114,16 @@ void	Server::listenTCP()
 	std::cout << "\033[33mlistenTCP() - Ecoute du port " << _server.getPort() << "\033[0m" << std::endl;
 }
 
-SOCKET	Server::getSocket()
+SOCKET	Server::getSocket() const
 { return (_sock); }
+
+unsigned int Server::getPort() const
+{ return (_server.getPort()); }
 
 bool	Server::hasCapacity() const
 { return (_currentConnection < _maxConnection); }
 
-void	Server::inrementCurrentConnection()
+void	Server::incrementCurrentConnection()
 { ++_currentConnection; }
 
 void	Server::decrementCurrentConnection()
