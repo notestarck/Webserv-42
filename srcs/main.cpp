@@ -5,11 +5,22 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
+<<<<<<< HEAD
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
 /*   Updated: 2023/03/15 18:54:13 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+=======
+/*   Created: 2023/03/13 06:23:52 by estarck           #+#    #+#             */
+/*   Updated: 2023/03/14 12:33:16 by estarck          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../include/ParsConfig.hpp"
+#include "../include/Server.hpp"
+#include "../include/Master.hpp"
+>>>>>>> 427a1fd6ceeddf9831520b4a3025cdded7f9f907
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -77,6 +88,13 @@ int main(int argc, char ** argv)
 	    Server *tmp = new Server(*my_config[i]);
 	    my_server.push_back(tmp);
 	}
+<<<<<<< HEAD
+=======
+
+	//Acceptation des connexions.
+	//Old client : Client	my_client(nbr_server, my_config, my_server);
+	Master start_connect(my_server);
+>>>>>>> 427a1fd6ceeddf9831520b4a3025cdded7f9f907
 	
 	//Creation de la connexion
 	Connection	my_connect(my_server);
