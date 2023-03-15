@@ -1,8 +1,18 @@
 #ifndef _PARSCONFIG_HPP_
 #define _PARSCONFIG_HPP_
 
-#include "Master.hpp"
-
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
 
 #define localhost "127.0.0.1"
 

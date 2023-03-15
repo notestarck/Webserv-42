@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 15:53:58 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 18:32:36 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ Connection::Connection(std::vector<Server *> &servers) :
 {
 	FD_ZERO(&_read);
 	FD_ZERO(&_write);
+	FD_ZERO(&_errors);
 	
 	_timeout.tv_sec = 1;
 	_timeout.tv_usec = 0;
@@ -48,6 +49,7 @@ void Connection::initConnection()
 		initSelect(it->_csock, _read);
 	runSelect();
 	acceptSocket();
+	traitement();
 }
 
 void Connection::initSelect(int fd, fd_set &set)
@@ -77,6 +79,7 @@ void Connection::acceptSocket()
 		{
 			//Socket server est pret a etre lu
 			Client	newClient;
+			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
 				int client_fd = accept((*it)->getSocket(), (sockaddr *)&newClient._csin, &newClient._crecsize);
@@ -85,6 +88,7 @@ void Connection::acceptSocket()
 				else
 				{
 					(*it)->incrementCurrentConnection();
+					newClient._csock = client_fd;
 					_client.push_back(newClient);
 					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;
 				}
@@ -96,4 +100,80 @@ void Connection::acceptSocket()
 			}
 		}
 	}
+}
+
+void Connection::traitement()
+{
+	//Ces fonctions renvoient le nombre d'octets reçus si elles réussissent, ou -1 si elles échouent. La valeur de retour sera 0 si le pair a effectué un arrêt normal.
+   for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
+	{
+       std::cout << "Size de _client : " << _client.size() << std::endl;
+    	if (FD_ISSET(it->_csock, &_read))
+		{
+			std::cout << "-------------gr ------------\n";
+        	if(MAX_REQUEST_SIZE <= it->_recSize)
+        	{
+				std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
+              //send_error(400, clients[i]);
+				_client.erase(it);
+          }
+		   
+          int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE - 1, 0);
+			if (ret == 0)
+			{
+				std::cerr << "Error : Connection::traitement recv() reception" << std::endl;
+				it--;
+			}
+			else if (ret == SOCKET_ERROR)
+			{
+				std::cerr << "Error : 500 Connection::traitement recv() condition inattendue" << std::endl;
+				it--;
+			}
+
+			it->_recSize += ret;
+			if (it->_recSize > MAX_REQUEST_SIZE)
+			{
+				std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
+				//send_error(413)...
+				_client.erase(it);
+			}
+          else
+          {
+              //Requet req = Requet(clients[i].get_socket());
+              //int code;
+              //if((code = req.parse(clients[i].requet)))
+              std::cout <<"parse requette" << std:: endl;
+             // std::cout << code << "code retour" << std::endl;
+             // {
+
+
+              //}
+              //std::string port = req.headers["Host"].substr(req.headers["Host"].find(':') + 1);
+              //if(servers[req.headers["Host"]])
+              //    clients[i].server = servers[req.headers["Host"]];
+              //else
+              //    // error 400
+              //      // i--;
+              //    break;;
+          }
+          //clients[i].requet[clients.get_rec_size()] = 0;
+      }
+	}
+//        Location* loc
+//
+//        if redir status
+//        if !allow method
+//        if  (loc & is_gci)
+//        else{
+//            if time out
+//            if redir
+//            if GET
+//            if POST
+//            if DELETE
+//
+//        clear requet;
+//
+//        }
+//    }
+//}
 }

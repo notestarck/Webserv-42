@@ -6,11 +6,28 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 15:41:36 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 17:26:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Master.hpp"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
+
+#include "../include/Client.hpp"
+#include "../include/Connection.hpp"
+#include "../include/ParsConfig.hpp"
+#include "../include/Server.hpp"
+
 
 int countServer(std::ifstream &config_file)
 {

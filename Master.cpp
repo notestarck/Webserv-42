@@ -6,11 +6,11 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 15:50:10 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 15:54:16 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 17:23:46 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Master.hpp"
+#include "../include/Master.hpp"
 
 Master::Master(std::ifstream &config_file)
 {}
