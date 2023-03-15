@@ -11,6 +11,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <arpa/inet.h>
+#include <map>
+#include <vector>
+
 
 class Servers{
 public:
@@ -19,6 +22,15 @@ public:
 private:
      std::string host;
      std::string port;
+
+
+    std::string             	_name_server;
+    std::string            		_root;
+    std::string           		_index;
+    std::map<int, std::string>	_error_page;
+    //std::vector<Location *> loc;
+    size_t              		_nbrLocation;
+
 public:
 
     int listen_socket;
@@ -32,6 +44,7 @@ public:
     Servers();
     ~Servers();
     Servers(std::string host, std::string port);
+    //Servers(ParsConfig &server);
 
     std::string getHost();
 
