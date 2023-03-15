@@ -93,10 +93,7 @@ std::string    ParsConfig::getErrorPage(int code) const
 {
 	std::map<int, std::string>::const_iterator	it = _error_page.find(code);
 	if (it == _error_page.end())
-	{
-		std::cerr << "\033[1;31mError page_error\033[0m" << std::endl;
-		exit (-2);
-	}
+		return("notFound");
 	return (it->second);
 }
 
@@ -144,6 +141,9 @@ std::string	ParsConfig::getLocationIndex(std::string url) const
 
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
+
+const std::vector<ParsConfig::Location> &ParsConfig::getLocation() const
+{ return (_location); }
 
 void    ParsConfig::setHost(std::string ip)
 {
