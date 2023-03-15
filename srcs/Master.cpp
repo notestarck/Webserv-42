@@ -1,27 +1,25 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Client.hpp                                         :+:      :+:    :+:   */
+/*   Master.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 15:39:19 by estarck          ###   ########.fr       */
+/*   Created: 2023/03/15 15:50:10 by estarck           #+#    #+#             */
+/*   Updated: 2023/03/15 15:54:16 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef _CLIENT_HPP_
-#define _CLIENT_HPP_
-
 #include "Master.hpp"
 
-struct Client
-{
-    /* Socket et contexte d'adressage du client */
-	int					_csock;
-	sockaddr_storage	_csin;
-	socklen_t			_crecsize;
-	timeval				_lastGetTime;
-};//struct Client
+Master::Master(std::ifstream &config_file)
+{}
 
-#endif/* _CLIENT_HPP_ */
+Master::Master(const Master &srcs)
+{}
+
+Master::~Master()
+{}
+
+Master &Master::operator=(const Master &srcs)
+{ return (*this); }

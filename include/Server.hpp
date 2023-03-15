@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 12:18:56 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 15:40:21 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,7 @@
 #ifndef _SERVER_HPP_
 #define _SERVER_HPP_
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include "ParsConfig.hpp"
+#include "Master.hpp"
 
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1

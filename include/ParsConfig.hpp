@@ -1,11 +1,7 @@
 #ifndef _PARSCONFIG_HPP_
 #define _PARSCONFIG_HPP_
 
-#include <iostream>
-#include <string>
-#include <map>
-#include <vector>
-#include <fstream>
+#include "Master.hpp"
 
 
 #define localhost "127.0.0.1"

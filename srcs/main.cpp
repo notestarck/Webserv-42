@@ -6,22 +6,11 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 12:23:27 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 15:41:36 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/ParsConfig.hpp"
-#include "../include/Server.hpp"
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
+#include "../include/Master.hpp"
 
 int countServer(std::ifstream &config_file)
 {
@@ -71,6 +60,9 @@ int main(int argc, char ** argv)
 	    Server *tmp = new Server(*my_config[i]);
 	    my_server.push_back(tmp);
 	}
+	
+	//Creation de la connexion
+	Connection	my_connect(my_server);
 	
 		//delete my_server<Server *>
 	for (int i = 0; i < nbr_server; i++)
