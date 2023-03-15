@@ -39,25 +39,24 @@ const char  *Clients::get_address() const {
     // http://manpagesfr.free.fr/man/man3/getnameinfo.3.html
 
     static char buffer[50];
-//    getnameinfo((struct sockaddr *)&address, address_length, 0, 0, buffer, sizeof(buffer), NI_NUMERICHOST);
-//    return buffer;
+    getnameinfo((struct sockaddr *)&address, address_length,  buffer, sizeof(buffer),0, 0, NI_NUMERICHOST);
+    return buffer;
 
 
-    static char sbuf[50];
-
-    if (getnameinfo((struct sockaddr *)&address, address_length,buffer, sizeof(buffer), sbuf,
-                    sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
-        printf("host=%s, serv=%s\n", buffer, sbuf);
-
-    return "1";
+//    static char sbuf[50];
+//
+//    if (getnameinfo((struct sockaddr *)&address, address_length,buffer, sizeof(buffer), sbuf,
+//                    sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV) == 0)
+//        printf("host=%s, serv=%s\n", buffer, sbuf);
+//
+//    return "1";
 
 }
 
 
 const char *Clients::get_port() const{
     static char buffer[100];
-    getnameinfo((struct sockaddr *)&address, address_length,
-                0, 0, buffer, sizeof(buffer), NI_NUMERICHOST);
+    getnameinfo((struct sockaddr *)&address, address_length, 0, 0, buffer, sizeof(buffer), NI_NUMERICHOST);
     return buffer;
 
 

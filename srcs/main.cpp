@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 //    else
 //        std::cout << "config .conf\n";
 
-        // fichier de config
+    // fichier de config
     std::vector<Servers> *servers;
 
     servers = new std::vector<Servers>;
@@ -39,8 +39,8 @@ int main(int argc, char **argv)
         master.wait();
 
 
-        master.accept_socket();
-        master.recive();
+        //master.accept_socket();
+        //master.recive();
         //master.sendr();
 
         //taitement requetes
@@ -49,6 +49,4 @@ int main(int argc, char **argv)
     //master.close_servers;
     delete servers;
     return 0;
-    }
-
-
+}

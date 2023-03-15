@@ -11,9 +11,11 @@ Servers::~Servers() {}
 Servers::Servers(std::string host, std::string port) {
 
 
-        this->host = host;//inet_addr(host);
-        this->port = port; //htons(port);
+    this->host = host;//inet_addr(host);
+    this->port = port; //htons(port);
 }
+
+
 
 void Servers::create_socket()
 {

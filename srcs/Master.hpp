@@ -19,6 +19,7 @@
 #include "Servers.hpp"
 #include "Requet.hpp"
 
+
 class Master {
 private:
     std::vector<Servers> _servers;
@@ -29,7 +30,7 @@ private:
 
     int max_fd;
 
-    std::map<int, std::string> info_status;    //gestions des status et erreurs
+    //std::map<int, std::string> info_status;    //gestions des status et erreurs
 
     Master();
 

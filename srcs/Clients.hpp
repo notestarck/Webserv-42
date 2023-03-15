@@ -19,6 +19,7 @@ private:
     int socket;
     int rec_size;
     timeval last_get_time;
+
 public:
 
     socklen_t address_length;
