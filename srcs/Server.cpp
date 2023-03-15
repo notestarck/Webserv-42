@@ -6,14 +6,14 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 14:59:46 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 11:29:43 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
 Server::Server(ParsConfig &server) :
-	_server(server),
+	_config(server),
 	_sockError(0),
 	_maxConnection(10),
 	_recsize(sizeof(_sin))
@@ -35,7 +35,7 @@ Server & Server::operator=(const Server &srcs)
 	if (this != &srcs)
 	{
 		_sockError = srcs._sockError;
-		_server = srcs._server;
+		_config = srcs._config;
 		_sock = srcs._sock;
 		_sin = srcs._sin;
 		_recsize = srcs._recsize;
@@ -61,8 +61,8 @@ void Server::paramSocket()
 
 void Server::linkSocket()
 {
-	_sin.sin_port = htons(_server.getPort());
-	_sin.sin_addr.s_addr = convertIp(_server.getIp()); //Pour une estd::coute sur std::coutes les adresses htonl(INADDR_ANY)
+	_sin.sin_port = htons(_config.getPort());
+	_sin.sin_addr.s_addr = convertIp(_config.getHost()); //Pour une estd::coute sur std::coutes les adresses htonl(INADDR_ANY)
 	_sin.sin_family = AF_INET;
 	_sockError = bind(_sock, (sockaddr*)&_sin, _recsize);
 	if (_sockError == SOCKET_ERROR)
@@ -111,16 +111,19 @@ void	Server::listenTCP()
 	_sockError = listen(_sock, _maxConnection);
 	if (_sockError == SOCKET_ERROR)
 		std::cerr << "\033[31mError : listenTCP()\033[0m" << std::endl;
-	std::cout << "\033[33mlistenTCP() - Ecoute du port " << _server.getPort() << "\033[0m" << std::endl;
+	std::cout << "\033[33mlistenTCP() - Ecoute du port " << _config.getPort() << "\033[0m" << std::endl;
 }
 
-SOCKET	Server::getSocket()
+SOCKET	Server::getSocket() const
 { return (_sock); }
+
+unsigned int Server::getPort() const
+{ return (_config.getPort()); }
 
 bool	Server::hasCapacity() const
 { return (_currentConnection < _maxConnection); }
 
-void	Server::inrementCurrentConnection()
+void	Server::incrementCurrentConnection()
 { ++_currentConnection; }
 
 void	Server::decrementCurrentConnection()

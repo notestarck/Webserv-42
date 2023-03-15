@@ -8,7 +8,7 @@ ParsConfig::ParsConfig()
 
 ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
 	_port(80),
-	_ip(localhost),
+	_host(localhost),
 	_name_server("default_name"),
 	_index("index.html"),
 	_nbrLocation(0)
@@ -29,7 +29,7 @@ ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
 		if (key == "listen")
 			setPort(stoi(value.substr(0, value.size() - 1)));
 		else if (key == "host")
-			setIp(value.substr(0, value.size() - 1));
+			setHost(value.substr(0, value.size() - 1));
 		else if (key == "server_name")
 			setNameServer(value.substr(0, value.size() - 1));
 		else if (key == "root")
@@ -61,7 +61,7 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 {
 	if (this != &srcs)
 	{
-		_ip = srcs._ip;
+		_host = srcs._host;
 		_port = srcs._port;
 		_name_server = srcs._name_server;
 		_root = srcs._root;
@@ -77,8 +77,8 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 unsigned int	ParsConfig::getPort() const
 { return (_port); }
 
-std::string    ParsConfig::getIp() const
-{ return (_ip); }
+std::string    ParsConfig::getHost() const
+{ return (_host); }
 
 std::string          ParsConfig::getNameServer() const
 { return (_name_server); }
@@ -145,14 +145,14 @@ std::string	ParsConfig::getLocationIndex(std::string url) const
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
 
-void    ParsConfig::setIp(std::string ip)
+void    ParsConfig::setHost(std::string ip)
 {
 	if (ip == "localhost")
 	{
-		_ip = localhost;
+		_host = localhost;
 	}
 	else
-		_ip = ip;
+		_host = ip;
 }
 
 void    ParsConfig::setPort(unsigned int port)

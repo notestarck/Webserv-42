@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.hpp                                         :+:      :+:    :+:   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/13 14:58:10 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/15 11:29:43 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,15 +41,17 @@ class Server
 
 		Server & operator=(const Server &srcs);
 
-		SOCKET		getSocket();
+		SOCKET			getSocket() const;
+		unsigned int	getPort() const;
 
 		bool hasCapacity() const;
-		void inrementCurrentConnection();
+		void incrementCurrentConnection();
 		void decrementCurrentConnection();
+
 	private :
 	//	Server();
 		int			_sockError;
-		ParsConfig	_server;
+		ParsConfig	_config;
 		int			_currentConnection;
 		int			_maxConnection;
 

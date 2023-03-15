@@ -29,9 +29,10 @@ class ParsConfig
 			private :
 				Location();
 				std::string _url;
-				std::string _allow;
+				std::string _allow; //plusieurs allow donc faire vector de _allow
 				std::string _root;
 				std::string _index;
+				//ajouter le cgi_info
 		};// class Locartion
 
 		ParsConfig();
@@ -42,7 +43,7 @@ class ParsConfig
 		ParsConfig & operator=(const ParsConfig &srcs);
 
 		//Getteur
-		std::string              getIp() const;
+		std::string              getHost() const;
 		unsigned int             getPort() const;
 		std::string              getNameServer() const;
 		std::string              getRoot() const;
@@ -52,19 +53,10 @@ class ParsConfig
 		std::string              getLocationAllow(std::string url) const;
 		std::string              getLocationRoot(std::string url) const;
 		std::string              getLocationIndex(std::string url) const;
-		size_t              getNbrLocation() const;
-
-		//Setteur
-		void    setIp(std::string ip);
-		void    setPort(unsigned int port);
-		void    setNameServer(std::string nameServer);
-		void    setRoot(std::string root);
-		void    setIndex(std::string index);
-		void    setErrorPage(int error, std::string page);
-		void    setLocation(std::ifstream &file_config, std::string url);
+		size_t              	getNbrLocation() const;
 
 	private :
-		std::string              	_ip;
+		std::string              	_host;
 		unsigned int           		_port;
 		std::string             	_name_server;
 		std::string            		_root;
@@ -72,6 +64,15 @@ class ParsConfig
 		std::map<int, std::string>	_error_page;
 		std::vector<Location>	    _location;
 		size_t              		_nbrLocation;
+
+		//Setteur
+		void    setHost(std::string ip);
+		void    setPort(unsigned int port);
+		void    setNameServer(std::string nameServer);
+		void    setRoot(std::string root);
+		void    setIndex(std::string index);
+		void    setErrorPage(int error, std::string page);
+		void    setLocation(std::ifstream &file_config, std::string url);
 };// class ParsConfig
 
 #endif /* _PARSCONFIG_HPP_ */
