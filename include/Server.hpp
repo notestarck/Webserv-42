@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:59:06 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 14:43:01 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,16 +35,44 @@ class Server
 
 		Server & operator=(const Server &srcs);
 
-<<<<<<< HEAD
 		//Getteur
 		SOCKET			getSocket() const;
 		std::string		getHost() const;
-		SOCKET			getSocket() const;
 		unsigned int	getPort() const;
->>>>>>> 427a1fd6ceeddf9831520b4a3025cdded7f9f907
+		std::string		getNameServer() const;
+		std::string		getRoot() const;
+		std::string		getIndex() const;
+		std::string		getErrorPage(int code) const;
+		size_t			getNbrLocation() const;
+
+		//nbr Connection
+		bool hasCapacity() const;
+		void incrementCurrentConnection();
 		void decrementCurrentConnection();
+
+	private :
+	//	Server();
+		int									_sockError;
 		ParsConfig							_config;
+		int									_currentConnection;
+		int									_maxConnection;
+
+    	/* Socket et contexte d'adressage du serveur */
 		SOCKET								_sock;
+		sockaddr_in							_sin;
+		socklen_t							_recsize;
+		
+		/* Access aux Location du fichier de config */
 		std::vector<ParsConfig::Location>	_location;
+		size_t								_nbrLocation;
+
+		/* Private Methode */
+		void		creatSocket();
 		void		paramSocket();
+		void		linkSocket();
+		void		listenTCP();
+		in_addr_t	convertIp(const std::string &str);
+
 };//class Server
+
+#endif /* _SERVER_HPP_ */

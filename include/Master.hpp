@@ -5,30 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-<<<<<<< HEAD
-/*   Created: 2023/03/14 10:50:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/14 15:29:29 by estarck          ###   ########.fr       */
-=======
 /*   Created: 2023/03/15 15:36:30 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:33:44 by estarck          ###   ########.fr       */
->>>>>>> master
+/*   Updated: 2023/03/16 15:03:14 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef _MASTER_HPP_
 #define _MASTER_HPP_
 
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <netinet/tcp.h>
-//#include <arpa/inet.h>
-//#include <unistd.h>
-//#include <iostream>
-//#include <fstream>
-//#include <sstream>
-//#include <vector>
-//#include <map>
 #include <string>
 
 #include "./ParsConfig.hpp"

@@ -181,15 +181,6 @@ accept :
 	Accepter une connexion sur une socket
 	http://manpagesfr.free.fr/man/man2/accept.2.html
 
-	select retourne le nombre de sockets qui sont prêts à lire,
-	écrire ou ayant une erreur, peut retourner 0 si aucun socket n'est prêt.
-	Retourne -1 en cas d'erreur.
-	Pour vérifier qu'un socket, ou descripteur de fichier, particulier a été défini
-	dans la structure, on utilisera la macro FD_ISSET.
-	Pour vérifier qu'une connexion entrante est en attente, que l'appel à accept
-	ne sera pas bloquant, on doit vérifier que notre socket serveur est prêt en
-	écriture.
-
 	int accept(int sockfd, struct sockaddr *adresse, socklen_t *longueur);
 
 	L'appel système accept() est employé avec les sockets utilisant un protocole en mode connecté (SOCK_STREAM et SOCK_SEQPACKET).

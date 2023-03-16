@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 15:50:10 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 15:00:30 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 14:36:53 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,10 +38,10 @@ Master::~Master()
 Master &Master::operator=(const Master &srcs)
 { return (*this); }
 
-<<<<<<< HEAD
-void Master::initSelect()
+void Master::initConfig(std::ifstream &config_file)
 {
-	for (std::vector<Server *>::iterator iter = _server.begin(); iter < _server.end(); iter++)
+	for (unsigned int i = 0; i < _nbrServer; i++)
+	{
 		ParsConfig *tmp = new ParsConfig(config_file, i);
 		_config.push_back(tmp);
 	}
@@ -71,5 +71,4 @@ void Master::startConnection()
 		_connection.acceptSocket();
 		_connection.traitement();
 	}
->>>>>>> master
 }

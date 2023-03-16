@@ -1,6 +1,0 @@
-[34mSocket created : [0m4 en mode TCP/IP.
-[33mlistenTCP() - Ecoute du port 1042[0m
-[34mSocket created : [0m5 en mode TCP/IP.
-[33mlistenTCP() - Ecoute du port 8080[0m
-[34mSocket created : [0m6 en mode TCP/IP.
-[33mlistenTCP() - Ecoute du port 8081[0m
