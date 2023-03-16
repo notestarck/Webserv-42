@@ -139,10 +139,14 @@ void Connection::traitement()
 			}
           else
           {
-              //Requet req = Requet(clients[i].get_socket());
-              //int code;
-              //if((code = req.parse(clients[i].requet)))
-              std::cout <<"parse requette" << std:: endl;
+              Requet req = Requet(it->_csock);
+              int code;
+              if((code = req.parse(it->_recBuffer)))
+              {
+                  std::cout << " error code\n";
+              }
+                  std::cout << "code = " << code << std::endl;
+              //std::cout <<"parse requette test" << std:: endl;
              // std::cout << code << "code retour" << std::endl;
              // {
 

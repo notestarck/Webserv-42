@@ -3,12 +3,10 @@
 #include <map>
 #include <sstream>
 
-class Requet
-{
+class Requet{
 private:
 
 int client_fd;
-
 Requet();
 
 public:

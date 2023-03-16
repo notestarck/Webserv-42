@@ -77,17 +77,30 @@ int main(int argc, char ** argv)
 	    Server *tmp = new Server(*my_config[i]);
 	    my_server.push_back(tmp);
 	}
-	
+
 	//Creation de la connexion
 	Connection	my_connect(my_server);
-	
+
 		//delete my_server<Server *>
 	for (int i = 0; i < nbr_server; i++)
 		delete my_server[i];
 
-	//delete my_config<parsconfig *>
-	for (int i = 0; i < nbr_server; i++)
-		delete my_config[i];
-	
-	return (0);
+
+//    master.create_server(); // creation des serveurs  puis create_socket
+//
+//    //std::cout << "test create serv\n";
+//    while(1) {
+//        master.wait();
+//
+//
+//        //master.accept_socket();
+//        //master.recive();
+//        //master.sendr();
+//
+//        //taitement requetes
+//    }
+//
+//    //master.close_servers;
+//    delete servers;
+    return 0;
 }

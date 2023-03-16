@@ -28,6 +28,7 @@
 
 #include "Client.hpp"
 #include "Server.hpp"
+#include "Requet.hpp"
 
 
 class Connection

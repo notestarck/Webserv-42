@@ -18,7 +18,8 @@ SDIR		=	./srcs
 _SRCS		=	main.cpp \
 				ParsConfig.cpp \
 				Server.cpp \
-				Connection.cpp 
+				Connection.cpp \
+				Requet.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin
