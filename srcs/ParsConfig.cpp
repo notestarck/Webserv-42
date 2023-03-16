@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:37:15 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 16:45:18 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ std::string	ParsConfig::getLocationUrl(size_t pos) const
 	} 
 	return (_location[pos].getUrl()); }
 
-std::string	ParsConfig::getLocationAllow(std::string url) const
+std::vector<std::string>	ParsConfig::getLocationAllow(std::string url) const
 {
 	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
 	{
@@ -218,13 +218,26 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 		ss >> key;
 		if (key == "}")
 			break;
-		ss >> value;
-		if (key == "allow")
-			_allow = value.substr(0, value.size() -1);
-		else if (key == "root")
-			_root = value.substr(0, value.size() - 1);
-		else if (key == "index")
-			_index = value.substr(0, value.size() - 1);
+		while (ss >> value)
+		{
+			if (key == "allow")
+			{
+				std::string	tmp;
+				if (!ss.eof())
+					tmp = value.substr(0, value.size());
+				else
+					tmp = value.substr(0, value.size() -1);
+				if (tmp != "GET" && tmp != "POST" && tmp != "DELETE")
+				{
+					std::cerr << "Error : file config not valide. " << tmp << " is not valide." << std::endl;
+					exit (-1);
+				}
+			}
+			else if (key == "root")
+				_root = value.substr(0, value.size() - 1);
+			else if (key == "index")
+				_index = value.substr(0, value.size() - 1);
+		}
 		line.clear();
 		ss.clear();
 		key.clear();
@@ -253,7 +266,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 const std::string & ParsConfig::Location::getUrl() const
 { return (_url); }
 
-const std::string & ParsConfig::Location::getAllow() const
+const std::vector<std::string> & ParsConfig::Location::getAllow() const
 { return (_allow); }
 
 const std::string & ParsConfig::Location::getRoot() const

@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 15:28:59 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 15:58:06 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,16 +34,32 @@ int countServer(std::ifstream &config_file)
 	return (nbr_server);
 }
 
+bool	checkExtension(std::string extension)
+{
+	std::string tmp = extension.substr(extension.size() - 5, extension.size());
+	if(tmp != ".conf")
+		return (false);
+	return (true);
+}
+
 int main(int argc, char ** argv)
 {
-	//On verifie la presence du fichier .conf, il faut encore gerer l'extension du fichier.
+	//On verifie la presence du fichier .conf
 	if (argc < 2)
 	{
 		std::cerr << "\033[1;31mError : Need < nginx_config_file >\033[0m" << std::endl;
 		exit (-1);
 	}
+	
+	//On verifie l'extension du fichier.
+	std::string	extension(argv[1]);
+	if (!checkExtension(extension))
+	{
+		std::cerr << "\033[1;31mError : Need extension .conf\033[0m" << std::endl;
+		exit (-1);
+	}
 
-	//Oouverture du fichier
+	//Ouverture du fichier
 	const std::string  config_file_path(argv[1]);
 	std::ifstream config_file(config_file_path.c_str());
 	if (!config_file.is_open())

@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:41:34 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 16:19:46 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,17 +34,18 @@ class ParsConfig
 				~Location();
 
 				Location & operator=(const Location &srcs);
-				const std::string & getUrl() const;
-				const std::string & getAllow() const;
-				const std::string & getRoot() const;
-				const std::string & getIndex() const;
+
+				const std::string &					getUrl() const;
+				const std::vector<std::string> &	getAllow() const;
+				const std::string &					getRoot() const;
+				const std::string &					getIndex() const;
 
 			private :
 				Location();
-				std::string _url;
-				std::string _allow; //plusieurs allow donc faire vector de _allow
-				std::string _root;
-				std::string _index;
+				std::string 				_url;
+				std::vector<std::string>	_allow;
+				std::string 				_root;
+				std::string 				_index;
 				//ajouter le cgi_info
 		};// class Locartion
 
@@ -56,18 +57,18 @@ class ParsConfig
 		ParsConfig & operator=(const ParsConfig &srcs);
 
 		//Getteur
-		std::string              getHost() const;
-		unsigned int             getPort() const;
-		std::string              getNameServer() const;
-		std::string              getRoot() const;
-		std::string              getIndex() const;
-		std::string              getErrorPage(int code) const;
-		std::string              getLocationUrl(size_t size) const;
-		std::string              getLocationAllow(std::string url) const;
-		std::string              getLocationRoot(std::string url) const;
-		std::string              getLocationIndex(std::string url) const;
+		std::string              		getHost() const;
+		unsigned int             		getPort() const;
+		std::string              		getNameServer() const;
+		std::string              		getRoot() const;
+		std::string              		getIndex() const;
+		std::string              		getErrorPage(int code) const;
+		std::string              		getLocationUrl(size_t size) const;
+		std::vector<std::string>		getLocationAllow(std::string url) const;
+		std::string              		getLocationRoot(std::string url) const;
+		std::string              		getLocationIndex(std::string url) const;
 		const std::vector<Location>&	getLocation() const;
-		size_t              	getNbrLocation() const;
+		size_t              			getNbrLocation() const;
 
 	private :
 		std::string              	_host;
