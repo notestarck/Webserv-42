@@ -6,7 +6,7 @@
 /*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 18:39:04 by reclaire         ###   ########.fr       */
+/*   Updated: 2023/03/16 18:56:34 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ Server::Server(const Server &srcs)
 { *this = srcs; }
 
 Server::~Server()
-{ close(_sock); }
+{
+	std::cout << "test\n"; 
+	close(_sock); }
 
 Server & Server::operator=(const Server &srcs)
 { 

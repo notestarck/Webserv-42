@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 15:58:06 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 18:39:20 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,18 @@
 #include <fstream>
 #include <string>
 
-#include "../include/Master.hpp"
+#include "../include/ParsConfig.hpp"
+#include "../include/Server.hpp"
+#include "../include/Connection.hpp"
+
+#include <vector>
+
+void signal_handler(int signal)
+{
+    std::cout << "Signal SIGINT reçu. Fermeture du programme..." << std::endl;
+    if (signal == SIGINT)
+    	exit(1);
+}
 
 int countServer(std::ifstream &config_file)
 {
@@ -44,6 +55,7 @@ bool	checkExtension(std::string extension)
 
 int main(int argc, char ** argv)
 {
+	signal(SIGINT, signal_handler);
 	//On verifie la presence du fichier .conf
 	if (argc < 2)
 	{
@@ -65,11 +77,34 @@ int main(int argc, char ** argv)
 	if (!config_file.is_open())
 		std::cerr << "\033[1;31mError : Opening " << config_file_path << "\003[0m" << std::endl;
 
-	//On compte le nombre de serveur qu'on enregistre ensuite dans my_config.
-	unsigned int nbr_server = countServer(config_file);
+	unsigned int _nbrServer = countServer(config_file);
 
-	//Creation du server
-	Master	my_webServe(config_file, nbr_server);
+	//On compte le nombre de serveur qu'on enregistre ensuite dans _config.
+	std::vector<ParsConfig *>	_config;
+	for (unsigned int i = 0; i < _nbrServer; i++)
+	{
+		ParsConfig *tmp = new ParsConfig(config_file, i);
+		_config.push_back(tmp);
+	}
+
+	//Initialisation des Server.
+	std::vector<Server *>		_server;
+	for (unsigned int i = 0; i < _nbrServer; i++)
+	{
+		Server *tmp = new Server(*_config[i]);
+		_server.push_back(tmp);
+	}
+
+	//Crate connection
+	Connection	_connection(_server);
+
+	while (42)
+	{
+		_connection.initConnection();
+		_connection.runSelect();
+		_connection.acceptSocket();
+		_connection.traitement();
+	}
 
     return 0;
 }
