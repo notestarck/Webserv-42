@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Master.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 15:50:10 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 16:34:16 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 18:23:05 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 Master::Master(std::ifstream &config_file, unsigned int nbrServer) :
 	_nbrServer(nbrServer)
 {
-	initConfig(config_file);
+	initConfig(config_file); //this._config
 	initServer();
 	creatConnection();
 	startConnection();

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:37:55 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 18:39:04 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ Server & Server::operator=(const Server &srcs)
 	}
 return (*this); }
 
+//Init socket
 void Server::creatSocket()
 {
 	_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -59,6 +60,7 @@ void Server::creatSocket()
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }
 
+//Setsockopt
 void Server::paramSocket()
 {
 	int	tmp;
@@ -68,6 +70,7 @@ void Server::paramSocket()
 		std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 }
 
+//Bind socket
 void Server::linkSocket()
 {
 	_sin.sin_port = htons(getPort());
@@ -81,6 +84,7 @@ void Server::linkSocket()
 	}
 }
 
+//Config la socket du serveur pr une connection TCP
 void	Server::listenTCP()
 {
 	_sockError = listen(_sock, _maxConnection);

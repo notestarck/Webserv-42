@@ -6,7 +6,7 @@
 /*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 17:48:12 by reclaire         ###   ########.fr       */
+/*   Updated: 2023/03/16 18:21:09 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ class Connection
 		void runSelect();
 		void acceptSocket();
 		void traitement();
+		void send_error(int i);
 
 	private :
 		/* Serveur */
