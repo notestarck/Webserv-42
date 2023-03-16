@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 15:50:10 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 09:18:28 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 10:08:17 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,24 @@ Master::Master(std::ifstream &config_file, unsigned int nbrServer) :
 	_nbrServer(nbrServer)
 {
 	initConfig(config_file);
+	initServer();
+	creatConnection();
+	startConnection();
 }
 
 Master::Master(const Master &srcs)
 {}
 
 Master::~Master()
-{}
+{
+	//delete _config
+	for (unsigned int i = 0; i < _nbrServer; i++)
+		delete _config[i];
+		
+	//delete _server
+	for (unsigned int i = 0; i < _nbrServer; i++)
+		delete _server[i];
+}
 
 Master &Master::operator=(const Master &srcs)
 { return (*this); }
@@ -38,5 +49,26 @@ void Master::initConfig(std::ifstream &config_file)
 
 void Master::initServer()
 {
-	for (unsigned int i = 0; )
+	for (unsigned int i = 0; i < _nbrServer; i++)
+	{
+		Server *tmp = new Server(*_config[i]);
+		_server.push_back(tmp);
+	}
+}
+
+void Master::creatConnection()
+{
+	Connection tmp(_server);
+	_connection = tmp;
+}
+
+void Master::startConnection()
+{
+	while (42)
+	{
+		_connection.initConnection();
+		_connection.runSelect();
+		_connection.acceptSocket();
+		_connection.traitement();
+	}
 }

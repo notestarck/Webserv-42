@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 15:36:30 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 09:17:39 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 10:06:36 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,8 @@ class Master
 		//Methode private
 		void initConfig(std::ifstream &config_file);
 		void initServer();
+		void creatConnection();
+		void startConnection();
 		
 };//class Master
 

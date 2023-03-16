@@ -6,7 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/03/15 17:26:06 by estarck          ###   ########.fr        #
+#    Updated: 2023/03/16 09:59:16 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,8 @@ SDIR		=	./srcs
 _SRCS		=	main.cpp \
 				ParsConfig.cpp \
 				Server.cpp \
-				Connection.cpp 
+				Connection.cpp \
+				Master.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin
