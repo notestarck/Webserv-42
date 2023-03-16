@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 19:05:12 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 10:18:30 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <vector>
 #include <map>
 
+#include "../include/Master.hpp"
 #include "../include/Client.hpp"
 #include "../include/Connection.hpp"
 #include "../include/ParsConfig.hpp"
@@ -63,44 +64,9 @@ int main(int argc, char ** argv)
 
 	//On compte le nombre de serveur qu'on enregistre ensuite dans my_config.
 	unsigned int nbr_server = countServer(config_file);
-	std::vector<ParsConfig *>  my_config;
-	for (unsigned int i = 0; i < nbr_server; i++)
-	{
-		ParsConfig  *tmp = new ParsConfig(config_file, i);
-		my_config.push_back(tmp);
-	}
 
-	//Creation des serveurs a parti du fichier de config.
-	std::vector<Server *>  my_server;
-	for (int i = 0; i < nbr_server; i++)
-	{
-	    Server *tmp = new Server(*my_config[i]);
-	    my_server.push_back(tmp);
-	}
+	//Creation du server
+	Master	my_webServe(config_file, nbr_server);
 
-	//Creation de la connexion
-	Connection	my_connect(my_server);
-
-		//delete my_server<Server *>
-	for (int i = 0; i < nbr_server; i++)
-		delete my_server[i];
-
-
-//    master.create_server(); // creation des serveurs  puis create_socket
-//
-//    //std::cout << "test create serv\n";
-//    while(1) {
-//        master.wait();
-//
-//
-//        //master.accept_socket();
-//        //master.recive();
-//        //master.sendr();
-//
-//        //taitement requetes
-//    }
-//
-//    //master.close_servers;
-//    delete servers;
     return 0;
 }
