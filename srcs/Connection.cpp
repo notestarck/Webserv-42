@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 18:42:07 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 18:56:01 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,6 @@ Connection::Connection(std::vector<Server *> &servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	FD_ZERO(&_read);
-	FD_ZERO(&_write);
-	FD_ZERO(&_errors);
-	
 	_timeout.tv_sec = 1;
 	_timeout.tv_usec = 0;
 }
@@ -53,6 +49,9 @@ Connection & Connection::operator=(const Connection &srcs)
 
 void Connection::initConnection()
 {
+	FD_ZERO(&_read);
+	FD_ZERO(&_write);
+	FD_ZERO(&_errors);
 	for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
@@ -109,6 +108,13 @@ void Connection::acceptSocket()
 	}
 }
 
+void Connection::send_error(int err)
+{
+	std::string html_page;
+
+	//this->_servers
+}
+
 void Connection::traitement()
 {
 	//Ces fonctions renvoient le nombre d'octets reçus si elles réussissent, ou -1 si elles échouent. La valeur de retour sera 0 si le pair a effectué un arrêt normal.
@@ -121,7 +127,7 @@ void Connection::traitement()
         	if(MAX_REQUEST_SIZE <= it->_recSize)
         	{
 				std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
-              //send_error(400, clients[i]);
+        		//send_error(400, clients[i]);
 				_client.erase(it);
           }
 		   
