@@ -1,4 +1,16 @@
-#include "Requet.hpp"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Requet.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/16 10:39:35 by estarck           #+#    #+#             */
+/*   Updated: 2023/03/16 14:37:35 by estarck          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../include/Requet.hpp"
 
 Requet::Requet(int client_fd){
     this->client_fd = client_fd;

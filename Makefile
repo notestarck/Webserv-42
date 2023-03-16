@@ -6,11 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-<<<<<<< HEAD
-#    Updated: 2023/03/15 18:53:43 by estarck          ###   ########.fr        #
-=======
-#    Updated: 2023/03/14 12:30:38 by estarck          ###   ########.fr        #
->>>>>>> 427a1fd6ceeddf9831520b4a3025cdded7f9f907
+#    Updated: 2023/03/16 14:57:51 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,10 +19,16 @@ _SRCS		=	main.cpp \
 				ParsConfig.cpp \
 				Server.cpp \
 <<<<<<< HEAD
+<<<<<<< HEAD
 				Connection.cpp 
 =======
 				Master.cpp
 >>>>>>> 427a1fd6ceeddf9831520b4a3025cdded7f9f907
+=======
+				Connection.cpp \
+				Requet.cpp \
+				Master.cpp
+>>>>>>> master
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin

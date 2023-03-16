@@ -7,6 +7,7 @@
 /*                                                +#+#+#+#+#+   +#+           */
 <<<<<<< HEAD
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2023/03/15 18:54:13 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
@@ -27,18 +28,18 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+=======
+/*   Updated: 2023/03/16 14:25:03 by estarck          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
+>>>>>>> master
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <vector>
-#include <map>
 
-#include "../include/Client.hpp"
-#include "../include/Connection.hpp"
-#include "../include/ParsConfig.hpp"
-#include "../include/Server.hpp"
-
+#include "../include/Master.hpp"
 
 int countServer(std::ifstream &config_file)
 {
@@ -74,13 +75,8 @@ int main(int argc, char ** argv)
 
 	//On compte le nombre de serveur qu'on enregistre ensuite dans my_config.
 	unsigned int nbr_server = countServer(config_file);
-	std::vector<ParsConfig *>  my_config;
-	for (unsigned int i = 0; i < nbr_server; i++)
-	{
-		ParsConfig  *tmp = new ParsConfig(config_file, i);
-		my_config.push_back(tmp);
-	}
 
+<<<<<<< HEAD
 	//Creation des serveurs a parti du fichier de config.
 	std::vector<Server *>  my_server;
 	for (int i = 0; i < nbr_server; i++)
@@ -102,10 +98,10 @@ int main(int argc, char ** argv)
 		//delete my_server<Server *>
 	for (int i = 0; i < nbr_server; i++)
 		delete my_server[i];
+=======
+	//Creation du server
+	Master	my_webServe(config_file, nbr_server);
+>>>>>>> master
 
-	//delete my_config<parsconfig *>
-	for (int i = 0; i < nbr_server; i++)
-		delete my_config[i];
-	
-	return (0);
+    return 0;
 }

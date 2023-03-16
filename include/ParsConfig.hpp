@@ -1,16 +1,23 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ParsConfig.hpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
+/*   Updated: 2023/03/16 14:41:34 by estarck          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef _PARSCONFIG_HPP_
 #define _PARSCONFIG_HPP_
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
+#include <sstream>
+
 #include <vector>
 #include <map>
 

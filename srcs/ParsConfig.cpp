@@ -6,12 +6,11 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 17:38:13 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 14:37:15 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/ParsConfig.hpp"
-#include <sstream>
 
 /*************************** Class ParsConfig ****************************/
 
