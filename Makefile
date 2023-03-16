@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+         #
+#    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/03/16 17:48:12 by reclaire         ###   ########.fr        #
+#    Updated: 2023/03/16 18:41:43 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,8 +19,7 @@ _SRCS		=	main.cpp \
 				ParsConfig.cpp \
 				Server.cpp \
 				Connection.cpp \
-				Request.cpp \
-				Master.cpp
+				Requet.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin
