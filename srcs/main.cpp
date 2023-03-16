@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 19:05:12 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 09:07:20 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 #include <vector>
 #include <map>
 
+#include "../include/Master.hpp"
 #include "../include/Client.hpp"
 #include "../include/Connection.hpp"
 #include "../include/ParsConfig.hpp"
