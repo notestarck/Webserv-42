@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 15:36:30 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 15:49:51 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 10:06:36 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@
 class Master
 {
 	public :
-		Master(std::ifstream &config_file);
+		Master(std::ifstream &config_file, unsigned int nbrServer);
 		Master(const Master &srcs);
 		~Master();
 
@@ -47,10 +47,16 @@ class Master
 
 		// @brief Initialise chaque serveur a partir de _config
 		std::vector<Server *>		_server;
-		int							_nbrServer;
+		unsigned int				_nbrServer;
 
 		// @brief gestion des connexion client avec le serveur
 		Connection					_connection;
+
+		//Methode private
+		void initConfig(std::ifstream &config_file);
+		void initServer();
+		void creatConnection();
+		void startConnection();
 		
 };//class Master
 
