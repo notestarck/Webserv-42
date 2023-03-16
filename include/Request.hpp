@@ -1,24 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Requet.hpp                                         :+:      :+:    :+:   */
+/*   Request.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 10:24:17 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:44:49 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 17:47:19 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef _REQUET_HPP_
-#define _REQUET_HPP_
+#ifndef _REQUEST_HPP_
+#define _REQUEST_HPP_
 
 #include <iostream>
 #include <sstream>
 
 #include <map>
 
-class Requet
+class Request
 {
 	public:
 		std::string path;
@@ -26,8 +26,8 @@ class Requet
 		std::map<std::string, std::string> headers;
 		std::string body;
 
-		Requet(int i);
-		~Requet();
+		Request(int i);
+		~Request();
 	
 		int parse(std::string request);
 		bool is_not_method(const std::string method);
@@ -36,8 +36,8 @@ class Requet
 
 	private:
 		int client_fd;
-		Requet();
+		Request();
 	
-};//Class Requet
+};//Class Request
 
-#endif/* _REQUET_HPP_ */
+#endif/* _REQUEST_HPP_ */

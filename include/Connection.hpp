@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.hpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 15:28:01 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 17:48:12 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 #include "./Server.hpp"
 #include "./Client.hpp"
-#include "./Requet.hpp"
+#include "./Request.hpp"
 
 #include <vector>
 

@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Requet.cpp                                         :+:      :+:    :+:   */
+/*   Request.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -10,14 +10,14 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Requet.hpp"
+#include "../include/Request.hpp"
 
-Requet::Requet(int client_fd){
+Request::Request(int client_fd){
     this->client_fd = client_fd;
 
 }
 
-Requet::~Requet(){}
+Request::~Request(){}
 
 
 static size_t StringToHex(std::string input)
@@ -65,7 +65,7 @@ static std::string parse_chunck(std::string &request, int i){
 
 
 
-int Requet::parse(std::string request){
+int Request::parse(std::string request){
 
     unsigned long i;
     int j;
@@ -115,7 +115,7 @@ int Requet::parse(std::string request){
 
 }
 
-bool Requet::is_not_method(const std::string method) {
+bool Request::is_not_method(const std::string method) {
     if(method.empty())
         return true;
     for(unsigned long  i = 0; i < method.length(); i++){
@@ -125,7 +125,7 @@ bool Requet::is_not_method(const std::string method) {
     return false;
 }
 
-bool Requet::check_protocol(std::map<std::string, std::string>::mapped_type &test ){
+bool Request::check_protocol(std::map<std::string, std::string>::mapped_type &test ){
     if(test == "HTTP/1.1")
         return true;
     return false;

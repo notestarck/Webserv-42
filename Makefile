@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
+#    By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/03/15 17:26:06 by estarck          ###   ########.fr        #
+#    Updated: 2023/03/16 17:48:12 by reclaire         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ _SRCS		=	main.cpp \
 				ParsConfig.cpp \
 				Server.cpp \
 				Connection.cpp \
-				Requet.cpp \
+				Request.cpp \
 				Master.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
