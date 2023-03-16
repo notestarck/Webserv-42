@@ -6,24 +6,12 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 18:10:05 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 14:09:44 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef _CLIENT_HPP_
 #define _CLIENT_HPP_
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-
 
 #define MAX_REQUEST_SIZE 2048
 

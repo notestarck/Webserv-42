@@ -6,29 +6,21 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 18:32:16 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 14:44:44 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef _CONNECTION_HPP_
 #define _CONNECTION_HPP_
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <unistd.h>
+#include <sys/select.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
+
+#include "./Server.hpp"
+#include "./Client.hpp"
+#include "./Requet.hpp"
+
 #include <vector>
-#include <map>
-
-#include "Client.hpp"
-#include "Server.hpp"
-
 
 class Connection
 {

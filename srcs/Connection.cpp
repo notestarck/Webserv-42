@@ -6,9 +6,10 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/15 18:32:36 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 14:33:20 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #include "../include/Connection.hpp"
 
@@ -25,19 +26,28 @@ Connection::Connection(std::vector<Server *> &servers) :
 	
 	_timeout.tv_sec = 1;
 	_timeout.tv_usec = 0;
-
-	while(42)
-		initConnection();
 }
 
 Connection::Connection(const Connection & srcs)
-{}
+{
+	*this = srcs; 
+}
 
 Connection::~Connection()
 {}
 
 Connection & Connection::operator=(const Connection &srcs)
 {
+	if (this != &srcs)
+	{
+		_servers = srcs._servers;
+		_client = srcs._client;
+		_maxFd = srcs._maxFd;
+		_read = srcs._read;
+		_write = srcs._write;
+		_errors = srcs._errors;
+		_timeout = srcs._timeout;
+	}
 	return (*this);
 }
 
@@ -47,9 +57,6 @@ void Connection::initConnection()
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 		initSelect(it->_csock, _read);
-	runSelect();
-	acceptSocket();
-	traitement();
 }
 
 void Connection::initSelect(int fd, fd_set &set)
@@ -139,10 +146,14 @@ void Connection::traitement()
 			}
           else
           {
-              //Requet req = Requet(clients[i].get_socket());
-              //int code;
-              //if((code = req.parse(clients[i].requet)))
-              std::cout <<"parse requette" << std:: endl;
+              Requet req = Requet(it->_csock);
+              int code;
+              if((code = req.parse(it->_recBuffer)))
+              {
+                  std::cout << " error code\n";
+              }
+                  std::cout << "code = " << code << std::endl;
+              //std::cout <<"parse requette test" << std:: endl;
              // std::cout << code << "code retour" << std::endl;
              // {
 
