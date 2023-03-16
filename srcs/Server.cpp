@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:37:55 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/16 17:02:59 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ Server::Server(const Server &srcs)
 { *this = srcs; }
 
 Server::~Server()
-{ close(_sock); }
+{
+	std::cout << "test\n"; 
+	close(_sock); }
 
 Server & Server::operator=(const Server &srcs)
 { 
