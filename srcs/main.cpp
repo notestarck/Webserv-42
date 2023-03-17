@@ -6,52 +6,15 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 18:39:20 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 15:26:51 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../include/utils.hpp"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-
-#include "../include/ParsConfig.hpp"
-#include "../include/Server.hpp"
-#include "../include/Connection.hpp"
-
-#include <vector>
-
-void signal_handler(int signal)
-{
-    std::cout << "Signal SIGINT reçu. Fermeture du programme..." << std::endl;
-    if (signal == SIGINT)
-    	exit(1);
-}
-
-int countServer(std::ifstream &config_file)
-{
-	int     nbr_server = 0;
-	char    *buf;
-
-	while (!config_file.eof())
-	{
-		std::string  line;
-
-		getline(config_file, line);
-		if (line == "server {")
-			nbr_server++;
-	}
-	config_file.seekg(0);
-	return (nbr_server);
-}
-
-bool	checkExtension(std::string extension)
-{
-	std::string tmp = extension.substr(extension.size() - 5, extension.size());
-	if(tmp != ".conf")
-		return (false);
-	return (true);
-}
+std::vector<Server *>		_server;
+std::vector<ParsConfig *>	_config;
+Connection					_connection;
 
 int main(int argc, char ** argv)
 {
@@ -80,7 +43,6 @@ int main(int argc, char ** argv)
 	unsigned int _nbrServer = countServer(config_file);
 
 	//On compte le nombre de serveur qu'on enregistre ensuite dans _config.
-	std::vector<ParsConfig *>	_config;
 	for (unsigned int i = 0; i < _nbrServer; i++)
 	{
 		ParsConfig *tmp = new ParsConfig(config_file, i);
@@ -88,7 +50,6 @@ int main(int argc, char ** argv)
 	}
 
 	//Initialisation des Server.
-	std::vector<Server *>		_server;
 	for (unsigned int i = 0; i < _nbrServer; i++)
 	{
 		Server *tmp = new Server(*_config[i]);
@@ -96,8 +57,8 @@ int main(int argc, char ** argv)
 	}
 
 	//Crate connection
-	Connection	_connection(_server);
-
+	Connection	_tmp(_server);
+	_connection = _tmp;
 	while (42)
 	{
 		_connection.initConnection();
@@ -105,6 +66,9 @@ int main(int argc, char ** argv)
 		_connection.acceptSocket();
 		_connection.traitement();
 	}
+
+	//delete
+	delProg();
 
     return 0;
 }

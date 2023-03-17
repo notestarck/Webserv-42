@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 13:33:10 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 14:59:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,9 @@ Server::Server(const Server &srcs)
 
 Server::~Server()
 {
-	std::cout << "test\n"; 
-	close(_sock); }
+	std::cout << "\033[32mLiberation des sockets serveur : " << getNameServer() <<  "\033[0m" <<std::endl; 
+	close(_sock);
+}
 
 Server & Server::operator=(const Server &srcs)
 { 
@@ -57,7 +58,7 @@ void Server::creatSocket()
 	_sock = socket(AF_INET, SOCK_STREAM, 0);
 	if(_sock == INVALID_SOCKET)
 	{
-		std::cerr << "\033[1;31mError : socket\033[0m" << std::endl;
+		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
@@ -67,8 +68,8 @@ void Server::creatSocket()
 void Server::paramSocket()
 {
 	int	tmp;
-	
-	tmp = setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY,(char *)&tmp, sizeof(tmp));
+	tmp = setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
+	//tmp = setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY,(char *)&tmp, sizeof(tmp));
 	if (tmp != 0)
 		std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 }
@@ -82,7 +83,7 @@ void Server::linkSocket()
 	_sockError = bind(_sock, (sockaddr*)&_sin, _recsize);
 	if (_sockError == SOCKET_ERROR)
 	{
-		std::cerr << "\033[1;31mError : Server::linkSocket bind()\033[0m" << std::endl;
+		std::cerr << "\033[1;31mError : Server::linkSocket bind() " << strerror(errno) << "\033[0m" << std::endl;
 		exit(1);
 	}
 }
@@ -93,7 +94,7 @@ void	Server::listenTCP()
 	_sockError = listen(_sock, _maxConnection);
 	if (_sockError == SOCKET_ERROR)
 	{
-		std::cerr << "\033[31mError : Server::listenTCP()\033[0m" << std::endl;
+		std::cerr << "\033[1;31mError : Server::linstenTCP listen() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
 	std::cout << "\033[33mlistenTCP() - Ecoute du port " << getPort() << "\033[0m" << std::endl;
