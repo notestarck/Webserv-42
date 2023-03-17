@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 17:02:59 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 12:29:58 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,8 @@ Server & Server::operator=(const Server &srcs)
 		_location = srcs._location;
 		_nbrLocation = srcs._nbrLocation;
 	}
-return (*this); }
+	return (*this);
+}
 
 void Server::creatSocket()
 {
@@ -151,6 +152,12 @@ std::string		Server::getErrorPage(int code) const
 
 size_t			Server::getNbrLocation() const
 { return (_config.getNbrLocation()); }
+
+ParsConfig &Server::getConfig()
+{ return (_config); }
+
+std::vector<ParsConfig::Location> &Server::getLocation()
+{ return (_location); }
 
 /// @brief Retourne vrai si y'a de la place sur le serveur.
 /// @return bool

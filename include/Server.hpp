@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 14:43:01 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 12:29:49 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,14 +36,16 @@ class Server
 		Server & operator=(const Server &srcs);
 
 		//Getteur
-		SOCKET			getSocket() const;
-		std::string		getHost() const;
-		unsigned int	getPort() const;
-		std::string		getNameServer() const;
-		std::string		getRoot() const;
-		std::string		getIndex() const;
-		std::string		getErrorPage(int code) const;
-		size_t			getNbrLocation() const;
+		SOCKET									getSocket() const;
+		std::string								getHost() const;
+		unsigned int							getPort() const;
+		std::string								getNameServer() const;
+		std::string								getRoot() const;
+		std::string								getIndex() const;
+		std::string								getErrorPage(int code) const;
+		size_t									getNbrLocation() const;
+		ParsConfig								&getConfig();
+		std::vector<ParsConfig::Location>		&getLocation();
 
 		//nbr Connection
 		bool hasCapacity() const;

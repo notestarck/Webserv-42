@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 18:42:07 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 12:35:03 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void Connection::acceptSocket()
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
 			//Socket server est pret a etre lu
-			Client	newClient;
+			Client newClient;
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
@@ -95,6 +95,8 @@ void Connection::acceptSocket()
 				else
 				{
 					(*it)->incrementCurrentConnection();
+					//newClient._config = (*it)->getConfig();
+					//newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
 					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;
