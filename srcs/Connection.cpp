@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 13:30:11 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 13:31:39 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,8 @@ void Connection::acceptSocket()
 				else
 				{
 					(*it)->incrementCurrentConnection();
-					//newClient._config = (*it)->getConfig();
-					//newClient._location = (*it)->getLocation();
+					newClient._config = (*it)->getConfig();
+					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
 					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;

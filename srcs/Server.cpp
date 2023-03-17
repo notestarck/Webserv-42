@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 13:30:47 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 13:33:10 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -157,10 +157,10 @@ std::string		Server::getErrorPage(int code) const
 size_t			Server::getNbrLocation() const
 { return (_config.getNbrLocation()); }
 
-ParsConfig &Server::getConfig()
+const ParsConfig &Server::getConfig() const
 { return (_config); }
 
-std::vector<ParsConfig::Location> &Server::getLocation()
+const std::vector<ParsConfig::Location> &Server::getLocation() const
 { return (_location); }
 
 /// @brief Retourne vrai si y'a de la place sur le serveur.

@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 12:29:49 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/17 13:32:42 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ class Server
 		std::string								getIndex() const;
 		std::string								getErrorPage(int code) const;
 		size_t									getNbrLocation() const;
-		ParsConfig								&getConfig();
-		std::vector<ParsConfig::Location>		&getLocation();
+		const ParsConfig						&getConfig() const;
+		const std::vector<ParsConfig::Location>	&getLocation() const;
 
 		//nbr Connection
 		bool hasCapacity() const;
