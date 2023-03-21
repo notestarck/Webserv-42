@@ -76,6 +76,7 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		_port = srcs._port;
 		_name_server = srcs._name_server;
 		_root = srcs._root;
+        _index = srcs._index;
 		for (size_t i = 0; i < _error_page.size(); i++)
 			_error_page.at(i) = srcs._error_page.at(i);
 		for (size_t i = 0; i < srcs._location.size(); i++)

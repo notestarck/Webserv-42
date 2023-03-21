@@ -64,7 +64,7 @@ int main(int argc, char ** argv)
 		_connection.initConnection();
 		_connection.runSelect();
 		_connection.acceptSocket();
-		_connection.traitement();
+        _connection.traitement();
 	}
 
 	//delete

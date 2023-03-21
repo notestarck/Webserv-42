@@ -20,6 +20,7 @@ _SRCS		=	main.cpp \
 				Server.cpp \
 				Connection.cpp \
 				Request.cpp \
+				Response.cpp \
 				utils.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
