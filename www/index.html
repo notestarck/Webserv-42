@@ -1,1 +1,68 @@
-Bienvenue sur notre site
+<!DOCTYPE html> <!--Indique qu'il s'agit d'une page html. Indispensable.-->
+<html lang="fr"> <!--Englobe tout le contenu de la page web.-->
+	<head>
+		<meta charset="utf-8"> <!--Indique au navigateur comment s'affichent les caracteres speciaux (accents, ideogrammes...)-->
+		<title>Accueil : WebServ-42</title>
+	</head>
+	
+	<body>
+		<header>
+			<h1>WebServ-42</h1>
+		</header>
+		<main id="fr">
+			<button onclick="toggleLanguage()">In English</button>
+			<h2>Bienvenue sur ma page web</h2>
+			<p>
+				Bienvenue sur cette page web, pour notre serveur web. <br>Il vient vous 
+				presenter notre projet.<br> Vous pourrez faire les tests directement 
+				a partir de ses pages
+			</p>
+			<ul>
+				<li><strong>Gestion des pages d'erreur</strong></li>
+				<li>Gestion des liens html</li>
+				<li><em>Gestion des locations</em></li>
+				<li>Gestions des redirections</li>
+				<li><mark>Boire une biére</mark></li>
+			</ul>
+		</main>
+		<main id="en" style="display: none;">
+			<button onclick="toggleLanguage()">En Français</button>
+			<h2>Welcome to my webpage</h2>
+			<p>
+				<p>
+					Welcome to this web page, for our web server. <br>It is 
+					here to present our project. <br> You will be able to perform 
+					tests directly from its pages.
+				</p>
+			</p>
+			<ol>
+				<li><strong>Error page management</strong></li>
+				<li>HTML link management</li>
+				<li><em>Location management</em></li>
+				<li>Redirection management</li>
+				<li><mark>Drink a beer</mark></li>
+			</ol>
+		</main>
+
+		<script>
+			function toggleLanguage()
+			{
+				var fr = document.getElementById("fr");
+				var en = document.getElementById("en");
+				
+				if (fr.style.display === "none")
+				{
+					fr.style.display = "block";
+					en.style.display = "none";
+					document.documentElement.lang = "fr";
+				}
+				else
+				{
+					fr.style.display = "none";
+					en.style.display = "block";
+					document.documentElement.lang = "en";
+				}
+			}
+			</script>
+	</body>
+</html>

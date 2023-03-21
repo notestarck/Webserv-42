@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 16:45:18 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/21 12:00:44 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,9 @@ ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
 		else if (key == "root")
 			setRoot(value.substr(0, value.size() - 1));
 		else if (key == "index")
-			setIndex(value.substr(0, value.size() - 1));
+		{
+			_index = (value.substr(0, value.size() - 1));
+		}
 		else if (key == "error_page")
 		{
 			std::string s_value;
@@ -76,6 +78,7 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		_port = srcs._port;
 		_name_server = srcs._name_server;
 		_root = srcs._root;
+		_index = srcs._index;
 		for (size_t i = 0; i < _error_page.size(); i++)
 			_error_page.at(i) = srcs._error_page.at(i);
 		for (size_t i = 0; i < srcs._location.size(); i++)

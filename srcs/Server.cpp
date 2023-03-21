@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 14:59:31 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/21 11:58:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ void Server::creatSocket()
 		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
+	std::cout << _config.getIndex() << ": mon index a moi \n";
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }
 
