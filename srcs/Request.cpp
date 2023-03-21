@@ -19,6 +19,14 @@ Request::Request(int client_fd){
 
 Request::~Request(){}
 
+std::string Request::get_path() {
+    unsigned long i = path.find_first_of("?", 0);
+    if(i == std::string::npos)
+        return path;
+    if((int)i == -1)
+        i = path.length();
+    return path.substr(0, i);
+}
 
 static size_t StringToHex(std::string input)
 {
