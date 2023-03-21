@@ -58,6 +58,7 @@ Connection & Connection::operator=(const Connection &srcs)
 		_write = srcs._write;
 		_errors = srcs._errors;
 		_timeout = srcs._timeout;
+        _status_info = srcs._status_info;
 	}
 	return (*this);
 }
