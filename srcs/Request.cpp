@@ -140,5 +140,4 @@ bool Request::check_protocol(std::map<std::string, std::string>::mapped_type &te
 
 }
 
-//void Request::clear()
-//for
+

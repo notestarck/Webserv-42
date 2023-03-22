@@ -78,7 +78,7 @@ class Connection
 		int		_maxFd;
 		fd_set	_read;
 		fd_set	_write;
-		fd_set	_errors;
+		//fd_set	_errors;
 
 		// @brief est un pointeur vers une structure pour le temps maximum
 		// que select doit attendre et bloquer avant de retourner, une valeur de

@@ -21,7 +21,7 @@ ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
 	_port(80),
 	_host(localhost),
 	_name_server("default_name"),
-	_index("index.html"),
+	_index("index2.html"),
 	_nbrLocation(0)
 {
 	std::string	line;
