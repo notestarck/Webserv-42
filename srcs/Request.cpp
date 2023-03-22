@@ -82,7 +82,7 @@ int Request::parse(std::string request){
     i = request.find_first_of(" ", 0);
     method = request.substr(0, i);
 
-    std::cout << "method is " << method << "\n";
+    //std::cout << "method is " << method << "\n";
     if(method == "PUT")
         return 200;
     if(is_not_method(method))
@@ -91,13 +91,13 @@ int Request::parse(std::string request){
         return 4001;
     path = request.substr(i + 1, j - i - 1);
 
-    std::cout << "path is " << path << "\n";
+    //std::cout << "path is " << path << "\n";
     headers["HTTP"] = request.substr(j + 1, request.find_first_of("\r", i) - j - 1);
     if(check_protocol(headers["HTTP"]) == false)
     {
 
         return 505;}
-    std::cout << "HTTP protocol is OK\n";
+    //std::cout << "HTTP protocol is OK\n";
     i = request.find_first_of("\n", j) + 1;
     while(i < request.size())
     {

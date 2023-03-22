@@ -29,6 +29,7 @@ struct Client
     ParsConfig							_config;
     std::vector<ParsConfig::Location>	_location;
 
+
 };//struct Client
 
 #endif/* _CLIENT_HPP_ */
