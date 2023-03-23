@@ -341,14 +341,15 @@ void Connection::traitement()
 //                method_ls.push_back(GET);
 //
 //            }
-//            if(!is_allow method(method_lst, req.method))
-//                {
-//                    send_error(405, *it, NULL);
-//                    bool dead = dead_or_alive(*it, live_request(&req.headers));
-//                    if(dead)
-//                        it--;
-//                    continue;
-//                }
+            std::vector<MethodType> method_ls;
+            if(!is_allow_method(method_ls, req.method))
+                {
+                    send_error(405, *it, NULL);
+                    bool dead = dead_or_alive(*it, live_request(&req.headers));
+                    if(dead)
+                        it--;
+                    continue;
+                }
 //         check cgi
 //         if(it->_location.size() > 0 && 1)  //&& is_cgi
 //         {
@@ -382,8 +383,10 @@ void Connection::traitement()
             }
         }
         bool dead = dead_or_alive(*it, live_request(&req.headers));
-        if ( dead)
+        if (dead) {
+            std::cout << " client dead\n";
             it--;
+        }
         std::cout << "request completed\n";
 
 
@@ -576,6 +579,7 @@ void Connection::delete_method(Client client, std::string path){
 
 void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
 {
+
     std::cout << "> Send error page(" << code << ")\n";
     std::ifstream page;
     std::cout << client._config.getErrorPage(code) << std::endl;
@@ -589,12 +593,12 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
     }
 
     else
-        code = 404;
-//    {
-//        page.open(client._config._error_page[code]);
-//        if (!page.is_open())
-//            code = 404;
-//    }
+        code = code;
+
+        page.open(client._config.getErrorPage(code));
+        if (!page.is_open())
+            code = 404;
+
 
     Response response(_status_info[code]);
     if (page.is_open())
@@ -685,7 +689,7 @@ const char *Connection::find_type(const char *path) const{
         if(strcmp(point, ".pdf") == 0) return "application/pdf";
 //        if(.gif)
         if(strcmp(point, ".jpeg") == 0) return "image/jpeg";
-       if(strcmp(point,".mp4") == 0) return "video/mp4";
+        if(strcmp(point,".mp4") == 0) return "video/mp4";
         if(strcmp(point, ".png") == 0) return "image/png";
         if(strcmp(point, ".ico") == 0) return "image/vnd.microsoft.icon";
 
@@ -701,6 +705,25 @@ std::string Connection::methodtype(MethodType method) const
     else if (method == POST)
         return "POST";
     else if (method == DELETE)
+        return "DELETE";
+    return "";
+}
+
+bool Connection::is_allow_method(std::vector<MethodType> allow_method, std::string method){
+    for(std::vector<MethodType>:: iterator it = allow_method.begin(); it != allow_method.end(); it++)
+    {
+        if(method == method_string(*it))
+            return true;
+    }
+    return false;
+}
+
+std::string Connection::method_string(MethodType method) const{
+    if(method == GET)
+        return "GET";
+    else if(method == POST)
+        return "POST";
+    else if(method == DELETE)
         return "DELETE";
     return "";
 }

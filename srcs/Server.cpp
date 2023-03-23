@@ -26,7 +26,7 @@ Server::Server(ParsConfig &server) :
 	listenTCP();
 }
 
-Server::Server(const Server &srcs)
+Server::Server(const Server &srcs) : _config(srcs._config)
 { *this = srcs; }
 
 Server::~Server()
