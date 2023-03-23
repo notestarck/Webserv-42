@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 14:51:40 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/23 16:27:53 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,8 @@ void Connection::acceptSocket()
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
 			//Socket server est pret a etre lu
-			Client newClient;
+            std::cout << "la\n";
+			Client newClient((*it)->getConfig());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
@@ -122,10 +123,10 @@ void Connection::acceptSocket()
 				{
 		 			(*it)->incrementCurrentConnection();
 					newClient._config = (*it)->getConfig();
-
 					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
+                    std::cout << "Get error 404 -----> " << _client.back()._config->getErrorPage(404) << std::endl;
 					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;
 				}
 			}
@@ -316,7 +317,7 @@ void Connection::traitement()
 //                  continue;
 //
 //              }
-              if(req.headers.find("Content-Length") != req.headers.end() && stoi(req.headers["Content-Length"]) > 4096) //(it->_config.bodylimit_du_client
+              if(req.headers.find("Content-Length") != req.headers.end() && stoi(req.headers["Content-Length"]) > 4096) //(it->_config->bodylimit_du_client
               {
                   send_error(413, *it, NULL);
                   bool dead = dead_or_alive(*it, live_request(&req.headers));
@@ -341,15 +342,14 @@ void Connection::traitement()
 //                method_ls.push_back(GET);
 //
 //            }
-            std::vector<MethodType> method_ls;
-            if(!is_allow_method(method_ls, req.method))
-                {
-                    send_error(405, *it, NULL);
-                    bool dead = dead_or_alive(*it, live_request(&req.headers));
-                    if(dead)
-                        it--;
-                    continue;
-                }
+//            if(!is_allow method(method_lst, req.method))
+//                {
+//                    send_error(405, *it, NULL);
+//                    bool dead = dead_or_alive(*it, live_request(&req.headers));
+//                    if(dead)
+//                        it--;
+//                    continue;
+//                }
 //         check cgi
 //         if(it->_location.size() > 0 && 1)  //&& is_cgi
 //         {
@@ -383,10 +383,8 @@ void Connection::traitement()
             }
         }
         bool dead = dead_or_alive(*it, live_request(&req.headers));
-        if (dead) {
-            std::cout << " client dead\n";
+        if ( dead)
             it--;
-        }
         std::cout << "request completed\n";
 
 
@@ -437,7 +435,7 @@ void Connection::get_method(Client &client, std::string path)
 //            if (loc)
 //                indexes = loc->index;
 //            else
-            indexes = client._config.getIndex();
+            indexes = client._config->getIndex();
 //            if (full_path.back() != '/')
 //                full_path.append("/");
 //            for (unsigned long i = 0; i < indexes.size(); i++)
@@ -579,26 +577,24 @@ void Connection::delete_method(Client client, std::string path){
 
 void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
 {
-
-    std::cout << "> Send error page(" << code << ")\n";
+    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code);
     std::ifstream page;
-    std::cout << client._config.getErrorPage(code) << std::endl;
-    if(client._config.getErrorPage(code) != "notFound")
+    if(client._config->getErrorPage(code) != "notFound")
     {
         std::cout << "page error found\n";
-        page.open(client._config.getErrorPage(code));
+        page.open(client._config->getErrorPage(code));
         if(!page.is_open())
             code = 404;
 
     }
 
     else
-        code = code;
-
-        page.open(client._config.getErrorPage(code));
-        if (!page.is_open())
-            code = 404;
-
+        code = 404;
+//    {
+//        page.open(client._config->_error_page[code]);
+//        if (!page.is_open())
+//            code = 404;
+//    }
 
     Response response(_status_info[code]);
     if (page.is_open())
@@ -649,19 +645,19 @@ std::string Connection::find_path_in_root(std::string path, Client &client) cons
 
     std::string full_path = "";
     //std::string location;
-    full_path.append(client._config.getRoot());
+    full_path.append(client._config->getRoot());
     full_path.append("/");
 
     if(path == "/")
-        full_path.append(client._config.getIndex());
+        full_path.append(client._config->getIndex());
     else {
         full_path.append(path);
-        //full_path.append(client._config.getIndex());
+        //full_path.append(client._config->getIndex());
     }
 //    ou chercher dans location
 
 //    client._location.
-//    Location *loc = client._config.getIndex();
+//    Location *loc = client._config->getIndex();
 //    if (loc)
 //        location = loc->path;
 //    else
@@ -689,7 +685,7 @@ const char *Connection::find_type(const char *path) const{
         if(strcmp(point, ".pdf") == 0) return "application/pdf";
 //        if(.gif)
         if(strcmp(point, ".jpeg") == 0) return "image/jpeg";
-        if(strcmp(point,".mp4") == 0) return "video/mp4";
+       if(strcmp(point,".mp4") == 0) return "video/mp4";
         if(strcmp(point, ".png") == 0) return "image/png";
         if(strcmp(point, ".ico") == 0) return "image/vnd.microsoft.icon";
 
@@ -705,25 +701,6 @@ std::string Connection::methodtype(MethodType method) const
     else if (method == POST)
         return "POST";
     else if (method == DELETE)
-        return "DELETE";
-    return "";
-}
-
-bool Connection::is_allow_method(std::vector<MethodType> allow_method, std::string method){
-    for(std::vector<MethodType>:: iterator it = allow_method.begin(); it != allow_method.end(); it++)
-    {
-        if(method == method_string(*it))
-            return true;
-    }
-    return false;
-}
-
-std::string Connection::method_string(MethodType method) const{
-    if(method == GET)
-        return "GET";
-    else if(method == POST)
-        return "POST";
-    else if(method == DELETE)
         return "DELETE";
     return "";
 }

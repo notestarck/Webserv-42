@@ -6,16 +6,16 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 14:59:31 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/23 16:13:54 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
-Server::Server(ParsConfig &server) :
-	_config(server),
-	_location(_config.getLocation()),
-	_nbrLocation(_config.getNbrLocation()),
+Server::Server(ParsConfig *config) :
+	_config(config),
+	_location(_config->getLocation()),
+	_nbrLocation(_config->getNbrLocation()),
 	_sockError(0),
 	_maxConnection(10),
 	_recsize(sizeof(_sin))
@@ -26,7 +26,8 @@ Server::Server(ParsConfig &server) :
 	listenTCP();
 }
 
-Server::Server(const Server &srcs) : _config(srcs._config)
+Server::Server(const Server &srcs) :
+	_config(srcs._config)
 { *this = srcs; }
 
 Server::~Server()
@@ -138,27 +139,27 @@ SOCKET	Server::getSocket() const
 { return (_sock); }
 
 std::string		Server::getHost() const
-{ return (_config.getHost()); }
+{ return (_config->getHost()); }
 		
 unsigned int Server::getPort() const
-{ return (_config.getPort()); }
+{ return (_config->getPort()); }
 
 std::string		Server::getNameServer() const
-{ return (_config.getNameServer()); }
+{ return (_config->getNameServer()); }
 
 std::string		Server::getRoot() const
-{ return (_config.getRoot()); }
+{ return (_config->getRoot()); }
 
 std::string		Server::getIndex() const
-{ return (_config.getIndex()); }
+{ return (_config->getIndex()); }
 
 std::string		Server::getErrorPage(int code) const
-{ return (_config.getErrorPage(code)); }
+{ return (_config->getErrorPage(code)); }
 
 size_t			Server::getNbrLocation() const
-{ return (_config.getNbrLocation()); }
+{ return (_config->getNbrLocation()); }
 
-const ParsConfig &Server::getConfig() const
+const ParsConfig *Server::getConfig() const
 { return (_config); }
 
 const std::vector<ParsConfig::Location> &Server::getLocation() const
