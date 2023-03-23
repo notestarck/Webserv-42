@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 14:51:40 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/23 16:27:09 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,7 +111,8 @@ void Connection::acceptSocket()
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
 			//Socket server est pret a etre lu
-			Client newClient;
+            std::cout << "la\n";
+			Client newClient((*it)->getConfig());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
@@ -122,10 +123,10 @@ void Connection::acceptSocket()
 				{
 		 			(*it)->incrementCurrentConnection();
 					newClient._config = (*it)->getConfig();
-
 					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
+                    std::cout << "Get error 404 -----> " << _client.back()._config->getErrorPage(404) << std::endl;
 					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;
 				}
 			}
@@ -316,7 +317,7 @@ void Connection::traitement()
 //                  continue;
 //
 //              }
-              if(req.headers.find("Content-Length") != req.headers.end() && stoi(req.headers["Content-Length"]) > 4096) //(it->_config.bodylimit_du_client
+              if(req.headers.find("Content-Length") != req.headers.end() && stoi(req.headers["Content-Length"]) > 4096) //(it->_config->bodylimit_du_client
               {
                   send_error(413, *it, NULL);
                   bool dead = dead_or_alive(*it, live_request(&req.headers));
@@ -434,7 +435,7 @@ void Connection::get_method(Client &client, std::string path)
 //            if (loc)
 //                indexes = loc->index;
 //            else
-            indexes = client._config.getIndex();
+            indexes = client._config->getIndex();
 //            if (full_path.back() != '/')
 //                full_path.append("/");
 //            for (unsigned long i = 0; i < indexes.size(); i++)
@@ -576,10 +577,9 @@ void Connection::delete_method(Client client, std::string path){
 
 void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
 {
-    std::cout << "> Send error page(" << code << ")\n";
+    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code);
     std::ifstream page;
-    std::cout << client._config.getErrorPage(code) << std::endl;
-    if(client._config.getErrorPage(code) != "notFound")
+    if(client._config->getErrorPage(code) != "notFound")
     {
         std::cout << "page error found\n";
         page.open(client._config.getErrorPage(code));
@@ -591,7 +591,7 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
     else
         code = 404;
 //    {
-//        page.open(client._config._error_page[code]);
+//        page.open(client._config->_error_page[code]);
 //        if (!page.is_open())
 //            code = 404;
 //    }
@@ -645,19 +645,19 @@ std::string Connection::find_path_in_root(std::string path, Client &client) cons
 
     std::string full_path = "";
     //std::string location;
-    full_path.append(client._config.getRoot());
+    full_path.append(client._config->getRoot());
     full_path.append("/");
 
     if(path == "/")
-        full_path.append(client._config.getIndex());
+        full_path.append(client._config->getIndex());
     else {
         full_path.append(path);
-        //full_path.append(client._config.getIndex());
+        //full_path.append(client._config->getIndex());
     }
 //    ou chercher dans location
 
 //    client._location.
-//    Location *loc = client._config.getIndex();
+//    Location *loc = client._config->getIndex();
 //    if (loc)
 //        location = loc->path;
 //    else

@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 15:26:51 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/23 16:07:51 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int main(int argc, char ** argv)
 	//Initialisation des Server.
 	for (unsigned int i = 0; i < _nbrServer; i++)
 	{
-		Server *tmp = new Server(*_config[i]);
+		Server *tmp = new Server(_config[i]);
 		_server.push_back(tmp);
 	}
 
