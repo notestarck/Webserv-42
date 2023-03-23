@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/23 16:27:09 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/23 16:27:53 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -582,7 +582,7 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
     if(client._config->getErrorPage(code) != "notFound")
     {
         std::cout << "page error found\n";
-        page.open(client._config.getErrorPage(code));
+        page.open(client._config->getErrorPage(code));
         if(!page.is_open())
             code = 404;
 
