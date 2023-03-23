@@ -25,7 +25,16 @@ Connection::Connection(std::vector<Server *> &servers) :
     test = 42;
 
 
-   _status_info.insert(std::pair<int, std::string>(200, "200 OK"));
+    _status_info.insert(std::pair<int, std::string>(200, "200 OK"));
+    _status_info.insert(std::pair<int, std::string>(404, "404 Not Found"));
+    _status_info.insert(std::pair<int, std::string>(400, "400 Bad Request"));
+    _status_info.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
+    _status_info.insert(std::pair<int, std::string>(408, "Request Timeout"));
+    _status_info.insert(std::pair<int, std::string>(413, "Content Too Large"));
+    _status_info.insert(std::pair<int, std::string>(414, "URI Too Long"));
+    _status_info.insert(std::pair<int, std::string>(500, "Internal Server Error"));
+    _status_info.insert(std::pair<int, std::string>(505, "HTTP Version Not Supported"));
+
 
 
 }
@@ -294,7 +303,8 @@ void Connection::traitement()
 
 //              if(req.headers["Host"])
 //              {
-//                 // clients[i].server = servers[req.headers["Host"]];
+//                  clients[i].server = servers[req.headers["Host"]];
+//                    it->_config =
 //              }
 //              else
 
@@ -319,8 +329,26 @@ void Connection::traitement()
 //           it->req[clients.get_rec_size()] = 0;
 //           it->_recBuffer->
 
-       // check allow method dans location
-
+//          check allow method dans location
+//            Location getcur loc
+//            std::vector<MethodType> method_ls;
+//            method_ls = loc ? loc->allow method : it->_  ;
+//            it->_config.getLocationAllow();
+//
+//            if(it->_config.redir_status != -1)
+//            {
+//                method_ls.clear();
+//                method_ls.push_back(GET);
+//
+//            }
+//            if(!is_allow method(method_lst, req.method))
+//                {
+//                    send_error(405, *it, NULL);
+//                    bool dead = dead_or_alive(*it, live_request(&req.headers));
+//                    if(dead)
+//                        it--;
+//                    continue;
+//                }
 //         check cgi
 //         if(it->_location.size() > 0 && 1)  //&& is_cgi
 //         {
@@ -550,8 +578,10 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
 {
     std::cout << "> Send error page(" << code << ")\n";
     std::ifstream page;
+    std::cout << client._config.getErrorPage(code) << std::endl;
     if(client._config.getErrorPage(code) != "notFound")
     {
+        std::cout << "page error found\n";
         page.open(client._config.getErrorPage(code));
         if(!page.is_open())
             code = 404;
@@ -569,6 +599,7 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
     Response response(_status_info[code]);
     if (page.is_open())
     {
+        std::cout << "normalemet  ici\n";
         std::string body;
         std::string line;
         while (!page.eof())
@@ -580,9 +611,10 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
         response.body = body;
         page.close();
     }
-    else
-        response.make_status_body();
+    else {
 
+        response.make_status_body();
+    }
     response.append_header("Content-Length", longToString(response.get_body_size()));
     response.append_header("Content-Type", "text/html");
     if (code == 405)

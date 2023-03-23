@@ -9,6 +9,8 @@ Response::Response(std::string status) {
     std::cout << "constuct Response\n";
     this->status_code = status.substr(0, 3);  // code status
     this->status_word = status.substr(4); // mot designant status
+
+
     std::cout << status_code << std::endl;
     std::cout << status_word << std::endl;
 

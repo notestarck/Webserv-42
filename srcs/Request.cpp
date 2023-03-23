@@ -88,7 +88,7 @@ int Request::parse(std::string request){
     if(is_not_method(method))
         return 400;
     if ((unsigned long)(j = request.find_first_of(" ", i + 1)) == std::string::npos)
-        return 4001;
+        return 400;
     path = request.substr(i + 1, j - i - 1);
 
     //std::cout << "path is " << path << "\n";
