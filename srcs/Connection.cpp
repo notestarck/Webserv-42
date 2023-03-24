@@ -117,7 +117,8 @@ void Connection::acceptSocket()
 			if((*it)->hasCapacity())
 			{
 				int client_fd = accept((*it)->getSocket(), (sockaddr *)&newClient._csin, &newClient._crecsize);
-				if (client_fd < 0)
+				std::cout << "\033[0;32m client connecte \033[0m\n";
+                if (client_fd < 0)
 					std::cerr << "Failed to accept connection on port " << (*it)->getPort() << std::endl;
 				else
 				{
@@ -148,6 +149,7 @@ bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
     close(client._csock);
+    std::cout << "\033[0;31m client close \033[0m\n";
 
     std::vector<Client>::iterator it;
     for(it = _client.begin(); it != _client.end(); it++ )
@@ -181,6 +183,7 @@ bool	Connection::live_request(char *request) const
 // connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
 bool	Connection::live_request(std::map<std::string, std::string> *headers) const
 {
+    std::cout << "test live request\n";
     if (headers->find("Connection") != headers->end())
     {
         if ((*headers)["Connection"] == "close")
@@ -246,19 +249,35 @@ void Connection::traitement()
 
     	if (FD_ISSET(it->_csock, &_read))
 		{
-
-        	if(MAX_REQUEST_SIZE <= it->_recSize)
+            std::cout << it->_csock << " socket cloent\n";
+            std::cout << " rec size = " << it->_recSize << std::endl;
+        	if(MAX_REQUEST_SIZE == it->_recSize)
         	{
-				std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
+                send_error(400, *it, NULL);
+                std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
         		bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
                 if(dead)
                     it--;
-                send_error(400, *it, NULL);
-				//_client.erase(it);
+
+				_client.erase(it);
                 continue;
             }
-            int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE - 1, 0);
-			if (ret == 0)
+            int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE  , 0);
+
+//              probleme sur recsize;
+//            if (it->_recSize > MAX_REQUEST_SIZE)
+//            {
+//                std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
+//                send_error(413, *it, NULL);
+//                bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
+//                if(dead)
+//                    it--;
+//                //_client.erase(it);
+//                continue;
+//
+//
+//            }
+            if (ret == 0)
 			{
 				std::cerr << "Error : Connection::traitement recv() reception" << std::endl;
                 dead_or_alive(*it);
@@ -273,19 +292,8 @@ void Connection::traitement()
 			}
 
 			it->_recSize += ret;
-			if (it->_recSize > MAX_REQUEST_SIZE)
-			{
-				std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
 
-                bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
-                if(dead)
-                    it--;
-
-                continue;
-                send_error(413, *it, NULL);
-				_client.erase(it);
-			}
-            else if(request_ok(it->_recBuffer))
+           if(request_ok(it->_recBuffer))
             {
 
              Request req = Request(it->_csock);
@@ -332,31 +340,32 @@ void Connection::traitement()
 
 //          check allow method dans location
 //            Location getcur loc
-//            std::vector<MethodType> method_ls;
+
 //            method_ls = loc ? loc->allow method : it->_  ;
+
 //            it->_config.getLocationAllow();
 //
-//            if(it->_config.redir_status != -1)
-//            {
-//                method_ls.clear();
-//                method_ls.push_back(GET);
-//
-//            }
-//            if(!is_allow method(method_lst, req.method))
-//                {
-//                    send_error(405, *it, NULL);
-//                    bool dead = dead_or_alive(*it, live_request(&req.headers));
-//                    if(dead)
-//                        it--;
-//                    continue;
-//                }
+               std::vector<MethodType> method_ls;
+                //method_ls.clear();
+                method_ls.push_back(GET);
+
+
+            if(!is_allowed_method(method_ls, req.method))
+                {
+                    std::cout << "check mothod non allowed\n";
+                    send_error(405, *it, NULL);
+                    bool dead = dead_or_alive(*it, live_request(&req.headers));
+                    if(dead)
+                        it--;
+                    continue;
+                }
 //         check cgi
 //         if(it->_location.size() > 0 && 1)  //&& is_cgi
 //         {
 //             std::cout << "loc existe\n";
 //         }
 
-        else
+        //else
         {
 //            if(rep_timeout(_client == true))
 //            {
@@ -370,6 +379,7 @@ void Connection::traitement()
                 std::cout << "REDIR\n";
                 //                send_redir(it, req.method);
             }
+
             else if(req.method == "GET") {
 
                 get_method(*it, req.path);
@@ -577,39 +587,33 @@ void Connection::delete_method(Client client, std::string path){
 
 void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
 {
-    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code);
+
+    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code) << std::endl;
     std::ifstream page;
     if(client._config->getErrorPage(code) != "notFound")
     {
-        std::cout << "page error found\n";
+
         page.open(client._config->getErrorPage(code));
         if(!page.is_open())
             code = 404;
 
     }
-
-    else
-        code = 404;
-//    {
-//        page.open(client._config->_error_page[code]);
-//        if (!page.is_open())
-//            code = 404;
-//    }
-
     Response response(_status_info[code]);
     if (page.is_open())
     {
-        std::cout << "normalemet  ici\n";
+
         std::string body;
         std::string line;
-        while (!page.eof())
+        while (page.good())
         {
+
             getline(page, line);
             body += line;
             body += '\n';
         }
         response.body = body;
         page.close();
+
     }
     else {
 
@@ -619,14 +623,14 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
     response.append_header("Content-Type", "text/html");
     if (code == 405)
     {
-        std::string allowed_method_list;
-        for (unsigned long i = 0; i < (*allow_methods).size(); i++)
-        {
-            allowed_method_list += methodtype((*allow_methods)[i]);
-            if (i < (*allow_methods).size() - 1)
-                allowed_method_list += ", ";
-        }
-        response.append_header("Allow", allowed_method_list);
+//        std::string allowed_method_list;
+//        for (unsigned long i = 0; i < (*allow_methods).size(); i++)
+//        {
+//            allowed_method_list += methodtype((*allow_methods)[i]);
+//            if (i < (*allow_methods).size() - 1)
+//                allowed_method_list += ", ";
+//        }
+        response.append_header("Allow", "GET");
     }
 
     std::string result = response.run_resp();
@@ -703,4 +707,15 @@ std::string Connection::methodtype(MethodType method) const
     else if (method == DELETE)
         return "DELETE";
     return "";
+}
+
+bool    Connection::is_allowed_method(std::vector<MethodType> allow_methods, std::string method)
+{
+    for (std::vector<MethodType>::iterator it = allow_methods.begin();
+         it != allow_methods.end(); it++)
+    {
+        if (method == methodtype(*it))
+            return true;
+    }
+    return false;
 }

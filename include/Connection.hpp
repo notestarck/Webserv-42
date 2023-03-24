@@ -67,8 +67,9 @@ class Connection
         void delete_method(Client client, std::string path);
         std::string methodtype(MethodType method) const;
         void send_error(int code, Client &client, std::vector<MethodType> *allow_methods);
-        bool is_allow_method(std::vector<MethodType> allow_method, std::string method);
+
         std::string method_string(MethodType method) const;
+        bool    is_allowed_method(std::vector<MethodType> allow_methods, std::string method);
 	private :
 		/* Serveur */
 		std::vector<Server *>	_servers;

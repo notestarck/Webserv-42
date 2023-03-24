@@ -14,6 +14,7 @@
 #define _CLIENT_HPP_
 
 #include <netinet/tcp.h>
+#include <sys/socket.h>
 
 #include "./ParsConfig.hpp"
 
