@@ -61,13 +61,14 @@ class Connection
         bool request_ok(char *request);
         bool live_request(std::map<std::string, std::string> *headers) const;
         void get_method(Client &client, std::string path);
+        void post_method(Client &client, Request &request);
         std::string find_path_in_root(std::string path, Client &client) const;
         std::string longToString(long number);
         const char *find_type(const char *path) const;
         void delete_method(Client client, std::string path);
         std::string methodtype(MethodType method) const;
         void send_error(int code, Client &client, std::vector<MethodType> *allow_methods);
-
+    int	write_in_path(Client &client, std::string content, std::string path);
         std::string method_string(MethodType method) const;
         bool    is_allowed_method(std::vector<MethodType> allow_methods, std::string method);
 	private :

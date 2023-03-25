@@ -26,6 +26,8 @@ Connection::Connection(std::vector<Server *> &servers) :
 
 
     _status_info.insert(std::pair<int, std::string>(200, "200 OK"));
+    _status_info.insert(std::pair<int, std::string>(201, "201 Created"));
+    _status_info.insert(std::pair<int, std::string>(204, "204 No Content"));
     _status_info.insert(std::pair<int, std::string>(404, "404 Not Found"));
     _status_info.insert(std::pair<int, std::string>(400, "400 Bad Request"));
     _status_info.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
@@ -259,7 +261,7 @@ void Connection::traitement()
                 if(dead)
                     it--;
 
-				_client.erase(it);
+				//_client.erase(it);
                 continue;
             }
             int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE  , 0);
@@ -291,9 +293,9 @@ void Connection::traitement()
 				it--;
 			}
 
-			it->_recSize += ret;
+			//it->_recSize += ret;   // pas forcement necessaire
 
-           if(request_ok(it->_recBuffer))
+           else if(request_ok(it->_recBuffer))
             {
 
              Request req = Request(it->_csock);
@@ -310,8 +312,9 @@ void Connection::traitement()
                 //std::cout << " req is ok\n";
                 std::string port = req.headers["Host"].substr(req.headers["Host"].find(':') + 1);
 
-//              if(req.headers["Host"])
+//              if(it->_config->getHost() == "Host")
 //              {
+//                  it->_config.
 //                  clients[i].server = servers[req.headers["Host"]];
 //                    it->_config =
 //              }
@@ -346,8 +349,11 @@ void Connection::traitement()
 //            it->_config.getLocationAllow();
 //
                std::vector<MethodType> method_ls;
+              //method_ls = it->_location.;
                 //method_ls.clear();
                 method_ls.push_back(GET);
+                method_ls.push_back(POST);
+                method_ls.push_back(DELETE);
 
 
             if(!is_allowed_method(method_ls, req.method))
@@ -369,7 +375,7 @@ void Connection::traitement()
         {
 //            if(rep_timeout(_client == true))
 //            {
-//                send_error(408, it);
+//                send_error(408, *it, NULL);
 //
 //            }
 
@@ -384,9 +390,12 @@ void Connection::traitement()
 
                 get_method(*it, req.path);
             }
-            else if(req.method == "POST")
+            else if(req.method == "POST") {
+
+
                 std::cout << "POST\n";
-               // post_method(it, req);
+                post_method(*it, req);
+            }
             else if(req.method == "DELETE") {
                 std::cout << "DELETE\n";
                 delete_method(*it, req.path);
@@ -557,6 +566,121 @@ void Connection::get_method(Client &client, std::string path)
     }
 }
 
+void Connection::post_method(Client &client, Request &request)
+{
+    std::cout << "POST method\n";
+
+    if (request.headers["Transfer-Encoding"] != "chunked"
+        && request.headers.find("Content-Length") == request.headers.end())
+    {
+        send_error(411, client, NULL);
+        return;
+    }
+
+    std::string full_path = find_path_in_root(request.path, client);
+
+    struct stat buf;
+    lstat(full_path.c_str(), &buf);
+    if (S_ISDIR(buf.st_mode))
+    {
+        if (request.headers.find("Content-Type") != request.headers.end())
+        {
+            size_t begin = request.headers["Content-Type"].find("boundary=");
+            if (begin != std::string::npos)
+            {
+                std::string boundary = request.headers["Content-Type"].substr(begin + 9);
+                begin = 0;
+                size_t end = 0;
+                std::string name;
+                while (true)
+                {
+                    begin = request.body.find("name=", begin) + 6;
+                    end = request.body.find_first_of("\"", begin);
+                    if (begin == std::string::npos || end == std::string::npos)
+                        break;
+                    name = request.body.substr(begin, end - begin);
+                    begin = request.body.find("\r\n\r\n", end) + 4;
+                    end = request.body.find(boundary, begin);
+                    if (begin == std::string::npos || end == std::string::npos)
+                        break;
+                    if (write_in_path(client, request.body.substr(begin, end - begin - 4), full_path + "/" + name) < 0)
+                        break;
+                    if (request.body[end + boundary.size()] == '-')
+                        break;
+                }
+            }
+            else
+            {
+                send_error(400, client, NULL);
+                return;
+            }
+        }
+        else
+        {
+            send_error(400, client, NULL);
+            return;
+        }
+    }
+    else
+    {
+        if (write_in_path(client, request.body, full_path) < 0)
+            return;
+    }
+
+    int code = 201;
+    if (request.headers["Content-Length"] == "0")
+        code = 204;
+
+
+    std::cout << " code response = " << code << std::endl;
+    Response response(_status_info[code]);
+    std::string header = response.make_header();
+    std::cout << "header response fabrique \n";
+    int send_ret = send(client._csock, header.c_str(), header.size(), 0);
+    std::cout << "test send retour refonse de post " << send_ret << std::endl;
+    if (send_ret < 0)
+        send_error(500, client, NULL);
+    else if (send_ret == 0)
+        send_error(400, client, NULL);
+    else
+        std::cout << "> " << full_path << " posted(" << code << ")\n";
+}
+
+
+int	Connection::write_in_path(Client &client, std::string content, std::string path)
+{
+    std::cout << "> write in: " << path << "\n";
+    size_t index = path.find_last_of("/");
+    std::string file_name = path.substr(index + 1);
+    std::string folder_path = path.substr(0, index);
+
+    std::string command = "mkdir -p " + folder_path;
+    system(command.c_str());
+    int write_fd = open(path.c_str(), O_WRONLY | O_TRUNC | O_CREAT, 0644);
+    if (write_fd < 0)
+    {
+        send_error(500, client, NULL);
+        return -1;
+    }
+
+    initSelect(write_fd, _write);
+    runSelect();
+    if (FD_ISSET(write_fd, &_write) == 0)
+    {
+        send_error(500, client, NULL);
+        close(write_fd);
+        return -1;
+    }
+    int r = write(write_fd, content.c_str(), content.size());
+    if (r < 0)
+    {
+        send_error(500, client, NULL);
+        close(write_fd);
+        return -1;
+    }
+    close(write_fd);
+    return 0;
+}
 void Connection::delete_method(Client client, std::string path){
     std::string full = find_path_in_root(path, client);
 
