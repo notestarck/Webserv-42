@@ -75,14 +75,13 @@ static std::string parse_chunck(std::string &request, int i){
 
 int Request::parse(std::string request){
 
+    std::cout << request << std::endl;
     unsigned long i;
     int j;
 
     std::cout << "parsing request\n";
     i = request.find_first_of(" ", 0);
     method = request.substr(0, i);
-
-    //std::cout << "method is " << method << "\n";
     if(method == "PUT")
         return 200;
     if(is_not_method(method))
@@ -91,13 +90,13 @@ int Request::parse(std::string request){
         return 400;
     path = request.substr(i + 1, j - i - 1);
 
-    //std::cout << "path is " << path << "\n";
+
     headers["HTTP"] = request.substr(j + 1, request.find_first_of("\r", i) - j - 1);
     if(check_protocol(headers["HTTP"]) == false)
     {
 
         return 505;}
-    //std::cout << "HTTP protocol is OK\n";
+
     i = request.find_first_of("\n", j) + 1;
     while(i < request.size())
     {
@@ -120,6 +119,7 @@ int Request::parse(std::string request){
     if(headers["Host"] == "")
         return 400;                               //a modifier code 400
     return 0;
+
 
 }
 

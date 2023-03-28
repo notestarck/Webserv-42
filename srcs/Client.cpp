@@ -14,7 +14,10 @@
 
 Client::Client(const ParsConfig *config) :
 	_config(config)
-{}
+
+{_csock = 0;
+ _recSize = 0;
+}    //initialisation du socket client a 0
 
 Client::Client(const Client &srcs) :
     _config(srcs._config)
@@ -27,7 +30,7 @@ Client &Client::operator=(const Client &srcs)
 {
 	if (this != &srcs)
 	{
-		std::cout << "Constructeur d'operator== de client\n";
+		//std::cout << "Constructeur d'operator== de client\n";
 		_csock = srcs._csock;
 		_csin = srcs._csin;
 		_crecsize = srcs._crecsize;

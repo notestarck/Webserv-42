@@ -30,12 +30,12 @@ Connection::Connection(std::vector<Server *> &servers) :
     _status_info.insert(std::pair<int, std::string>(204, "204 No Content"));
     _status_info.insert(std::pair<int, std::string>(404, "404 Not Found"));
     _status_info.insert(std::pair<int, std::string>(400, "400 Bad Request"));
-    _status_info.insert(std::pair<int, std::string>(405, "Method Not Allowed"));
-    _status_info.insert(std::pair<int, std::string>(408, "Request Timeout"));
-    _status_info.insert(std::pair<int, std::string>(413, "Content Too Large"));
-    _status_info.insert(std::pair<int, std::string>(414, "URI Too Long"));
-    _status_info.insert(std::pair<int, std::string>(500, "Internal Server Error"));
-    _status_info.insert(std::pair<int, std::string>(505, "HTTP Version Not Supported"));
+    _status_info.insert(std::pair<int, std::string>(405, "405 Method Not Allowed"));
+    _status_info.insert(std::pair<int, std::string>(408, "408 Request Timeout"));
+    _status_info.insert(std::pair<int, std::string>(413, "413 Content Too Large"));
+    _status_info.insert(std::pair<int, std::string>(414, "414 URI Too Long"));
+    _status_info.insert(std::pair<int, std::string>(500, "500 Internal Server Error"));
+    _status_info.insert(std::pair<int, std::string>(505, "505 HTTP Version Not Supported"));
 
 
 
@@ -113,7 +113,7 @@ void Connection::acceptSocket()
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
 			//Socket server est pret a etre lu
-            std::cout << "la\n";
+            //std::cout << "la\n";
 			Client newClient((*it)->getConfig());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
@@ -151,6 +151,8 @@ bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
     close(client._csock);
+
+
     std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
 
     std::vector<Client>::iterator it;
@@ -187,7 +189,7 @@ bool	Connection::live_request(char *request) const
 // connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
 bool	Connection::live_request(std::map<std::string, std::string> *headers) const
 {
-    std::cout << "test live request\n";
+    //std::cout << "test live request\n";
     if (headers->find("Connection") != headers->end())
     {
         if ((*headers)["Connection"] == "close")
@@ -263,24 +265,25 @@ void Connection::traitement()
                 if(dead)
                     it--;
 
-				//_client.erase(it);
+				_client.erase(it);
                 continue;
             }
             int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE  , 0);
 
-//              probleme sur recsize;
-//            if (it->_recSize > MAX_REQUEST_SIZE)
-//            {
-//                std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
-//                send_error(413, *it, NULL);
-//                bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
-//                if(dead)
-//                    it--;
-//                //_client.erase(it);
-//                continue;
-//
-//
-//            }
+//              probleme sur recsize plus mai;
+            if (it->_recSize > MAX_REQUEST_SIZE)
+            {
+
+                std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
+                send_error(413, *it, NULL);
+                bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
+                if(dead)
+                    it--;
+                //_client.erase(it);
+                continue;
+
+
+            }
             if (ret == 0)
 			{
 				std::cerr << "Error : Connection::traitement recv() reception" << std::endl;
@@ -295,16 +298,16 @@ void Connection::traitement()
 				it--;
 			}
 
-			//it->_recSize += ret;   // pas forcement necessaire
-
-           else if(request_ok(it->_recBuffer))
+			it->_recSize += ret;   // pas forcement necessaire
+            //else if
+            if(request_ok(it->_recBuffer))
             {
 
              Request req = Request(it->_csock);
               int code;
               if((code = req.parse(it->_recBuffer)))
               {
-                  std::cout << "code = " << code << std::endl;
+
                   send_error(code, *it, NULL);
                   bool dead = dead_or_alive(*it, live_request(&req.headers));
                   if(dead)
@@ -394,8 +397,6 @@ void Connection::traitement()
             }
             else if(req.method == "POST") {
 
-
-                std::cout << "POST\n";
                 post_method(*it, req);
             }
             else if(req.method == "DELETE") {
@@ -406,20 +407,26 @@ void Connection::traitement()
         bool dead = dead_or_alive(*it, live_request(&req.headers));
         if ( dead)
             it--;
+
         std::cout << "request completed\n";
+        //close(it->_csock);
+
+        _client.erase(it);     //je tets
+
+
 
 
 
         it->_recSize = 0;
         for (int i = 0; i < MAX_REQUEST_SIZE; i++)
             it->_recBuffer[i]= '\0';
-        std::cout << "req clear\n";
+
     }
 
 
 }
 }
-   usleep(500);
+   //usleep(500);
 }
 
 void Connection::get_method(Client &client, std::string path)
@@ -562,7 +569,7 @@ void Connection::get_method(Client &client, std::string path)
                 }
                 if (r == 0)
                     break;
-                //close(client._csock);
+                //close(client._csock); non marche pas
             }
         }
         close(read_fd);
@@ -642,12 +649,12 @@ void Connection::post_method(Client &client, Request &request)
         code = 204;
 
 
-    std::cout << " code response = " << code << std::endl;
+
     Response response(_status_info[code]);
     std::string header = response.make_header();
-    std::cout << "header response fabrique \n";
+
     int send_ret = send(client._csock, header.c_str(), header.size(), 0);
-    std::cout << "test send retour refonse de post " << send_ret << std::endl;
+
     if (send_ret < 0)
         send_error(500, client, NULL);
     else if (send_ret == 0)
@@ -693,7 +700,7 @@ int	Connection::write_in_path(Client &client, std::string content, std::string p
     close(write_fd);
     return 0;
 }
-void Connection::delete_method(Client client, std::string path){
+void Connection::delete_method(Client &client, std::string path){
     std::string full = find_path_in_root(path, client);
 
     FILE *fp = fopen(full.c_str(), "r");

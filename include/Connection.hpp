@@ -65,7 +65,7 @@ class Connection
         std::string find_path_in_root(std::string path, Client &client) const;
         std::string longToString(long number);
         const char *find_type(const char *path) const;
-        void delete_method(Client client, std::string path);
+        void delete_method(Client &client, std::string path);
         std::string methodtype(MethodType method) const;
         void send_error(int code, Client &client, std::vector<MethodType> *allow_methods);
     int	write_in_path(Client &client, std::string content, std::string path);
