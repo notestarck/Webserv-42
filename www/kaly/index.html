@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="utf-8">
+		<link href="./style/style.css" rel="stylesheet" >
+		<link href="./style/index.css" rel="stylesheet" >
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Manrope&family=Montserrat&display=swap" rel="stylesheet">
+		<title>Kali'Renov</title>
+	</head>
+
+	<body>
+		<header>
+			<nav>
+				<a href="index.html" class="lien-icone">
+					<img src="./img/logo/logo.png" alt="Image temporaire" class="logo">
+				</a>
+				<div>
+					<a href="index.html">Accueil</a>
+					<a href="a_propos.html">À propos</a>
+					<a href="mes_realisations.html">Mes réalisations</a>
+				</div>
+			</nav>
+		</header>
+
+		<main>
+			<section class="accueil-introduction">
+				<div class="accueil-texte">
+					<div>
+						<h1>Kali'Renov</h1>
+						<h2>Artisan passionné du bâtiment !</h2>
+					</div>
+					<p>
+						Avec des années d'expérience et un amour pour le travail bien fait, 
+						Kali est fier de proposer des services de qualité supérieure, à sa clientèle.
+					</p>
+					<p>
+						Kali s'engage à travailler en étroite collaboration avec ses clients 
+						pour s'assurer que chaque projet est réalisé selon leurs besoins et leurs attentes. 
+						Que ce soit pour la construction d'une salle de bain, la rénovation d'une cuisine ou la 
+						création d'une extension, Kali met tout en œuvre pour garantir la satisfaction de ses clients.
+					</p>
+					<p>
+						En faisant appel à Kali, vous pouvez être sûr que votre projet sera pris en charge 
+						par un artisan compétent et soucieux du détail. Contactez-le dès maintenant pour 
+						discuter de votre projet et obtenir un devis gratuit.
+					</p>
+					<a href="#contact" class="cta"> Un Projet ? Écrivez-moi.</a>
+				</div>
+				<img src="./img/projets-accueil/tmp-projet.jpg" alt="Image temporaire">
+			</section>
+			<section class="accueil-photos">
+				<h2>Mon dernier projet</h2>
+				<div>
+					<img src="./img/projets-accueil/recent-1.jpeg" alt="Projet recent 1">
+					<img src="./img/projets-accueil/recent-2.jpg" alt="Projet recent 2">
+					<img src="./img/projets-accueil/recent-3.jpg" alt="Projet recent 3">
+				</div>
+				<div>
+					<img src="./img/projets-accueil/recent-4.jpg.webp" alt="Projet recent 4">
+					<img src="./img/projets-accueil/recent-5.jpg.webp" alt="Projet recent 5">
+					<img src="./img/projets-accueil/recent-6.webp" alt="Projet recent 6">
+				</div>
+			</section>
+			<section id="contact" class="section-contact">
+				<h2>Parlons de votre projet</h2>
+				<form method="post" action="">
+					<div class="nom-prenom-mail">
+						<div class="form-column">
+							<label for="name">Nom</label>
+							<input type="text" name="Nom" id="name" maxlength="24" placeholder="Votre nom" required>
+						</div>
+						<div class="form-column">
+							<label for="last-name">Prenom</label>
+							<input type="text" name="Prenom" id="last-name" maxlength="24" placeholder="Votre prenom">
+						</div>
+						<div class="form-column">
+							<label for="mail">Mail</label>
+							<input type="email" name="Mail" id="mail" placeholder="Votre email" required><br>
+						</div>
+					</div>
+					<label for="message">Votre message</label>
+						<textarea type="text" name="Message" id="message" maxlength="1024" placeholder="Inscrivez ici votre message (Max 1024 caractéres)" rows="10" required></textarea>
+					<input class="cta" type="submit" value="Envoyer">
+				</form>
+			</section>
+		</main>
+
+		<footer>
+			<nav>
+				<img src="./img/logo/logo.png" alt="Image temporaire" class="logo">
+				<div class="footer-contact">
+					<p class="titre">06 06 06 06 06</p>
+					<p class="titre">Rue de la fontaine Ronde 88260 Viomenil</p>
+				</div>
+				<div>
+					<a target="_blank" href="https://twitter.com/" class="lien-icone">
+						<img src="img/icone/twitter.png" alt="Logo Twitter" >
+					</a>
+					<a target="_blank" href="https://www.instagram.com/" class="lien-icone">
+						<img src="img/icone/instagram.png" alt="Logo Instagram" >
+					</a>
+				</div>
+			</nav>
+		</footer>
+	</body>
+</html>

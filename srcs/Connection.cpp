@@ -411,7 +411,7 @@ void Connection::traitement()
         std::cout << "request completed\n";
         //close(it->_csock);
 
-        _client.erase(it);     //je tets
+       // _client.erase(it);     //je tets
 
 
 
@@ -426,7 +426,7 @@ void Connection::traitement()
 
 }
 }
-   //usleep(500);
+   usleep(125);
 }
 
 void Connection::get_method(Client &client, std::string path)
