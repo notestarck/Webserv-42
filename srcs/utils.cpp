@@ -16,9 +16,12 @@ void	delProg()
 {
 	//delete _server
 	std::cout << "\033[34mDelete des serveurs : \033[0m\n";
-	for (int i = 0; i < _server.size(); i++)
-		delete _server[i];
-	
+	for (int i = 0; i < _server.size(); i++) {
+        close(_server[i]->getSocket());
+        delete _server[i];
+
+
+    }
 	//delete _config
 	std::cout << "\033[34mDelete de la config : \033[0m\n";
 	for (int i = 0; i < _config.size(); i++)

@@ -119,7 +119,7 @@ void Connection::acceptSocket()
 			if((*it)->hasCapacity())
 			{
 				int client_fd = accept((*it)->getSocket(), (sockaddr *)&newClient._csin, &newClient._crecsize);
-				std::cout << "\033[0;32m client connecte \033[0m\n";
+				std::cout << "\033[0;32m client connecte \033[0m sur socket : " << newClient._csock << std::endl;
                 if (client_fd < 0)
 					std::cerr << "Failed to accept connection on port " << (*it)->getPort() << std::endl;
 				else
@@ -129,8 +129,8 @@ void Connection::acceptSocket()
 					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
-                    std::cout << "Get error 404 -----> " << _client.back()._config->getErrorPage(404) << std::endl;
-					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;
+                    //std::cout << "Get error 404 -----> " << _client.back()._config->getErrorPage(404) << std::endl;
+					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
 			else
@@ -151,13 +151,15 @@ bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
     close(client._csock);
-    std::cout << "\033[0;31m client close \033[0m\n";
+    std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
 
     std::vector<Client>::iterator it;
     for(it = _client.begin(); it != _client.end(); it++ )
     {
+
         if((*it)._csock == client._csock)
         {
+            std::cout << "client erase\n";
             _client.erase(it);
             return true;
         }
@@ -560,10 +562,18 @@ void Connection::get_method(Client &client, std::string path)
                 }
                 if (r == 0)
                     break;
+                //close(client._csock);
             }
         }
         close(read_fd);
+        //close(client._csock);
+
+
+
+
+
     }
+
 }
 
 void Connection::post_method(Client &client, Request &request)
@@ -653,6 +663,8 @@ int	Connection::write_in_path(Client &client, std::string content, std::string p
     size_t index = path.find_last_of("/");
     std::string file_name = path.substr(index + 1);
     std::string folder_path = path.substr(0, index);
+
+    //https://koor.fr/C/cstdlib/system.wp
 
     std::string command = "mkdir -p " + folder_path;
     system(command.c_str());

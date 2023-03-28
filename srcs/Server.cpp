@@ -82,7 +82,7 @@ void Server::linkSocket()
 	_sin.sin_addr.s_addr = convertIp(getHost()); //Pour une estd::coute sur std::coutes les adresses htonl(INADDR_ANY)
 	_sin.sin_family = AF_INET;
 	_sockError = bind(_sock, (sockaddr*)&_sin, _recsize);
-	if (_sockError == SOCKET_ERROR)
+	if (_sockError != 0)
 	{
 		std::cerr << "\033[1;31mError : Server::linkSocket bind() " << strerror(errno) << "\033[0m" << std::endl;
 		exit(1);
