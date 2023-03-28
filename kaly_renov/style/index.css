@@ -1,0 +1,86 @@
+.accueil-introduction {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.accueil-texte p{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-right: 20px;
+}
+
+.accueil-texte h1, .accueil-texte h2, .accueil-texte p {
+	text-align: justify;
+}
+
+.accueil-introduction img {
+	max-width: 50%;
+}
+
+.accueil-photos {
+	background-color: white;
+}
+
+.accueil-photos h2 {
+	color: #2E3244;
+	text-align: center;
+	margin-bottom: 50px;
+}
+
+.accueil-photos div {
+	display: flex;
+	flex-direction: row;
+	gap: 15px;
+	justify-content: center;
+	margin-bottom: 15px;
+}
+
+.accueil-photos img {
+	max-width: 30%;
+}
+
+.section-contact h2 {
+	text-align: center;
+	margin-bottom: 50px;
+}
+
+form {
+	color: white;
+	display: flex;
+	flex-direction: column;
+	width: 90%;
+	margin: auto;
+}
+
+label {
+	margin-bottom: 10px;
+}
+
+input,
+textarea {
+	padding: 15px;
+	border-radius: 3px;
+	border: none;
+}
+
+input[type='submit'] {
+	width: 200px;
+	margin: auto;
+	margin-top: 30px;
+}
+
+.nom-prenom-mail {
+	display: flex;
+	flex-direction: row;
+	gap: 25px;
+}
+
+.form-column {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 20px;
+}
+
