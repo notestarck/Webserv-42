@@ -17,7 +17,7 @@ Server::Server(ParsConfig *config) :
 	_location(_config->getLocation()),
 	_nbrLocation(_config->getNbrLocation()),
 	_sockError(0),
-	_maxConnection(50),
+	_maxConnection(15000),
 	_recsize(sizeof(_sin))
 {
 	creatSocket();

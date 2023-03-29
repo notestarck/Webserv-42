@@ -46,6 +46,7 @@ class ParsConfig
 				std::vector<std::string>	_allow;
 				std::string 				_root;
 				std::string 				_index;
+                std::string                 _cgi_pass;
 				//ajouter le cgi_info
 		};// class Locartion
 
@@ -67,6 +68,7 @@ class ParsConfig
 		std::vector<std::string>		getLocationAllow(std::string url) const;
 		std::string              		getLocationRoot(std::string url) const;
 		std::string              		getLocationIndex(std::string url) const;
+       // std::string                     getLocationCgi(std::string )
 		const std::vector<Location>&	getLocation() const;
 		size_t              			getNbrLocation() const;
 

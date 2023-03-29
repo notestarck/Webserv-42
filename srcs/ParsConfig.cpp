@@ -239,6 +239,8 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 				_root = value.substr(0, value.size() - 1);
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
+            else if(key == "cgi_pass")
+                _cgi_pass = value.substr(0, value.size() -1);
 		}
 		line.clear();
 		ss.clear();
@@ -261,6 +263,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 		_allow = srcs._allow;
 		_root = srcs._root;
 		_index = srcs._index;
+        _cgi_pass = srcs._cgi_pass;
 	}
 	return (*this);
 }
@@ -276,3 +279,7 @@ const std::string & ParsConfig::Location::getRoot() const
 
 const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }
+
+//const std::string & ParsConfig::Location::getCgi() const{
+//    return (_cgi_pass);
+//}

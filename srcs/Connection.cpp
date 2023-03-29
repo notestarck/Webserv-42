@@ -136,7 +136,9 @@ void Connection::acceptSocket()
 			else
 			{
 				std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
-				//continue ;
+                // augmenter la capacite de connection
+                //exit(1);
+                //continue ;
                 //boucle infini a gerer.
 			}
 		}
@@ -150,6 +152,8 @@ void Connection::acceptSocket()
 bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
+    //FD_ZERO(&_read);
+    //FD_CLR(client._csock, &_read);
     close(client._csock);
 
 
@@ -370,6 +374,9 @@ void Connection::traitement()
                         it--;
                     continue;
                 }
+            std::cout << " tqille locaion" << it->_location.size() << std::endl;
+//            it->_location[1].
+//
 //         check cgi
 //         if(it->_location.size() > 0 && 1)  //&& is_cgi
 //         {
@@ -410,7 +417,7 @@ void Connection::traitement()
 
         std::cout << "request completed\n";
         //close(it->_csock);
-
+        //FD_CLR(it->_csock, &_read);
        // _client.erase(it);     //je tets
 
 
@@ -420,7 +427,9 @@ void Connection::traitement()
         it->_recSize = 0;
         for (int i = 0; i < MAX_REQUEST_SIZE; i++)
             it->_recBuffer[i]= '\0';
-
+        FD_CLR(it->_csock, &_read);
+        FD_ZERO(&_read);
+        //close(it->_csock);
     }
 
 
