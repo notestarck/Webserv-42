@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Connection.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*   By: reclaire <reclaire@student.42mulhouse.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/23 16:27:53 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/29 11:26:23 by reclaire         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -452,15 +452,12 @@ void Connection::get_method(Client &client, std::string path)
 
     std::string full_path = find_path_in_root(path, client);
     std::cout << full_path << std::endl;
-    lstat(full_path.c_str(), &buf);
-    FILE *check_fp = fopen(full_path.c_str(), "rb");
+    if (stat(full_path.c_str(), &buf) < 0)
+	{
+		send_error(404, client, NULL);
+		return ;
+	}
 
-    if (!check_fp)
-        //std::cout << "error page 404\n";
-        send_error(404, client, NULL);
-    else
-    {
-        fclose(check_fp);
         if (S_ISDIR(buf.st_mode)) {
             std::cout << "> Current path is directory\n";
             bool flag = false;
@@ -583,12 +580,6 @@ void Connection::get_method(Client &client, std::string path)
         }
         close(read_fd);
         //close(client._csock);
-
-
-
-
-
-    }
 
 }
 
@@ -742,18 +733,17 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
 
     std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code) << std::endl;
     std::ifstream page;
+
+
     if(client._config->getErrorPage(code) != "notFound")
     {
-
         page.open(client._config->getErrorPage(code));
         if(!page.is_open())
             code = 404;
-
     }
     Response response(_status_info[code]);
     if (page.is_open())
     {
-
         std::string body;
         std::string line;
         while (page.good())
