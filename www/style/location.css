@@ -1,0 +1,61 @@
+header {
+	background: linear-gradient(to right, #1e3c72, #2a5298);
+    height: 65px;
+	border-radius: 0% 0% 90% 10% / 0% 0% 32% 10% ;
+}
+
+main {
+	margin-top: 20px;
+	padding: 20px;
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+}
+
+h1 {
+	grid-column-start: 1;
+	grid-column-end: 4;
+}
+
+h1,
+h2 {
+	text-align: center;
+}
+
+main a {
+	color: lightgreen;
+}
+
+pre {
+    background-color: black;
+	margin: auto;
+    padding: 15px;
+    border-radius: 5px;
+    position: relative;
+    font-family: "Courier New", monospace;
+    color: #ffffff;
+    display: inline-block;
+    overflow-x: visible;
+}
+
+code {
+    display: inline-block;
+    left: -1ch;
+    color: inherit;
+}
+
+.definition,
+.test {
+	padding: 10px;
+}
+.definition {
+	/*border: 2px solid black;*/
+	border-radius: 10px;
+	background-color: #2d2d2d;
+	grid-column-start: 1;
+	grid-column-end: 2;
+}
+
+.test {
+	grid-column-start: 2;
+	grid-column-end: 4;
+}

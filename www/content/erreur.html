@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../style/style.css">
+		<link rel="stylesheet" href="../style/erreur.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
+		<title>Test-WebServ</title>
+		<link rel="stylesheet" href="path/to/prism.css">
+		<script src="path/to/prism.js"></script>
+	</head>
+
+	<body>
+		<header>
+			<div class="barre_nav">
+				<img src="../image/logo WebServ-42.png" alt="Logo WebServ-42">
+				<p>WebServ-42</p>
+				<nav>
+					<a href="../index.html">Accueil</a>
+					<a href="team.html">Team</a>
+					<a href="documentation.html">Documentation</a>
+				</nav>
+			</div>
+		</header>
+
+		<main>
+			<h1>Tester les codes html</h1>
+			<div class="definition">
+				<h2>Les pages erreurs ?</h2>
+				<p>
+					Les pages d'erreur HTML sont des pages affichées par le navigateur web lorsqu'une erreur 
+					se produit lors de l'affichage d'un site web. Il existe différents codes d'erreur HTTP 
+					qui peuvent être générés, tels que 404 (page non trouvée), 500 (erreur de serveur interne), 
+					403 (accès refusé), etc.<br>
+				</p>
+				<h3>Liste succincte des codes html :</h3>
+				<ul class="code_erreur">
+					<li>200 OK : La requête a réussi et la réponse contient les données demandées.</li>
+					<li>301 Redirection permanente : La page demandée a été déplacée de façon permanente vers une autre URL.</li>
+					<li>302 Redirection temporaire : La page demandée a été déplacée temporairement vers une autre URL.</li>
+					<li>400 Bad Request : La requête est mal formulée et ne peut pas être traitée par le serveur.</li>
+					<li>401 Unauthorized : La requête nécessite une authentification de l'utilisateur pour être traitée.</li>
+					<li>403 Forbidden : L'accès à la ressource demandée est refusé pour des raisons d'autorisation.</li>
+					<li>404 Not Found : La ressource demandée n'a pas été trouvée sur le serveur.</li>
+					<li>500 Internal Server Error : Le serveur a rencontré une erreur interne et ne peut pas traiter la requête.</li>
+					<li>503 Service Unavailable : Le serveur est temporairement incapable de traiter la requête en raison d'une surcharge ou d'une maintenance planifiée.</li>
+				</ul>
+			</div>
+			<div class="test">
+				<h2>Les tests</h2>
+				<ol>
+					<li>
+						Acces a une page qui n'existe pas. Doit retourner erreur 404 -> <a href="./teaam.html">teaam.html</a>
+					</li> <br>
+					<li>
+						Acces a une page protégée. Doit retourner erreur 403 -> <a href="../private/index.html">../private/index.html</a>
+					</li> <br>
+					<li>
+						Tester les autres erreurs avec Postman...
+					</li>
+				</ol>
+			</div>
+		</main>
+
+		<footer>
+
+		</footer>
+	</body>
+</html>

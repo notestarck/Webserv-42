@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../style/style.css">
+		<link rel="stylesheet" href="../style/upload.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
+		<title>Test-WebServ</title>
+	</head>
+
+	<body>
+		<header>
+			<div class="barre_nav">
+				<img src="../image/logo WebServ-42.png" alt="Logo WebServ-42">
+				<p>WebServ-42</p>
+				<nav>
+					<a href="../index.html">Accueil</a>
+					<a href="team.html">Team</a>
+					<a href="documentation.html">Documentation</a>
+				</nav>
+			</div>
+		</header>
+
+		<main>
+			<h1>Gestion de fichier</h1>
+			<div class="definition">
+				<h2>Comment ca marche ?</h2>
+				<p>
+					Dans ce test le formulaire est soumis à upload.py en utilisant la méthode POST.
+				</p>
+			</div>
+			<div class="test">
+				<h2>Test d'Upload</h2>
+				<form action="upload.py" method="post" enctype="multipart/form-data">
+					<label for="file">Sélectionnez un fichier à envoyer :</label><br>
+					<input type="file" name="file" id="file"><br>
+					<input type="submit" value="Envoyer" class="envoyer">
+				</form>
+			</div> <br>
+			<div class="definition">
+				<h2>Comment ca marche ?</h2>
+				<p>
+					Dans ce test le formulaire est soumis à la méthode DELETE. Une liste de fichier a été crée 
+					au démarage du serveur pour éffectuer ce test. Il est possible de les supprimer avec ce formulaire.
+				</p>
+			</div>
+			<div class="test">
+				<h2>Test de suppression de fichier</h2>
+				<form method="post" action="delete_file.php">
+					<label for="file">Sélectionnez un fichier à supprimer :</label>
+					<select name="file" id="file">
+						<option value="">Sélectionnez un fichier</option>
+						<option value="fichier1.txt">fichier1.txt</option>
+						<option value="fichier2.txt">fichier2.txt</option>
+						<option value="fichier3.txt">fichier3.txt</option>
+						<option value="fichier4.txt">fichier4.txt</option>
+					</select>
+					<input type="submit" value="Supprimer" class="envoyer">
+				</form>
+				<p class="warning">
+					La liste déroulante n'est pas mis à jour après la suppression. 
+					Cela demande une page en php, html et js crée par le serveur.
+				</p>
+			</div>
+		</main>
+
+		<footer>
+
+		</footer>
+	</body>
+</html>
