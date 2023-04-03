@@ -29,7 +29,7 @@
 extern std::vector<Server *>		_server;
 extern std::vector<ParsConfig *>	_config;
 extern Connection					_connection;
-extern volatile sig_atomic_t		boolStart;
+extern volatile bool				boolStart;
 
 void	delProg();
 

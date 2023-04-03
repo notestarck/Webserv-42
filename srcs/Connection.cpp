@@ -67,7 +67,6 @@ Connection & Connection::operator=(const Connection &srcs)
 		_maxFd = srcs._maxFd;
 		_read = srcs._read;
 		_write = srcs._write;
-		//_errors = srcs._errors;
 		_timeout = srcs._timeout;
         _status_info = srcs._status_info;
 	}
@@ -78,7 +77,6 @@ void Connection::initConnection()
 {
 	FD_ZERO(&_read);
 	FD_ZERO(&_write);
-	//FD_ZERO(&_errors);
 	for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)

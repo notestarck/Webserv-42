@@ -72,7 +72,6 @@ void Server::paramSocket()
 {
 	int	tmp;
 	tmp = setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
-	//tmp = setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY,(char *)&tmp, sizeof(tmp));
 	if (tmp != 0)
 		std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 }

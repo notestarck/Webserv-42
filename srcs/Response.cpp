@@ -17,18 +17,22 @@ Response::Response(std::string status) {
 
 }
 
-Response::~Response() {}
+Response::~Response()
+{}
 
-void Response::append_header(std::string one, std::string two) {
+void Response::append_header(std::string one, std::string two)
+{
     headers.insert(std::make_pair(one, two));
 
 }
 
-int Response::get_body_size() {
+int Response::get_body_size()
+{
     return body.size();
 }
 
-void Response::set_body(std::string &str) {
+void Response::set_body(std::string &str)
+{
     this->body = str;
 }
 
@@ -69,7 +73,8 @@ void Response::make_status_body(std::string url)
     body = result;
 }
 
-std::string Response::run_resp() {
+std::string Response::run_resp()
+{
     std::string result;
 
     result.append("HTTP/1.1 " + status_code + " " + status_word + "\r\n");

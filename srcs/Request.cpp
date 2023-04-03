@@ -12,15 +12,17 @@
 
 #include "../include/Request.hpp"
 
-Request::Request(int client_fd){
+Request::Request(int client_fd)
+{
     this->client_fd = client_fd;
-
 }
 
 Request::~Request(){}
 
-std::string Request::get_path() {
+std::string Request::get_path() 
+{
     unsigned long i = path.find_first_of("?", 0);
+
     if(i == std::string::npos)
         return path;
     if((int)i == -1)
@@ -36,18 +38,21 @@ static size_t StringToHex(std::string input)
     convert >> ret;
     return ret;
 }
-static std::string parse_body(std::string &request, int i){
+static std::string parse_body(std::string &request, int i)
+{
     return request.substr(i + 2, request.size());
 }
 
-static int parse_header(std::map<std::string, std::string> &headers, std::string &request, int i){
+static int parse_header(std::map<std::string, std::string> &headers, std::string &request, int i)
+{
     int point = request.find_first_of(":", i);
     int end = request.find_first_of("\r\n", point);
     headers[request.substr(i, point - i)] = request.substr(point + 2, end - point - 2);
     return end;
 }
 
-static std::string parse_chunck(std::string &request, int i){
+static std::string parse_chunck(std::string &request, int i)
+{
     size_t size = 1;
     std::string ret;
     std::string size_buf;
@@ -68,12 +73,12 @@ static std::string parse_chunck(std::string &request, int i){
         j += size + 4;
     }
     return ret;
-
 }
 
 
 
-int Request::parse(std::string request){
+int Request::parse(std::string request)
+{
 
     std::cout << request << std::endl;
     unsigned long i;
@@ -123,7 +128,8 @@ int Request::parse(std::string request){
 
 }
 
-bool Request::is_not_method(const std::string method) {
+bool Request::is_not_method(const std::string method)
+{
     if(method.empty())
         return true;
     for(unsigned long  i = 0; i < method.length(); i++){

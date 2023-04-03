@@ -15,7 +15,7 @@
 std::vector<Server *>		_server;
 std::vector<ParsConfig *>	_config;
 Connection					_connection;
-volatile sig_atomic_t						boolStart = 1;
+volatile bool				boolStart = 1;
 
 int main(int argc, char ** argv)
 {
