@@ -15,6 +15,7 @@
 std::vector<Server *>		_server;
 std::vector<ParsConfig *>	_config;
 Connection					_connection;
+volatile sig_atomic_t						boolStart = 1;
 
 int main(int argc, char ** argv)
 {
@@ -59,16 +60,15 @@ int main(int argc, char ** argv)
 	//Crate connection
 	Connection	_tmp(_server);
 	_connection = _tmp;
-	while (42)
+	while (boolStart)
 	{
 		_connection.initConnection();
 		_connection.runSelect();
 		_connection.acceptSocket();
 		_connection.traitement();
 	}
-
-	//delete
 	delProg();
+	std::cout << "Fin du Programme\n";
 
     return 0;
 }

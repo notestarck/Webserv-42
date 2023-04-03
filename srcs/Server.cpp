@@ -61,6 +61,7 @@ void Server::creatSocket()
 		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
+	fcntl(_sock, F_SETFL, O_NONBLOCK);
 	std::cout << _config->getIndex() << ": mon index a moi \n";
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }

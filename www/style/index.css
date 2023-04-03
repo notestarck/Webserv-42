@@ -27,8 +27,11 @@ header {
 	max-width: 450px;
 }
 
+
+@media screen and (max-width: 811px){
 .text-header p{
 	overflow: scroll;
+}
 }
 
 main {
