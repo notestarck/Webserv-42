@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:33:24 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:47:35 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,6 +129,7 @@ void Connection::acceptSocket()
 					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
+                    //std::cout << "Location : " << newClient._location->at(0) << std::endl;
                     //std::cout << "Get error 404 -----> " << _client.back()._config->getErrorPage(404) << std::endl;
 					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
@@ -460,7 +461,7 @@ void Connection::get_method(Client &client, std::string path)
 
         if (S_ISDIR(buf.st_mode)) {
             std::cout << "> Current path is directory\n";
-            bool flag = false;
+//            bool flag = false;
 //            Location *loc = client.server->get_cur_location(path);
 //            std::vector<std::string> indexes;
             std::string indexes;
