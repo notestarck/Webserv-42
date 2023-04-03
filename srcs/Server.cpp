@@ -12,13 +12,13 @@
 
 #include "../include/Server.hpp"
 
-Server::Server(ParsConfig &server) :
+Server::Server(ParsConfig *server) :
 	_sockError(0),
 	_config(server),
 	_maxConnection(10),
 	_recsize(sizeof(_sin)),
-	_location(_config.getLocation()),
-	_nbrLocation(_config.getNbrLocation())
+	_location(_config->getLocation()),
+	_nbrLocation(_config->getNbrLocation())
 {
 	creatSocket();
 	paramSocket();
@@ -62,7 +62,7 @@ void Server::creatSocket()
 		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
-	std::cout << _config.getIndex() << ": mon index a moi \n";
+	std::cout << _config->getIndex() << ": mon index a moi \n";
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }
 

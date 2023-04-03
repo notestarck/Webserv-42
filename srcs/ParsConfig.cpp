@@ -263,6 +263,8 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 	{
 		_url = srcs._url;
 		_allow = srcs._allow;
+		for (std::vector<std::string>::const_iterator it = srcs._allow.begin(); it < srcs._allow.end(); it++)
+			_allow.push_back(*it);
 		_root = srcs._root;
 		_index = srcs._index;
         _cgi_pass = srcs._cgi_pass;
