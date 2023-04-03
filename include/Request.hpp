@@ -25,13 +25,14 @@ class Request
 		std::string method;
 		std::map<std::string, std::string> headers;
 		std::string body;
+        size_t content_length;
 
 		Request(int i);
 		~Request();
 	
 		int parse(std::string request);
 		bool is_not_method(const std::string method);
-	
+	    std::string get_path();
 		bool check_protocol(std::map<std::string, std::string>::mapped_type &test);
 
 	private:

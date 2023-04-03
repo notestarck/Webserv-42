@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 14:26:51 by estarck          ###   ########.fr       */
+/*   Updated: 2023/03/23 16:07:15 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,14 @@
 #include "./ParsConfig.hpp"
 
 #define INVALID_SOCKET -1
-#define SOCKET_ERROR -1
+#define  SOCKET_ERROR -1
 
 typedef int SOCKET;
 
 class Server
 {
 	public :
-		Server(ParsConfig &server);
+		Server(ParsConfig *config);
 		Server(const Server &srcs);
 		~Server();
 
@@ -44,7 +44,7 @@ class Server
 		std::string								getIndex() const;
 		std::string								getErrorPage(int code) const;
 		size_t									getNbrLocation() const;
-		const ParsConfig						&getConfig() const;
+		const ParsConfig						*getConfig() const;
 		const std::vector<ParsConfig::Location>	&getLocation() const;
 
 		//nbr Connection
@@ -55,7 +55,7 @@ class Server
 	private :
 	//	Server();
 		int									_sockError;
-		ParsConfig							_config;
+		ParsConfig							*_config;
 		int									_currentConnection;
 		int									_maxConnection;
 

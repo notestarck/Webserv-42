@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:07:33 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:35:37 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,13 +74,14 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 {
 	if (this != &srcs)
 	{
+		std::cout << "Constructeur d'operateur= de ParsConfig\n";
 		_host = srcs._host;
 		_port = srcs._port;
 		_name_server = srcs._name_server;
 		_root = srcs._root;
-		_index = srcs._index;
-		for (size_t i = 0; i < _error_page.size(); i++)
-			_error_page.at(i) = srcs._error_page.at(i);
+        _index = srcs._index;
+		for (std::map<int, std::string>::iterator it = _error_page.begin(); it != _error_page.end(); it++)
+			_error_page.insert(*it);
 		for (size_t i = 0; i < srcs._location.size(); i++)
 			_location.push_back(srcs._location[i]);
 		_nbrLocation = srcs._nbrLocation;
@@ -240,6 +241,8 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 				_root = value.substr(0, value.size() - 1);
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
+            else if(key == "cgi_pass")
+                _cgi_pass = value.substr(0, value.size() -1);
 		}
 		line.clear();
 		ss.clear();
@@ -262,6 +265,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 		_allow = srcs._allow;
 		_root = srcs._root;
 		_index = srcs._index;
+        _cgi_pass = srcs._cgi_pass;
 	}
 	return (*this);
 }
@@ -277,3 +281,7 @@ const std::string & ParsConfig::Location::getRoot() const
 
 const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }
+
+//const std::string & ParsConfig::Location::getCgi() const{
+//    return (_cgi_pass);
+//}

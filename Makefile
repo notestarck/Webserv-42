@@ -6,7 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/04/03 11:02:50 by estarck          ###   ########.fr        #
+#    Updated: 2023/04/03 11:31:18 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,8 @@ _SRCS		=	main.cpp \
 				Server.cpp \
 				Connection.cpp \
 				Request.cpp \
+				Response.cpp \
+				Client.cpp \
 				utils.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 

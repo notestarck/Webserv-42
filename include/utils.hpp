@@ -23,6 +23,9 @@
 
 #include <vector>
 
+
+
+
 extern std::vector<Server *>		_server;
 extern std::vector<ParsConfig *>	_config;
 extern Connection					_connection;
@@ -33,5 +36,9 @@ void 	signal_handler(int signal);
 
 int 	countServer(std::ifstream &config_file);
 bool	checkExtension(std::string extension);
+
+
+
+
 
 #endif /* _UTILS_H_ */
