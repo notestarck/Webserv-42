@@ -94,12 +94,11 @@ void Connection::initSelect(int fd, fd_set &set)
 
 void Connection::runSelect()
 {
-	//int res = select(_maxFd + 1, &_read, &_write, &_errors, 0);
     int res = select(_maxFd + 1, &_read, &_write, 0, 0);
 	if (res < 0)
 	{
 		std::cerr << "Error : Status of socket Connection::runSelect()" << std::endl;
-		exit (1);
+		//exit (1);
 	}
 	else if (res == 0)
 		std::cerr << "Error : Timeout Select Connection::runSelect()" << std::endl;

@@ -28,11 +28,10 @@ void	delProg()
 
 void signal_handler(int signal)
 {
-    std::cout << "Signal SIGINT reçu. Fermeture du programme..." << std::endl;
     if (signal == SIGINT)
 	{
-		delProg();
-    	exit(1);
+    	std::cout << "Signal SIGINT reçu. Fermeture du programme..." << std::endl;
+		boolStart = 0;
 	}
 }
 
