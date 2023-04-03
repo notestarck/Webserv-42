@@ -1,0 +1,63 @@
+body {
+	margin: 0px;
+	background-color: #292c5f;
+}
+
+a {
+	color: white;
+	font-family: 'Noto Sans', sans-serif;
+	font-weight: bold;
+	font-size: 18px;
+	text-decoration: none;
+}
+
+h1, h2, h3, p, li, label, input {
+	color: white;
+	font-family: 'Noto Sans', sans-serif;
+	font-weight: bold;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+.barre_nav {
+	height : 60px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.barre_nav img {
+	width: 75px;
+	height: 50px;
+	margin-left: 80px;
+}
+
+.barre_nav p {
+	font-family: 'Dancing Script', cursive;
+	font-size: 24px;
+}
+
+.barre_nav nav {
+	display: grid;
+	margin-left: auto;
+	margin-right: 80px;
+	grid-template-columns: 150px 150px 150px;
+	text-align: center;
+}
+
+@media screen and (max-width: 811px){
+	.barre_nav img {
+		margin-left: auto;
+	}
+
+	.barre_nav nav {
+		margin-right: auto;
+		grid-template-columns: 100px 100px 100px;
+	}
+
+	.barre_nav nav a {
+		font-size: 15px;
+	}
+}

@@ -6,7 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/03/17 15:08:12 by estarck          ###   ########.fr        #
+#    Updated: 2023/04/03 11:02:50 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -38,8 +38,8 @@ DELNAME		=	printf "$(_RED)$(_BOLD)Remove $(NAME)\n$(_END)"
 
 # Compilation
 CC			=	c++
-FLAGS		=	-Wall -Wextra -Werror -std=c++98
-FLAGS		+=	-g
+CFLAGS		=	-Wall -Wextra -Werror -std=c++98
+CFLAGS		+=	-g
 
 # Formatting
 _RETURN		=	$'\33[2K\r

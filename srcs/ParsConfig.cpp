@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 16:45:18 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:07:33 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 ParsConfig::ParsConfig()
 {}
 
-ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
-	_port(80),
+ParsConfig::ParsConfig(std::ifstream &file_config) :
 	_host(localhost),
+	_port(80),
 	_name_server("default_name"),
 	_index("index.html"),
 	_nbrLocation(0)
@@ -46,7 +46,9 @@ ParsConfig::ParsConfig(std::ifstream &file_config, int indexServer) :
 		else if (key == "root")
 			setRoot(value.substr(0, value.size() - 1));
 		else if (key == "index")
-			setIndex(value.substr(0, value.size() - 1));
+		{
+			_index = (value.substr(0, value.size() - 1));
+		}
 		else if (key == "error_page")
 		{
 			std::string s_value;
@@ -76,6 +78,7 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		_port = srcs._port;
 		_name_server = srcs._name_server;
 		_root = srcs._root;
+		_index = srcs._index;
 		for (size_t i = 0; i < _error_page.size(); i++)
 			_error_page.at(i) = srcs._error_page.at(i);
 		for (size_t i = 0; i < srcs._location.size(); i++)
@@ -183,7 +186,7 @@ void    ParsConfig::setErrorPage(int error, std::string page)
 
 void    ParsConfig::setLocation(std::ifstream &file_config, std::string url)
 {
-	int i = 0;
+	size_t i = 0;
 	Location tmp(file_config, url);
 
 	while (i != _location.size() && _location[i].getUrl() != url)

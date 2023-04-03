@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/16 16:19:46 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:05:36 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class ParsConfig
 		};// class Locartion
 
 		ParsConfig();
-		ParsConfig(std::ifstream &file_config, int indexServer);
+		ParsConfig(std::ifstream &file_config);
 		ParsConfig(const ParsConfig &srcs);
 		~ParsConfig();
 

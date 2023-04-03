@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 15:26:51 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:06:19 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int main(int argc, char ** argv)
 	//On compte le nombre de serveur qu'on enregistre ensuite dans _config.
 	for (unsigned int i = 0; i < _nbrServer; i++)
 	{
-		ParsConfig *tmp = new ParsConfig(config_file, i);
+		ParsConfig *tmp = new ParsConfig(config_file);
 		_config.push_back(tmp);
 	}
 
