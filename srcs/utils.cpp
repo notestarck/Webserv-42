@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/17 15:02:57 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 15:08:33 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:11:10 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,12 @@ void	delProg()
 {
 	//delete _server
 	std::cout << "\033[34mDelete des serveurs : \033[0m\n";
-	for (int i = 0; i < _server.size(); i++)
+	for (size_t i = 0; i < _server.size(); i++)
 		delete _server[i];
 	
 	//delete _config
 	std::cout << "\033[34mDelete de la config : \033[0m\n";
-	for (int i = 0; i < _config.size(); i++)
+	for (size_t i = 0; i < _config.size(); i++)
 		delete _config[i];
 }
 
@@ -38,7 +38,6 @@ void signal_handler(int signal)
 int countServer(std::ifstream &config_file)
 {
 	int     nbr_server = 0;
-	char    *buf;
 
 	while (!config_file.eof())
 	{

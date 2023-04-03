@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/21 17:10:33 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:09:52 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void Connection::acceptSocket()
 void Connection::send_error(int err)
 {
 	std::string html_page;
-
+	(void)err;
 	//this->_servers
 }
 

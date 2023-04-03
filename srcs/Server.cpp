@@ -6,19 +6,19 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/21 11:58:31 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:09:08 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
 Server::Server(ParsConfig &server) :
-	_config(server),
-	_location(_config.getLocation()),
-	_nbrLocation(_config.getNbrLocation()),
 	_sockError(0),
+	_config(server),
 	_maxConnection(10),
-	_recsize(sizeof(_sin))
+	_recsize(sizeof(_sin)),
+	_location(_config.getLocation()),
+	_nbrLocation(_config.getNbrLocation())
 {
 	creatSocket();
 	paramSocket();
