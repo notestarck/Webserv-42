@@ -16,13 +16,14 @@
 #include <netinet/tcp.h>
 #include <sys/socket.h>
 
+#include "./Server.hpp"
 #include "./ParsConfig.hpp"
 
 #define MAX_REQUEST_SIZE 2048
 
 struct Client
 {
-	Client(const ParsConfig *config);
+	Client(const ParsConfig *config, Server &server);
 	Client (const Client &srcs);
 
 	~Client();
@@ -37,7 +38,8 @@ struct Client
 	int					_recSize;
     //Config du serveur
     const ParsConfig							*_config;
-    std::vector<ParsConfig::Location>	_location;
+    std::vector<ParsConfig::Location>			_location;
+	Server										&_server;
 
 
 };//struct Client

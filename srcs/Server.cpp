@@ -139,6 +139,9 @@ in_addr_t Server::convertIp(const std::string &str)
 SOCKET	Server::getSocket() const
 { return (_sock); }
 
+Server	&Server::getServer()
+{ return (*this); }
+
 std::string		Server::getHost() const
 { return (_config->getHost()); }
 		

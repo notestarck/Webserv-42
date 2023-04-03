@@ -236,13 +236,14 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 					std::cerr << "Error : file config not valide. " << tmp << " is not valide." << std::endl;
 					exit (-1);
 				}
+				_allow.push_back(tmp);
 			}
 			else if (key == "root")
 				_root = value.substr(0, value.size() - 1);
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
             else if(key == "cgi_pass")
-                _cgi_pass = value.substr(0, value.size() -1);
+                _cgi_pass = value.substr(0, value.size() - 1);
 		}
 		line.clear();
 		ss.clear();
@@ -262,7 +263,6 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 	if (this != &srcs)
 	{
 		_url = srcs._url;
-		_allow = srcs._allow;
 		for (std::vector<std::string>::const_iterator it = srcs._allow.begin(); it < srcs._allow.end(); it++)
 			_allow.push_back(*it);
 		_root = srcs._root;

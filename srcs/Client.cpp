@@ -12,15 +12,18 @@
 
 #include "../include/Client.hpp"
 
-Client::Client(const ParsConfig *config) :
-	_config(config)
+Client::Client(const ParsConfig *config, Server &server) :
+	_config(config),
+	_server(server)
 
-{_csock = 0;
- _recSize = 0;
-}    //initialisation du socket client a 0
+{
+	_csock = 0;
+	_recSize = 0;
+}
 
 Client::Client(const Client &srcs) :
-    _config(srcs._config)
+    _config(srcs._config),
+	_server(srcs._server)
 { *this = srcs; }
 
 Client::~Client()
@@ -30,7 +33,6 @@ Client &Client::operator=(const Client &srcs)
 {
 	if (this != &srcs)
 	{
-		//std::cout << "Constructeur d'operator== de client\n";
 		_csock = srcs._csock;
 		_csin = srcs._csin;
 		_crecsize = srcs._crecsize;
@@ -38,6 +40,12 @@ Client &Client::operator=(const Client &srcs)
 		_recSize = srcs._recSize;
 		_config = srcs._config;
 		_location = srcs._location;
+		_server = srcs._server;
+		for (size_t i = 0; i < srcs._location.size(); i++)
+		{
+			for (std::vector<std::string>::const_iterator it = srcs._location[i]._allow.begin(); it < srcs._location[i]._allow.end(); it++)
+				_location[i]._allow.push_back(*it);
+		}
 	}
 	return (*this);
 }

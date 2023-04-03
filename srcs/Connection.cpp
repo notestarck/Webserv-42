@@ -112,9 +112,7 @@ void Connection::acceptSocket()
 	{
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
-			//Socket server est pret a etre lu
-            //std::cout << "la\n";
-			Client newClient((*it)->getConfig());
+			Client newClient((*it)->getConfig(), (*it)->getServer());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
@@ -125,29 +123,18 @@ void Connection::acceptSocket()
 				else
 				{
 		 			(*it)->incrementCurrentConnection();
-					newClient._config = (*it)->getConfig();
 					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
-                    //std::cout << "Location : " << newClient._location->at(0) << std::endl;
-                    //std::cout << "Get error 404 -----> " << _client.back()._config->getErrorPage(404) << std::endl;
+                    std::cout << _client[0]._config->getErrorPage(404) << " ---- test erreur page !!\n";
 					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
 			else
-			{
 				std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
-                // augmenter la capacite de connection
-                //exit(1);
-                //continue ;
-                //boucle infini a gerer.
-			}
 		}
 	}
 }
-
-
-
 
 // erase client si Connection=close
 bool Connection::dead_or_alive(Client client, bool alive){
@@ -430,6 +417,7 @@ void Connection::traitement()
             it->_recBuffer[i]= '\0';
         FD_CLR(it->_csock, &_read);
         FD_ZERO(&_read);
+        it->_server.decrementCurrentConnection();
         //close(it->_csock);
     }
 
