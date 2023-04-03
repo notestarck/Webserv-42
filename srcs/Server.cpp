@@ -6,19 +6,19 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:09:08 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:37:03 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Server.hpp"
 
-Server::Server(ParsConfig &server) :
+Server::Server(ParsConfig *server) :
 	_sockError(0),
 	_config(server),
 	_maxConnection(10),
 	_recsize(sizeof(_sin)),
-	_location(_config.getLocation()),
-	_nbrLocation(_config.getNbrLocation())
+	_location(_config->getLocation()),
+	_nbrLocation(_config->getNbrLocation())
 {
 	creatSocket();
 	paramSocket();
@@ -61,7 +61,7 @@ void Server::creatSocket()
 		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
-	std::cout << _config.getIndex() << ": mon index a moi \n";
+	std::cout << _config->getIndex() << ": mon index a moi \n";
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }
 
@@ -137,6 +137,9 @@ in_addr_t Server::convertIp(const std::string &str)
 
 SOCKET	Server::getSocket() const
 { return (_sock); }
+
+Server	&Server::getServer()
+{ return (*this); }
 
 std::string		Server::getHost() const
 { return (_config.getHost()); }

@@ -1,0 +1,5 @@
+curl 127.0.0.1:1042/video.mp4 --output video.mp4     // test telechargement video.
+
+
+
+//client._config.getErrorPage(code)

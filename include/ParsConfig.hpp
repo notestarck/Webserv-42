@@ -39,11 +39,11 @@ class ParsConfig
 				const std::vector<std::string> &	getAllow() const;
 				const std::string &					getRoot() const;
 				const std::string &					getIndex() const;
+				std::vector<std::string>			_allow;
 
 			private :
 				Location();
 				std::string 				_url;
-				std::vector<std::string>	_allow;
 				std::string 				_root;
 				std::string 				_index;
 				//ajouter le cgi_info

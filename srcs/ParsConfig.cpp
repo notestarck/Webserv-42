@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:07:33 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:35:37 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,9 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		_port = srcs._port;
 		_name_server = srcs._name_server;
 		_root = srcs._root;
-		_index = srcs._index;
-		for (size_t i = 0; i < _error_page.size(); i++)
-			_error_page.at(i) = srcs._error_page.at(i);
+        _index = srcs._index;
+		for (std::map<int, std::string>::iterator it = _error_page.begin(); it != _error_page.end(); it++)
+			_error_page.insert(*it);
 		for (size_t i = 0; i < srcs._location.size(); i++)
 			_location.push_back(srcs._location[i]);
 		_nbrLocation = srcs._nbrLocation;
@@ -235,11 +235,14 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 					std::cerr << "Error : file config not valide. " << tmp << " is not valide." << std::endl;
 					exit (-1);
 				}
+				_allow.push_back(tmp);
 			}
 			else if (key == "root")
 				_root = value.substr(0, value.size() - 1);
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
+            else if(key == "cgi_pass")
+                _cgi_pass = value.substr(0, value.size() - 1);
 		}
 		line.clear();
 		ss.clear();
@@ -259,7 +262,8 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 	if (this != &srcs)
 	{
 		_url = srcs._url;
-		_allow = srcs._allow;
+		for (std::vector<std::string>::const_iterator it = srcs._allow.begin(); it < srcs._allow.end(); it++)
+			_allow.push_back(*it);
 		_root = srcs._root;
 		_index = srcs._index;
 	}

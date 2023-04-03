@@ -37,6 +37,7 @@ class Server
 
 		//Getteur
 		SOCKET									getSocket() const;
+		Server									&getServer();
 		std::string								getHost() const;
 		unsigned int							getPort() const;
 		std::string								getNameServer() const;

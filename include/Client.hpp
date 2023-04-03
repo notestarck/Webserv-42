@@ -15,13 +15,19 @@
 
 #include <netinet/in.h>
 
+#include "./Server.hpp"
 #include "./ParsConfig.hpp"
 
 #define MAX_REQUEST_SIZE 2048
 
 struct Client
 {
-	/* Socket et contexte d'adressage du client */
+	Client(const ParsConfig *config, Server &server);
+	Client (const Client &srcs);
+
+	~Client();
+	Client &operator=(const Client &srcs);
+    /* Socket et contexte d'adressage du client */
 	int					_csock;
 	sockaddr_storage	_csin;
 	socklen_t			_crecsize;
@@ -30,10 +36,12 @@ struct Client
 	// Buffer de reception
 	char				_recBuffer[MAX_REQUEST_SIZE + 1];
 	int					_recSize;
-	
-	//Config du serveur
-	ParsConfig							_config;
-	std::vector<ParsConfig::Location>	_location;
+    //Config du serveur
+    const ParsConfig							*_config;
+    std::vector<ParsConfig::Location>			_location;
+	Server										&_server;
+
+
 };//struct Client
 
 #endif/* _CLIENT_HPP_ */

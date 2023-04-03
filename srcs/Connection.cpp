@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:09:52 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/03 11:47:35 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,8 +92,7 @@ void Connection::acceptSocket()
 	{
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
-			//Socket server est pret a etre lu
-			Client newClient;
+			Client newClient((*it)->getConfig(), (*it)->getServer());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
@@ -102,28 +101,110 @@ void Connection::acceptSocket()
 					std::cerr << "Failed to accept connection on port " << (*it)->getPort() << std::endl;
 				else
 				{
-					(*it)->incrementCurrentConnection();
-					newClient._config = (*it)->getConfig();
+		 			(*it)->incrementCurrentConnection();
 					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
-					std::cout << "Accepted connection on port " << (*it)->getPort() << std::endl;
+                    std::cout << _client[0]._config->getErrorPage(404) << " ---- test erreur page !!\n";
+					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
 			else
-			{
 				std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
-				//boucle infini a gerer.
-			}
 		}
 	}
 }
 
-void Connection::send_error(int err)
+// erase client si Connection=close
+bool Connection::dead_or_alive(Client client, bool alive){
+    if(alive)
+        return false;
+    //FD_ZERO(&_read);
+    //FD_CLR(client._csock, &_read);
+    close(client._csock);
+
+
+    std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
+
+    std::vector<Client>::iterator it;
+    for(it = _client.begin(); it != _client.end(); it++ )
+    {
+
+        if((*it)._csock == client._csock)
+        {
+            std::cout << "client erase\n";
+            _client.erase(it);
+            return true;
+        }
+    }
+    exit(1);
+}
+// connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
+bool	Connection::live_request(char *request) const
 {
-	std::string html_page;
-	(void)err;
-	//this->_servers
+    char *body = strstr(request, "\r\n\r\n");
+    if (!body)
+        return false;
+    body += 4;
+
+    char *connection;
+    if ((connection = strnstr(request, "Connection", strlen(request) - strlen(body))))
+    {
+        if (strnstr(connection, "close", strlen(request) - strlen(body)))
+            return false;
+        return true;
+    }
+    return true;
+}
+
+// connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
+bool	Connection::live_request(std::map<std::string, std::string> *headers) const
+{
+    //std::cout << "test live request\n";
+    if (headers->find("Connection") != headers->end())
+    {
+        if ((*headers)["Connection"] == "close")
+            return false;
+        return true;
+    }
+    return true;
+}
+
+//verification des erreurs de la requete
+bool    Connection::request_ok(char *request)
+{
+    char *body = strstr(request, "\r\n\r\n");
+    if (!body)
+        return false;
+    body += 4;
+    if (strnstr(request, "chunked", strlen(request) - strlen(body)))
+    {
+        if (strstr(body, "\r\n\r\n"))
+            return true;
+        return false;
+    }
+
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length
+    else if (strnstr(request, "Content-Length", strlen(request) - strlen(body)))
+    {
+        if (strstr(body, "\r\n\r\n"))
+            return true;
+        char *start = strnstr(request, "Content-Length: ", strlen(request) - strlen(body)) + 16;
+        char *end = strstr(start, "\r\n");
+        char *len = strndup(start, end - start);
+        free(len);
+        int len_i = atoi(len);
+        if ((size_t)len_i <= strlen(body))
+            return true;
+        return false;
+    }
+    else if (strnstr(request, "boundary=", strlen(request) - strlen(body)))
+    {
+        if (strstr(body, "\r\n\r\n"))
+            return true;
+        return false;
+    }
+    return true;
 }
 
 void Connection::traitement()
@@ -201,6 +282,389 @@ void Connection::traitement()
 //
 //        clear requet;
 //
+//            }
+
+
+            if(!"redir")
+            {
+                std::cout << "REDIR\n";
+                //                send_redir(it, req.method);
+            }
+
+            else if(req.method == "GET") {
+
+                get_method(*it, req.path);
+            }
+            else if(req.method == "POST") {
+
+                post_method(*it, req);
+            }
+            else if(req.method == "DELETE") {
+                std::cout << "DELETE\n";
+                delete_method(*it, req.path);
+            }
+        }
+        bool dead = dead_or_alive(*it, live_request(&req.headers));
+        if ( dead)
+            it--;
+
+        std::cout << "request completed\n";
+        //close(it->_csock);
+        //FD_CLR(it->_csock, &_read);
+       // _client.erase(it);     //je tets
+
+
+
+
+
+        it->_recSize = 0;
+        for (int i = 0; i < MAX_REQUEST_SIZE; i++)
+            it->_recBuffer[i]= '\0';
+        FD_CLR(it->_csock, &_read);
+        FD_ZERO(&_read);
+        it->_server.decrementCurrentConnection();
+        //close(it->_csock);
+    }
+
+
+}
+}
+   usleep(125);
+}
+
+void Connection::get_method(Client &client, std::string path)
+{
+
+    std::cout << " GET method\n";
+    std::cout << path << "path de la requete GET\n";
+    if (path.length() >= MAX_URI_SIZE)
+    {
+        send_error(414, client, NULL);
+        return;
+    }
+    struct stat buf;
+
+    std::string full_path = find_path_in_root(path, client);
+    std::cout << full_path << std::endl;
+    if (stat(full_path.c_str(), &buf) < 0)
+	{
+		send_error(404, client, NULL);
+		return ;
+	}
+
+        if (S_ISDIR(buf.st_mode)) {
+            std::cout << "> Current path is directory\n";
+//            bool flag = false;
+//            Location *loc = client.server->get_cur_location(path);
+//            std::vector<std::string> indexes;
+            std::string indexes;
+//            if(client._location.size() > 0)
+//                indexes = client._location;
+//            if (loc)
+//                indexes = loc->index;
+//            else
+            indexes = client._config->getIndex();
+//            if (full_path.back() != '/')
+//                full_path.append("/");
+//            for (unsigned long i = 0; i < indexes.size(); i++)
+//            {
+//                FILE *tmp_fp = fopen((full_path + indexes[i]).c_str(), "rb");
+//                if (tmp_fp)
+//                {
+//                    fclose(tmp_fp);
+//                    full_path.append(indexes[i]);
+//                    flag = true;
+//                    break;
+//                }
+//            }
+//            if (!flag)
+//            {
+//                if (client.server->autoindex)
+//                {
+//                    send_autoindex_page(client, path);
+//                    return;
+//                }
+//                else
+//                {
+//                    //send_error(404, client);
+//                    return;
+//                }
+//           }
+        }
+            FILE *fp = fopen(full_path.c_str(), "rb");
+            fseek(fp, 0L, SEEK_END);
+            size_t length = ftell(fp);
+            rewind(fp);
+            fclose(fp);
+           const char *type = find_type(full_path.c_str());
+
+
+
+            Response response(_status_info[200]);
+
+            response.append_header("Content-Length", longToString(length));
+
+            response.append_header("Content-Type", type);
+
+
+            std::string header = response.make_header();
+            int send_ret_1 = send(client._csock, header.c_str(), header.size(), 0);
+            if (send_ret_1 < 0) {
+                //std::cout << "error 500\n";
+                send_error(500, client, NULL);
+                return;
+            } else if (send_ret_1 == 0) {
+                //std::cout << "error 400\n";
+                 send_error(400, client, NULL);
+                return;
+            }
+//
+            char buffer[BSIZE];
+            int read_fd = open(full_path.c_str(), O_RDONLY);
+            if (read_fd < 0) {
+                send_error(500, client, NULL);
+                return;
+            }
+            initSelect(read_fd, _read);
+            runSelect();
+            if (FD_ISSET(read_fd, &_read) == 0) {
+                send_error(400, client, NULL);
+                close(read_fd);
+                return;
+            }
+            int r = read(read_fd, buffer, BSIZE); //BSIZE
+            if (r < 0)
+
+                send_error(500, client, NULL);
+
+            else
+
+            {
+            int send_ret_2;
+            while (r)
+            {
+                send_ret_2 = send(client._csock, buffer, r, 0);
+                if (send_ret_2 < 0)
+                {
+                    send_error(500, client, NULL);
+                    break;
+                }
+                else if (send_ret_2 == 0)
+                {
+                    send_error(400, client, NULL);
+                    break;
+                }
+                initSelect(read_fd, _read);
+                runSelect();
+                if (FD_ISSET(read_fd, &_read) == 0)
+                {
+                    send_error(400, client, NULL);
+                    break;
+                }
+                r = read(read_fd, buffer, BSIZE);
+                if (r < 0)
+                {
+                    send_error(500, client, NULL);
+                    break;
+                }
+                if (r == 0)
+                    break;
+                //close(client._csock); non marche pas
+            }
+        }
+        close(read_fd);
+        //close(client._csock);
+
+}
+
+void Connection::post_method(Client &client, Request &request)
+{
+    std::cout << "POST method\n";
+
+    if (request.headers["Transfer-Encoding"] != "chunked"
+        && request.headers.find("Content-Length") == request.headers.end())
+    {
+        send_error(411, client, NULL);
+        return;
+    }
+
+    std::string full_path = find_path_in_root(request.path, client);
+
+    struct stat buf;
+    lstat(full_path.c_str(), &buf);
+    if (S_ISDIR(buf.st_mode))
+    {
+        if (request.headers.find("Content-Type") != request.headers.end())
+        {
+            size_t begin = request.headers["Content-Type"].find("boundary=");
+            if (begin != std::string::npos)
+            {
+                std::string boundary = request.headers["Content-Type"].substr(begin + 9);
+                begin = 0;
+                size_t end = 0;
+                std::string name;
+                while (true)
+                {
+                    begin = request.body.find("name=", begin) + 6;
+                    end = request.body.find_first_of("\"", begin);
+                    if (begin == std::string::npos || end == std::string::npos)
+                        break;
+                    name = request.body.substr(begin, end - begin);
+                    begin = request.body.find("\r\n\r\n", end) + 4;
+                    end = request.body.find(boundary, begin);
+                    if (begin == std::string::npos || end == std::string::npos)
+                        break;
+                    if (write_in_path(client, request.body.substr(begin, end - begin - 4), full_path + "/" + name) < 0)
+                        break;
+                    if (request.body[end + boundary.size()] == '-')
+                        break;
+                }
+            }
+            else
+            {
+                send_error(400, client, NULL);
+                return;
+            }
+        }
+        else
+        {
+            send_error(400, client, NULL);
+            return;
+        }
+    }
+    else
+    {
+        if (write_in_path(client, request.body, full_path) < 0)
+            return;
+    }
+
+    int code = 201;
+    if (request.headers["Content-Length"] == "0")
+        code = 204;
+
+
+
+    Response response(_status_info[code]);
+    std::string header = response.make_header();
+
+    int send_ret = send(client._csock, header.c_str(), header.size(), 0);
+
+    if (send_ret < 0)
+        send_error(500, client, NULL);
+    else if (send_ret == 0)
+        send_error(400, client, NULL);
+    else
+        std::cout << "> " << full_path << " posted(" << code << ")\n";
+}
+
+
+int	Connection::write_in_path(Client &client, std::string content, std::string path)
+{
+    std::cout << "> write in: " << path << "\n";
+    size_t index = path.find_last_of("/");
+    std::string file_name = path.substr(index + 1);
+    std::string folder_path = path.substr(0, index);
+
+    //https://koor.fr/C/cstdlib/system.wp
+
+    std::string command = "mkdir -p " + folder_path;
+    system(command.c_str());
+    int write_fd = open(path.c_str(), O_WRONLY | O_TRUNC | O_CREAT, 0644);
+    if (write_fd < 0)
+    {
+        send_error(500, client, NULL);
+        return -1;
+    }
+
+    initSelect(write_fd, _write);
+    runSelect();
+    if (FD_ISSET(write_fd, &_write) == 0)
+    {
+        send_error(500, client, NULL);
+        close(write_fd);
+        return -1;
+    }
+    int r = write(write_fd, content.c_str(), content.size());
+    if (r < 0)
+    {
+        send_error(500, client, NULL);
+        close(write_fd);
+        return -1;
+    }
+    close(write_fd);
+    return 0;
+}
+void Connection::delete_method(Client &client, std::string path){
+    std::string full = find_path_in_root(path, client);
+
+    FILE *fp = fopen(full.c_str(), "r");
+    if(!fp)
+    {
+        send_error(404, client, NULL);
+        return ;
+
+
+    }
+    fclose(fp);
+
+    std::remove(full.c_str());
+    Response res(_status_info[200]);
+
+    std::string header = res.make_header();
+    int send_re = send(client._csock, header.c_str(), header.size(),0);
+    if(send_re < 0) {
+        send_error(500, client, NULL);
+    }
+    else if(send_re == 0) {
+        send_error (400, client, NULL);
+    }
+    std::cout << "delete ok\n";
+
+}
+
+void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
+{
+
+    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code) << std::endl;
+    std::ifstream page;
+
+
+    if(client._config->getErrorPage(code) != "notFound")
+    {
+        page.open(client._config->getErrorPage(code));
+        if(!page.is_open())
+            code = 404;
+    }
+    Response response(_status_info[code]);
+    if (page.is_open())
+    {
+        std::string body;
+        std::string line;
+        while (page.good())
+        {
+
+            getline(page, line);
+            body += line;
+            body += '\n';
+        }
+        response.body = body;
+        page.close();
+
+    }
+    else {
+
+        response.make_status_body();
+    }
+    response.append_header("Content-Length", longToString(response.get_body_size()));
+    response.append_header("Content-Type", "text/html");
+    if (code == 405)
+    {
+//        std::string allowed_method_list;
+//        for (unsigned long i = 0; i < (*allow_methods).size(); i++)
+//        {
+//            allowed_method_list += methodtype((*allow_methods)[i]);
+//            if (i < (*allow_methods).size() - 1)
+//                allowed_method_list += ", ";
 //        }
 //    }
 //}
