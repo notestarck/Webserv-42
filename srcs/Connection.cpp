@@ -298,34 +298,34 @@ void Connection::traitement()
               {
 
                   send_error(code, *it, NULL);
-                  bool dead = dead_or_alive(*it, live_request(&req.headers));
+                  bool dead = dead_or_alive(*it, live_request(&req._headers));
                   if(dead)
                       it--;
                   continue;
               }
                 //std::cout << " req is ok\n";
-                std::string port = req.headers["Host"].substr(req.headers["Host"].find(':') + 1);
+                std::string port = req._headers["Host"].substr(req._headers["Host"].find(':') + 1);
 
 //              if(it->_config->getHost() == "Host")
 //              {
 //                  it->_config.
-//                  clients[i].server = servers[req.headers["Host"]];
+//                  clients[i].server = servers[req._headers["Host"]];
 //                    it->_config =
 //              }
 //              else
 
 //              {
 //                  //send_error(400, it);
-//                  bool dead = dead_or_alive(*it, live_request(&req.headers));
+//                  bool dead = dead_or_alive(*it, live_request(&req._headers));
 //                  if(dead)
 //                      it--;
 //                  continue;
 //
 //              }
-              if(req.headers.find("Content-Length") != req.headers.end() && stoi(req.headers["Content-Length"]) > 4096) //(it->_config->bodylimit_du_client
+              if(req._headers.find("Content-Length") != req._headers.end() && stoi(req._headers["Content-Length"]) > 4096) //(it->_config->bodylimit_du_client
               {
                   send_error(413, *it, NULL);
-                  bool dead = dead_or_alive(*it, live_request(&req.headers));
+                  bool dead = dead_or_alive(*it, live_request(&req._headers));
                   if(dead)
                       it--;
                   continue;
@@ -338,7 +338,7 @@ void Connection::traitement()
 //          check allow method dans location
 //            Location getcur loc
 
-//            method_ls = loc ? loc->allow method : it->_  ;
+//            method_ls = loc ? loc->allow _method : it->_  ;
 
 //            it->_config.getLocationAllow();
 //
@@ -350,11 +350,11 @@ void Connection::traitement()
                 method_ls.push_back(DELETE);
 
 
-            if(!is_allowed_method(method_ls, req.method))
+            if(!is_allowed_method(method_ls, req._method))
                 {
                     std::cout << "check mothod non allowed\n";
                     send_error(405, *it, NULL);
-                    bool dead = dead_or_alive(*it, live_request(&req.headers));
+                    bool dead = dead_or_alive(*it, live_request(&req._headers));
                     if(dead)
                         it--;
                     continue;
@@ -380,23 +380,23 @@ void Connection::traitement()
             if(!"redir")
             {
                 std::cout << "REDIR\n";
-                //                send_redir(it, req.method);
+                //                send_redir(it, req._method);
             }
 
-            else if(req.method == "GET") {
+            else if(req._method == "GET") {
 
-                get_method(*it, req.path);
+                get_method(*it, req._path);
             }
-            else if(req.method == "POST") {
+            else if(req._method == "POST") {
 
                 post_method(*it, req);
             }
-            else if(req.method == "DELETE") {
+            else if(req._method == "DELETE") {
                 std::cout << "DELETE\n";
-                delete_method(*it, req.path);
+                delete_method(*it, req._path);
             }
         }
-        bool dead = dead_or_alive(*it, live_request(&req.headers));
+        bool dead = dead_or_alive(*it, live_request(&req._headers));
         if ( dead)
             it--;
 
@@ -573,42 +573,42 @@ void Connection::post_method(Client &client, Request &request)
 {
     std::cout << "POST method\n";
 
-    if (request.headers["Transfer-Encoding"] != "chunked"
-        && request.headers.find("Content-Length") == request.headers.end())
+    if (request._headers["Transfer-Encoding"] != "chunked"
+        && request._headers.find("Content-Length") == request._headers.end())
     {
         send_error(411, client, NULL);
         return;
     }
 
-    std::string full_path = find_path_in_root(request.path, client);
+    std::string full_path = find_path_in_root(request._path, client);
 
     struct stat buf;
     lstat(full_path.c_str(), &buf);
     if (S_ISDIR(buf.st_mode))
     {
-        if (request.headers.find("Content-Type") != request.headers.end())
+        if (request._headers.find("Content-Type") != request._headers.end())
         {
-            size_t begin = request.headers["Content-Type"].find("boundary=");
+            size_t begin = request._headers["Content-Type"].find("boundary=");
             if (begin != std::string::npos)
             {
-                std::string boundary = request.headers["Content-Type"].substr(begin + 9);
+                std::string boundary = request._headers["Content-Type"].substr(begin + 9);
                 begin = 0;
                 size_t end = 0;
                 std::string name;
                 while (true)
                 {
-                    begin = request.body.find("name=", begin) + 6;
-                    end = request.body.find_first_of("\"", begin);
+                    begin = request._body.find("name=", begin) + 6;
+                    end = request._body.find_first_of("\"", begin);
                     if (begin == std::string::npos || end == std::string::npos)
                         break;
-                    name = request.body.substr(begin, end - begin);
-                    begin = request.body.find("\r\n\r\n", end) + 4;
-                    end = request.body.find(boundary, begin);
+                    name = request._body.substr(begin, end - begin);
+                    begin = request._body.find("\r\n\r\n", end) + 4;
+                    end = request._body.find(boundary, begin);
                     if (begin == std::string::npos || end == std::string::npos)
                         break;
-                    if (write_in_path(client, request.body.substr(begin, end - begin - 4), full_path + "/" + name) < 0)
+                    if (write_in_path(client, request._body.substr(begin, end - begin - 4), full_path + "/" + name) < 0)
                         break;
-                    if (request.body[end + boundary.size()] == '-')
+                    if (request._body[end + boundary.size()] == '-')
                         break;
                 }
             }
@@ -626,12 +626,12 @@ void Connection::post_method(Client &client, Request &request)
     }
     else
     {
-        if (write_in_path(client, request.body, full_path) < 0)
+        if (write_in_path(client, request._body, full_path) < 0)
             return;
     }
 
     int code = 201;
-    if (request.headers["Content-Length"] == "0")
+    if (request._headers["Content-Length"] == "0")
         code = 204;
 
 

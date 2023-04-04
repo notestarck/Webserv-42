@@ -63,7 +63,6 @@ void Server::creatSocket()
 		exit (1);
 	}
 	fcntl(_sock, F_SETFL, O_NONBLOCK);
-	std::cout << _config->getIndex() << ": mon index a moi \n";
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }
 
