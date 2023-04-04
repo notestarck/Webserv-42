@@ -15,7 +15,8 @@
 Server::Server(ParsConfig *server) :
 	_sockError(0),
 	_config(server),
-	_maxConnection(10),
+	_currentConnection(0),
+	_maxConnection(100),
 	_recsize(sizeof(_sin)),
 	_location(_config->getLocation()),
 	_nbrLocation(_config->getNbrLocation())
@@ -162,11 +163,14 @@ std::string		Server::getErrorPage(int code) const
 size_t			Server::getNbrLocation() const
 { return (_config->getNbrLocation()); }
 
-const ParsConfig *Server::getConfig() const
-{ return (_config); }
+ParsConfig &Server::getConfig()
+{ return (*_config); }
 
 std::vector<ParsConfig::Location> &Server::getLocation()
 { return (_location); }
+
+int	Server::getCurrentConnection()
+{ return (_currentConnection); }
 
 /// @brief Retourne vrai si y'a de la place sur le serveur.
 /// @return bool

@@ -113,21 +113,24 @@ void Connection::acceptSocket()
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
+	            int	tmp;
+	            tmp = setsockopt(newClient._csock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
+	            if (tmp != 0)
+		            std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 				int client_fd = accept((*it)->getSocket(), (sockaddr *)&newClient._csin, &newClient._crecsize);
-				std::cout << "\033[0;32m client connecte \033[0m sur socket : " << newClient._csock << std::endl;
                 if (client_fd < 0)
 					std::cerr << "Failed to accept connection on port " << (*it)->getPort() << std::endl;
 				else
 				{
 		 			(*it)->incrementCurrentConnection();
 					newClient._csock = client_fd;
+				    std::cout << "\033[0;32m client connecte \033[0m sur socket : " << newClient._csock << std::endl;
 					_client.push_back(newClient);
-                    std::cout << _client[0]._config->getErrorPage(404) << " ---- test erreur page !!\n";
 					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
-			else
-				std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
+			//else
+				//std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
 		}
 	}
 }
@@ -137,9 +140,9 @@ bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
     //FD_ZERO(&_read);
-    //FD_CLR(client._csock, &_read);
+    client._server.decrementCurrentConnection();
+    FD_CLR(client._csock, &_read);
     close(client._csock);
-
 
     std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
 
@@ -156,6 +159,7 @@ bool Connection::dead_or_alive(Client client, bool alive){
     }
     exit(1);
 }
+
 // connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
 bool	Connection::live_request(char *request) const
 {
@@ -175,7 +179,7 @@ bool	Connection::live_request(char *request) const
 }
 
 // connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
-bool	Connection::live_request(std::map<std::string, std::string> *headers) const
+bool Connection::live_request(std::map<std::string, std::string> *headers) const
 {
     //std::cout << "test live request\n";
     if (headers->find("Connection") != headers->end())
@@ -269,8 +273,6 @@ void Connection::traitement()
                     it--;
                 //_client.erase(it);
                 continue;
-
-
             }
             if (ret == 0)
 			{
@@ -286,8 +288,6 @@ void Connection::traitement()
 				it--;
 			}
 
-			it->_recSize += ret;   // pas forcement necessaire
-            //else if
             if(request_ok(it->_recBuffer))
             {
 
@@ -305,7 +305,7 @@ void Connection::traitement()
                 //std::cout << " req is ok\n";
                 std::string port = req._headers["Host"].substr(req._headers["Host"].find(':') + 1);
 
-//              if(it->_config->getHost() == "Host")
+//              if(it->_config.getHost() == "Host")
 //              {
 //                  it->_config.
 //                  clients[i].server = servers[req._headers["Host"]];
@@ -321,7 +321,7 @@ void Connection::traitement()
 //                  continue;
 //
 //              }
-              if(req._headers.find("Content-Length") != req._headers.end() && stoi(req._headers["Content-Length"]) > 4096) //(it->_config->bodylimit_du_client
+              if(req._headers.find("Content-Length") != req._headers.end() && stoi(req._headers["Content-Length"]) > 4096) //(it->_config.bodylimit_du_client
               {
                   send_error(413, *it, NULL);
                   bool dead = dead_or_alive(*it, live_request(&req._headers));
@@ -411,9 +411,8 @@ void Connection::traitement()
         it->_recSize = 0;
         for (int i = 0; i < MAX_REQUEST_SIZE; i++)
             it->_recBuffer[i]= '\0';
-        FD_CLR(it->_csock, &_read);
-        FD_ZERO(&_read);
-        it->_server.decrementCurrentConnection();
+        //FD_ZERO(&_read);
+        //FD_CLR(it->_csock, &_read);
         //close(it->_csock);
     }
 
@@ -454,7 +453,7 @@ void Connection::get_method(Client &client, std::string path)
 //            if (loc)
 //                indexes = loc->index;
 //            else
-            indexes = client._config->getIndex();
+            indexes = client._config.getIndex();
 //            if (full_path.back() != '/')
 //                full_path.append("/");
 //            for (unsigned long i = 0; i < indexes.size(); i++)
@@ -716,13 +715,13 @@ void Connection::delete_method(Client &client, std::string path){
 void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
 {
 
-    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code) << std::endl;
+    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config.getErrorPage(code) << std::endl;
     std::ifstream page;
 
 
-    if(client._config->getErrorPage(code) != "notFound")
+    if(client._config.getErrorPage(code) != "notFound")
     {
-        page.open(client._config->getErrorPage(code));
+        page.open(client._config.getErrorPage(code));
         if(!page.is_open())
             code = 404;
     }
@@ -776,19 +775,19 @@ std::string Connection::find_path_in_root(std::string path, Client &client) cons
 
     std::string full_path = "";
     //std::string location;
-    full_path.append(client._config->getRoot());
+    full_path.append(client._config.getRoot());
     full_path.append("/");
 
     if(path == "/")
-        full_path.append(client._config->getIndex());
+        full_path.append(client._config.getIndex());
     else {
         full_path.append(path);
-        //full_path.append(client._config->getIndex());
+        //full_path.append(client._config.getIndex());
     }
 //    ou chercher dans location
 
 //    client._location.
-//    Location *loc = client._config->getIndex();
+//    Location *loc = client._config.getIndex();
 //    if (loc)
 //        location = loc->path;
 //    else

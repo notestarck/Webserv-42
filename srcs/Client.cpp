@@ -12,12 +12,13 @@
 
 #include "../include/Client.hpp"
 
-Client::Client(const ParsConfig *config, Server &server, std::vector<ParsConfig::Location> &location) :
+Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Location> &location) :
 	_config(config),
 	_server(server),
 	_location(location)
 
 {
+	std::cout << "test ------- >" << this->_server.getCurrentConnection() << std::endl;
 	_csock = 0;
 	_recSize = 0;
 }
