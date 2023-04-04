@@ -109,7 +109,7 @@ void Connection::acceptSocket()
 	{
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
-			Client newClient((*it)->getConfig(), (*it)->getServer());
+			Client newClient((*it)->getConfig(), (*it)->getServer(), (*it)->getLocation());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
@@ -120,7 +120,6 @@ void Connection::acceptSocket()
 				else
 				{
 		 			(*it)->incrementCurrentConnection();
-					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
 					_client.push_back(newClient);
                     std::cout << _client[0]._config->getErrorPage(404) << " ---- test erreur page !!\n";

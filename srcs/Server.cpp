@@ -165,7 +165,7 @@ size_t			Server::getNbrLocation() const
 const ParsConfig *Server::getConfig() const
 { return (_config); }
 
-const std::vector<ParsConfig::Location> &Server::getLocation() const
+std::vector<ParsConfig::Location> &Server::getLocation()
 { return (_location); }
 
 /// @brief Retourne vrai si y'a de la place sur le serveur.

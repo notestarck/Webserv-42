@@ -68,8 +68,7 @@ class ParsConfig
 		std::vector<std::string>		getLocationAllow(std::string url) const;
 		std::string              		getLocationRoot(std::string url) const;
 		std::string              		getLocationIndex(std::string url) const;
-       // std::string                     getLocationCgi(std::string )
-		const std::vector<Location>&	getLocation() const;
+		std::vector<Location>			&getLocation();
 		size_t              			getNbrLocation() const;
 
 	private :

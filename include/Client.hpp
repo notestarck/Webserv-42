@@ -23,7 +23,7 @@
 
 struct Client
 {
-	Client(const ParsConfig *config, Server &server);
+	Client(const ParsConfig *config, Server &server, std::vector<ParsConfig::Location> &location);
 	Client (const Client &srcs);
 
 	~Client();
@@ -38,7 +38,7 @@ struct Client
 	int					_recSize;
     //Config du serveur
     const ParsConfig							*_config;
-    std::vector<ParsConfig::Location>			_location;
+    std::vector<ParsConfig::Location>			&_location;
 	Server										&_server;
 
 

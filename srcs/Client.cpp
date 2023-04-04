@@ -12,9 +12,10 @@
 
 #include "../include/Client.hpp"
 
-Client::Client(const ParsConfig *config, Server &server) :
+Client::Client(const ParsConfig *config, Server &server, std::vector<ParsConfig::Location> &location) :
 	_config(config),
-	_server(server)
+	_server(server),
+	_location(location)
 
 {
 	_csock = 0;
@@ -23,7 +24,8 @@ Client::Client(const ParsConfig *config, Server &server) :
 
 Client::Client(const Client &srcs) :
     _config(srcs._config),
-	_server(srcs._server)
+	_server(srcs._server),
+	_location(srcs._location)
 { *this = srcs; }
 
 Client::~Client()
@@ -41,11 +43,6 @@ Client &Client::operator=(const Client &srcs)
 		_config = srcs._config;
 		_location = srcs._location;
 		_server = srcs._server;
-		for (size_t i = 0; i < srcs._location.size(); i++)
-		{
-			for (std::vector<std::string>::const_iterator it = srcs._location[i]._allow.begin(); it < srcs._location[i]._allow.end(); it++)
-				_location[i]._allow.push_back(*it);
-		}
 	}
 	return (*this);
 }

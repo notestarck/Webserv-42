@@ -47,7 +47,7 @@ class Server
 		std::string								getErrorPage(int code) const;
 		size_t									getNbrLocation() const;
 		const ParsConfig						*getConfig() const;
-		const std::vector<ParsConfig::Location>	&getLocation() const;
+		std::vector<ParsConfig::Location>		&getLocation();
 
 		//nbr Connection
 		bool hasCapacity() const;
