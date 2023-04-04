@@ -48,6 +48,8 @@ Connection::Connection(const Connection & srcs)
 
 Connection::~Connection()
 {
+    for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
+        delete *it;
 	memset(&_read, 0, sizeof(_read));
 	memset(&_write, 0, sizeof(_write));
 	//memset(&_errors, 0, sizeof(_errors));

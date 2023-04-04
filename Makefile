@@ -41,7 +41,7 @@ DELNAME		=	printf "$(_RED)$(_BOLD)Remove $(NAME)\n$(_END)"
 # Compilation
 CC			=	c++
 #CFLAGS		=	-Wall -Wextra -Werror -std=c++98
-CFLAGS		+=	-g
+CFLAGS		+=	-g -fsanitize=address
 
 # Formatting
 _RETURN		=	$'\33[2K\r
