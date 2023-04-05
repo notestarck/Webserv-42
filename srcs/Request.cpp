@@ -17,7 +17,8 @@ Request::Request(int client_fd)
     this->client_fd = client_fd;
 }
 
-Request::~Request(){}
+Request::~Request()
+{}
 
 std::string Request::get_path() 
 {
@@ -95,8 +96,7 @@ int Request::parse(std::string request)
     if ((unsigned long)(j = request.find_first_of(" ", i + 1)) == std::string::npos)
         return 400;
     _path = request.substr(i + 1, j - i - 1);
-
-
+    
     _headers["HTTP"] = request.substr(j + 1, request.find_first_of("\r", i) - j - 1);
     if(check_protocol(_headers["HTTP"]) == false)
     {
@@ -125,8 +125,6 @@ int Request::parse(std::string request)
     if(_headers["Host"] == "")
         return 400;                               //a modifier code 400
     return 0;
-
-
 }
 
 bool Request::is_not_method(const std::string method)
@@ -140,11 +138,11 @@ bool Request::is_not_method(const std::string method)
     return false;
 }
 
-bool Request::check_protocol(std::map<std::string, std::string>::mapped_type &test ){
+bool Request::check_protocol(std::map<std::string, std::string>::mapped_type &test )
+{
     if(test == "HTTP/1.1")
         return true;
     return false;
-
 }
 
 

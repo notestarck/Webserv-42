@@ -30,10 +30,19 @@ class Request
 		bool		is_not_method(const std::string method);
 		bool		check_protocol(std::map<std::string, std::string>::mapped_type &test);
 	
+		/// @brief Ressource de la requete http
 		std::string							_path;
+		
+		/// @brief Methode de la requete
 		std::string							_method;
+
+		/// @brief map cles valeur du header
 		std::map<std::string, std::string>	_headers;
+
+		/// @brief media soit code html, data....
 		std::string							_body;
+
+		/// @brief taille de la requete
         size_t								_content_length;
 	private:
 		Request();

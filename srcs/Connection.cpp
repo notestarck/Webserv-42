@@ -129,22 +129,18 @@ void Connection::acceptSocket()
 					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
-			//else
-				//std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
 		}
 	}
 }
 
 // erase client si Connection=close
 bool Connection::dead_or_alive(Client client, bool alive){
-	if(alive)
-		return false;
-	//FD_ZERO(&_read);
-	client._server.decrementCurrentConnection();
-	FD_CLR(client._csock, &_read);
-	close(client._csock);
-
-	std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
+    if(alive)
+        return false;
+    client._server.decrementCurrentConnection();
+    FD_CLR(client._csock, &_read);
+    close(client._csock);
+    std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
 
 	std::vector<Client>::iterator it;
 	for(it = _client.begin(); it != _client.end(); it++ )
@@ -238,9 +234,9 @@ bool    Connection::request_ok(char *request)
 //    client.set_last_time_sec(tv);
 //    return false;
 //}
+
 void Connection::traitement()
 {
-
 	//Ces fonctions renvoient le nombre d'octets reçus si elles réussissent, ou -1 si elles échouent. La valeur de retour sera 0 si le pair a effectué un arrêt normal.
    for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
    {
@@ -366,9 +362,7 @@ void Connection::traitement()
 //         {
 //             std::cout << "loc existe\n";
 //         }
-
-		//else
-		{
+        //{
 //            if(rep_timeout(_client == true))
 //            {
 //                send_error(408, *it, NULL);
@@ -409,8 +403,11 @@ void Connection::traitement()
 		}
 
 
-		std::cout << "request completed\n";
-	   // _client.erase(it);     //je tets
+        std::cout << "request completed\n";
+        std::cout << req._path << " : ----------path" << std::endl;
+        //close(it->_csock);
+        //FD_CLR(it->_csock, &_read);
+       // _client.erase(it);     //je tets
 
 
 
