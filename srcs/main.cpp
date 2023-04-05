@@ -15,28 +15,39 @@
 std::vector<Server *>		_server;
 std::vector<ParsConfig *>	_config;
 Connection					_connection;
-volatile sig_atomic_t						boolStart = 1;
+volatile bool				boolStart = 1;
 
 int main(int argc, char ** argv)
 {
 	signal(SIGINT, signal_handler);
+	std::string  config_file_path;
+
 	//On verifie la presence du fichier .conf
-	if (argc < 2)
+	if (argc > 2)
 	{
-		std::cerr << "\033[1;31mError : Need < nginx_config_file >\033[0m" << std::endl;
+		std::cerr << "\033[1;31mError - Need  one argument : < nginx_config_file >\033[0m" << std::endl;
 		exit (-1);
 	}
 	
-	//On verifie l'extension du fichier.
-	std::string	extension(argv[1]);
-	if (!checkExtension(extension))
+	//On met un fichier par default s'il y'a pas de fichier config
+	if (argc == 1)
 	{
-		std::cerr << "\033[1;31mError : Need extension .conf\033[0m" << std::endl;
-		exit (-1);
+		std::cout << "\033[33mUtilisation d'un fichier .conf par default.\033[0m" << std::endl;
+		config_file_path = "default.conf";
+	}
+	else
+	{
+		//On verifie l'extension du fichier.
+		std::string	extension(argv[1]);
+		if (!checkExtension(extension))
+		{
+			std::cerr << "\033[1;31mError : Need extension .conf\033[0m" << std::endl;
+			exit (-1);
+		}
+		//Ouverture du fichier
+		config_file_path = argv[1];
 	}
 
-	//Ouverture du fichier
-	const std::string  config_file_path(argv[1]);
 	std::ifstream config_file(config_file_path.c_str());
 	if (!config_file.is_open())
 		std::cerr << "\033[1;31mError : Opening " << config_file_path << "\003[0m" << std::endl;

@@ -15,7 +15,8 @@
 Server::Server(ParsConfig *server) :
 	_sockError(0),
 	_config(server),
-	_maxConnection(10),
+	_currentConnection(0),
+	_maxConnection(100),
 	_recsize(sizeof(_sin)),
 	_location(_config->getLocation()),
 	_nbrLocation(_config->getNbrLocation())
@@ -62,7 +63,6 @@ void Server::creatSocket()
 		exit (1);
 	}
 	fcntl(_sock, F_SETFL, O_NONBLOCK);
-	std::cout << _config->getIndex() << ": mon index a moi \n";
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
 }
 
@@ -71,7 +71,6 @@ void Server::paramSocket()
 {
 	int	tmp;
 	tmp = setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
-	//tmp = setsockopt(_sock, IPPROTO_TCP, TCP_NODELAY,(char *)&tmp, sizeof(tmp));
 	if (tmp != 0)
 		std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 }
@@ -163,11 +162,14 @@ std::string		Server::getErrorPage(int code) const
 size_t			Server::getNbrLocation() const
 { return (_config.getNbrLocation()); }
 
-const ParsConfig &Server::getConfig() const
-{ return (_config); }
+ParsConfig &Server::getConfig()
+{ return (*_config); }
 
-const std::vector<ParsConfig::Location> &Server::getLocation() const
+std::vector<ParsConfig::Location> &Server::getLocation()
 { return (_location); }
+
+int	Server::getCurrentConnection()
+{ return (_currentConnection); }
 
 /// @brief Retourne vrai si y'a de la place sur le serveur.
 /// @return bool

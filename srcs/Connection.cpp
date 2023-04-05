@@ -10,7 +10,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "../include/Connection.hpp"
 
 Connection::Connection()
@@ -50,7 +49,6 @@ Connection & Connection::operator=(const Connection &srcs)
 		_maxFd = srcs._maxFd;
 		_read = srcs._read;
 		_write = srcs._write;
-		_errors = srcs._errors;
 		_timeout = srcs._timeout;
 	}
 	return (*this);
@@ -60,7 +58,6 @@ void Connection::initConnection()
 {
 	FD_ZERO(&_read);
 	FD_ZERO(&_write);
-	FD_ZERO(&_errors);
 	for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
@@ -92,25 +89,28 @@ void Connection::acceptSocket()
 	{
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
-			Client newClient((*it)->getConfig(), (*it)->getServer());
+			Client newClient((*it)->getConfig(), (*it)->getServer(), (*it)->getLocation());
 			newClient._crecsize = sizeof(newClient._csin);
 			if((*it)->hasCapacity())
 			{
+	            int	tmp;
+	            tmp = setsockopt(newClient._csock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
+	            if (tmp != 0)
+		            std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 				int client_fd = accept((*it)->getSocket(), (sockaddr *)&newClient._csin, &newClient._crecsize);
-				if (client_fd < 0)
+                if (client_fd < 0)
 					std::cerr << "Failed to accept connection on port " << (*it)->getPort() << std::endl;
 				else
 				{
 		 			(*it)->incrementCurrentConnection();
-					newClient._location = (*it)->getLocation();
 					newClient._csock = client_fd;
+				    std::cout << "\033[0;32m client connecte \033[0m sur socket : " << newClient._csock << std::endl;
 					_client.push_back(newClient);
-                    std::cout << _client[0]._config->getErrorPage(404) << " ---- test erreur page !!\n";
 					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
-			else
-				std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
+			//else
+				//std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
 		}
 	}
 }
@@ -120,9 +120,9 @@ bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
     //FD_ZERO(&_read);
-    //FD_CLR(client._csock, &_read);
+    client._server.decrementCurrentConnection();
+    FD_CLR(client._csock, &_read);
     close(client._csock);
-
 
     std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
 
@@ -139,6 +139,7 @@ bool Connection::dead_or_alive(Client client, bool alive){
     }
     exit(1);
 }
+
 // connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
 bool	Connection::live_request(char *request) const
 {
@@ -158,7 +159,7 @@ bool	Connection::live_request(char *request) const
 }
 
 // connection vivante : https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Connection
-bool	Connection::live_request(std::map<std::string, std::string> *headers) const
+bool Connection::live_request(std::map<std::string, std::string> *headers) const
 {
     //std::cout << "test live request\n";
     if (headers->find("Connection") != headers->end())
@@ -221,10 +222,23 @@ void Connection::traitement()
 				std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
         		//send_error(400, clients[i]);
 				_client.erase(it);
-          }
-		   
-          int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE - 1, 0);
-			if (ret == 0)
+                continue;
+            }
+            int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE  , 0);
+
+//              probleme sur recsize plus mai;
+            if (it->_recSize > MAX_REQUEST_SIZE)
+            {
+
+                std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
+                send_error(413, *it, NULL);
+                bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
+                if(dead)
+                    it--;
+                //_client.erase(it);
+                continue;
+            }
+            if (ret == 0)
 			{
 				std::cerr << "Error : Connection::traitement recv() reception" << std::endl;
 				it--;
@@ -235,40 +249,78 @@ void Connection::traitement()
 				it--;
 			}
 
-			it->_recSize += ret;
-			if (it->_recSize > MAX_REQUEST_SIZE)
-			{
-				std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
-				//send_error(413)...
-				_client.erase(it);
-			}
-          else
-          {
-              Request req = Request(it->_csock);
+            if(request_ok(it->_recBuffer))
+            {
+
+             Request req = Request(it->_csock);
               int code;
               if((code = req.parse(it->_recBuffer)))
               {
-                  std::cout << " error code\n";
+
+                  send_error(code, *it, NULL);
+                  bool dead = dead_or_alive(*it, live_request(&req._headers));
+                  if(dead)
+                      it--;
+                  continue;
               }
-                  std::cout << "code = " << code << std::endl;
-              //std::cout <<"parse requette test" << std:: endl;
-             // std::cout << code << "code retour" << std::endl;
-             // {
+                //std::cout << " req is ok\n";
+                std::string port = req._headers["Host"].substr(req._headers["Host"].find(':') + 1);
+
+//              if(it->_config.getHost() == "Host")
+//              {
+//                  it->_config.
+//                  clients[i].server = servers[req._headers["Host"]];
+//                    it->_config =
+//              }
+//              else
+
+//              {
+//                  //send_error(400, it);
+//                  bool dead = dead_or_alive(*it, live_request(&req._headers));
+//                  if(dead)
+//                      it--;
+//                  continue;
+//
+//              }
+              if(req._headers.find("Content-Length") != req._headers.end() && stoi(req._headers["Content-Length"]) > 4096) //(it->_config.bodylimit_du_client
+              {
+                  send_error(413, *it, NULL);
+                  bool dead = dead_or_alive(*it, live_request(&req._headers));
+                  if(dead)
+                      it--;
+                  continue;
+              }
 
 
-              //}
-              //std::string port = req.headers["Host"].substr(req.headers["Host"].find(':') + 1);
-              //if(servers[req.headers["Host"]])
-              //    clients[i].server = servers[req.headers["Host"]];
-              //else
-              //    // error 400
-              //      // i--;
-              //    break;;
-          }
-          //clients[i].requet[clients.get_rec_size()] = 0;
-      }
-	}
-//        Location* loc
+//           it->req[clients.get_rec_size()] = 0;
+//           it->_recBuffer->
+
+//          check allow method dans location
+//            Location getcur loc
+
+//            method_ls = loc ? loc->allow _method : it->_  ;
+
+//            it->_config.getLocationAllow();
+//
+               std::vector<MethodType> method_ls;
+              //method_ls = it->_location.;
+                //method_ls.clear();
+                method_ls.push_back(GET);
+                method_ls.push_back(POST);
+                method_ls.push_back(DELETE);
+
+
+            if(!is_allowed_method(method_ls, req._method))
+                {
+                    std::cout << "check mothod non allowed\n";
+                    send_error(405, *it, NULL);
+                    bool dead = dead_or_alive(*it, live_request(&req._headers));
+                    if(dead)
+                        it--;
+                    continue;
+                }
+            std::cout << " tqille locaion" << it->_location.size() << std::endl;
+//            it->_location[1].
 //
 //        if redir status
 //        if !allow method
@@ -288,23 +340,23 @@ void Connection::traitement()
             if(!"redir")
             {
                 std::cout << "REDIR\n";
-                //                send_redir(it, req.method);
+                //                send_redir(it, req._method);
             }
 
-            else if(req.method == "GET") {
+            else if(req._method == "GET") {
 
-                get_method(*it, req.path);
+                get_method(*it, req._path);
             }
-            else if(req.method == "POST") {
+            else if(req._method == "POST") {
 
                 post_method(*it, req);
             }
-            else if(req.method == "DELETE") {
+            else if(req._method == "DELETE") {
                 std::cout << "DELETE\n";
-                delete_method(*it, req.path);
+                delete_method(*it, req._path);
             }
         }
-        bool dead = dead_or_alive(*it, live_request(&req.headers));
+        bool dead = dead_or_alive(*it, live_request(&req._headers));
         if ( dead)
             it--;
 
@@ -320,9 +372,8 @@ void Connection::traitement()
         it->_recSize = 0;
         for (int i = 0; i < MAX_REQUEST_SIZE; i++)
             it->_recBuffer[i]= '\0';
-        FD_CLR(it->_csock, &_read);
-        FD_ZERO(&_read);
-        it->_server.decrementCurrentConnection();
+        //FD_ZERO(&_read);
+        //FD_CLR(it->_csock, &_read);
         //close(it->_csock);
     }
 
@@ -363,7 +414,7 @@ void Connection::get_method(Client &client, std::string path)
 //            if (loc)
 //                indexes = loc->index;
 //            else
-            indexes = client._config->getIndex();
+            indexes = client._config.getIndex();
 //            if (full_path.back() != '/')
 //                full_path.append("/");
 //            for (unsigned long i = 0; i < indexes.size(); i++)
@@ -481,42 +532,42 @@ void Connection::post_method(Client &client, Request &request)
 {
     std::cout << "POST method\n";
 
-    if (request.headers["Transfer-Encoding"] != "chunked"
-        && request.headers.find("Content-Length") == request.headers.end())
+    if (request._headers["Transfer-Encoding"] != "chunked"
+        && request._headers.find("Content-Length") == request._headers.end())
     {
         send_error(411, client, NULL);
         return;
     }
 
-    std::string full_path = find_path_in_root(request.path, client);
+    std::string full_path = find_path_in_root(request._path, client);
 
     struct stat buf;
     lstat(full_path.c_str(), &buf);
     if (S_ISDIR(buf.st_mode))
     {
-        if (request.headers.find("Content-Type") != request.headers.end())
+        if (request._headers.find("Content-Type") != request._headers.end())
         {
-            size_t begin = request.headers["Content-Type"].find("boundary=");
+            size_t begin = request._headers["Content-Type"].find("boundary=");
             if (begin != std::string::npos)
             {
-                std::string boundary = request.headers["Content-Type"].substr(begin + 9);
+                std::string boundary = request._headers["Content-Type"].substr(begin + 9);
                 begin = 0;
                 size_t end = 0;
                 std::string name;
                 while (true)
                 {
-                    begin = request.body.find("name=", begin) + 6;
-                    end = request.body.find_first_of("\"", begin);
+                    begin = request._body.find("name=", begin) + 6;
+                    end = request._body.find_first_of("\"", begin);
                     if (begin == std::string::npos || end == std::string::npos)
                         break;
-                    name = request.body.substr(begin, end - begin);
-                    begin = request.body.find("\r\n\r\n", end) + 4;
-                    end = request.body.find(boundary, begin);
+                    name = request._body.substr(begin, end - begin);
+                    begin = request._body.find("\r\n\r\n", end) + 4;
+                    end = request._body.find(boundary, begin);
                     if (begin == std::string::npos || end == std::string::npos)
                         break;
-                    if (write_in_path(client, request.body.substr(begin, end - begin - 4), full_path + "/" + name) < 0)
+                    if (write_in_path(client, request._body.substr(begin, end - begin - 4), full_path + "/" + name) < 0)
                         break;
-                    if (request.body[end + boundary.size()] == '-')
+                    if (request._body[end + boundary.size()] == '-')
                         break;
                 }
             }
@@ -534,12 +585,12 @@ void Connection::post_method(Client &client, Request &request)
     }
     else
     {
-        if (write_in_path(client, request.body, full_path) < 0)
+        if (write_in_path(client, request._body, full_path) < 0)
             return;
     }
 
     int code = 201;
-    if (request.headers["Content-Length"] == "0")
+    if (request._headers["Content-Length"] == "0")
         code = 204;
 
 
@@ -625,13 +676,13 @@ void Connection::delete_method(Client &client, std::string path){
 void Connection::send_error(int code, Client &client, std::vector<MethodType> *allow_methods)
 {
 
-    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config->getErrorPage(code) << std::endl;
+    std::cout << "> Send error page(" << code << ")" << " page erreur : " << client._config.getErrorPage(code) << std::endl;
     std::ifstream page;
 
 
-    if(client._config->getErrorPage(code) != "notFound")
+    if(client._config.getErrorPage(code) != "notFound")
     {
-        page.open(client._config->getErrorPage(code));
+        page.open(client._config.getErrorPage(code));
         if(!page.is_open())
             code = 404;
     }
@@ -666,6 +717,92 @@ void Connection::send_error(int code, Client &client, std::vector<MethodType> *a
 //            if (i < (*allow_methods).size() - 1)
 //                allowed_method_list += ", ";
 //        }
-//    }
-//}
+        response.append_header("Allow", "GET");
+    }
+
+    std::string result = response.run_resp();
+    int send_ret = send(client._csock, result.c_str(), result.size(), 0);
+    if (send_ret < 0)
+        std::cerr << "> Unexpected disconnect!\n";
+    else if (send_ret == 0)
+        std::cerr << "> The connection has been closed or 0 bytes were passed to send()!\n";
+    //client.clear requete();
+}
+
+
+std::string Connection::find_path_in_root(std::string path, Client &client) const
+{
+
+
+    std::string full_path = "";
+    //std::string location;
+    full_path.append(client._config.getRoot());
+    full_path.append("/");
+
+    if(path == "/")
+        full_path.append(client._config.getIndex());
+    else {
+        full_path.append(path);
+        //full_path.append(client._config.getIndex());
+    }
+//    ou chercher dans location
+
+//    client._location.
+//    Location *loc = client._config.getIndex();
+//    if (loc)
+//        location = loc->path;
+//    else
+//        location = "";
+//    std::string str = path.substr(location.length());
+//    full_path.append(str);
+    return full_path;
+}
+
+std::string Connection::longToString(long number) {
+    std::stringstream ss;
+    ss << number;
+    return ss.str();
+}
+
+const char *Connection::find_type(const char *path) const{
+    const char *point = strrchr(path, '.');
+    if(point)
+    {
+        if(strcmp(point, ".css") == 0) return "text/css";
+//        if(.csv)
+        if(strcmp(point,".html") == 0) return "text/html";
+//        if(.js)
+//        if(.json)
+        if(strcmp(point, ".pdf") == 0) return "application/pdf";
+//        if(.gif)
+        if(strcmp(point, ".jpeg") == 0) return "image/jpeg";
+       if(strcmp(point,".mp4") == 0) return "video/mp4";
+        if(strcmp(point, ".png") == 0) return "image/png";
+        if(strcmp(point, ".ico") == 0) return "image/vnd.microsoft.icon";
+
+
+    }
+    return "text/plain";
+}
+
+std::string Connection::methodtype(MethodType method) const
+{
+    if (method == GET)
+        return "GET";
+    else if (method == POST)
+        return "POST";
+    else if (method == DELETE)
+        return "DELETE";
+    return "";
+}
+
+bool    Connection::is_allowed_method(std::vector<MethodType> allow_methods, std::string method)
+{
+    for (std::vector<MethodType>::iterator it = allow_methods.begin();
+         it != allow_methods.end(); it++)
+    {
+        if (method == methodtype(*it))
+            return true;
+    }
+    return false;
 }

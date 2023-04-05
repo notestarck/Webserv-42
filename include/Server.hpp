@@ -46,10 +46,11 @@ class Server
 		std::string								getIndex() const;
 		std::string								getErrorPage(int code) const;
 		size_t									getNbrLocation() const;
-		const ParsConfig						&getConfig() const;
-		const std::vector<ParsConfig::Location>	&getLocation() const;
+		ParsConfig								&getConfig();
+		std::vector<ParsConfig::Location>		&getLocation();
 
 		//nbr Connection
+		int	getCurrentConnection();
 		bool hasCapacity() const;
 		void incrementCurrentConnection();
 		void decrementCurrentConnection();

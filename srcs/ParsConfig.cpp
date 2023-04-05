@@ -156,7 +156,7 @@ std::string	ParsConfig::getLocationIndex(std::string url) const
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
 
-const std::vector<ParsConfig::Location> &ParsConfig::getLocation() const
+std::vector<ParsConfig::Location> &ParsConfig::getLocation()
 { return (_location); }
 
 void    ParsConfig::setHost(std::string ip)
