@@ -116,7 +116,7 @@ void Connection::acceptSocket()
 			if((*it)->hasCapacity())
 			{
 	            int	tmp;
-	            tmp = setsockopt(newClient._csock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
+	            tmp = setsockopt(newClient._csock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp));
 	            if (tmp != 0)
 		            std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 				int client_fd = accept((*it)->getSocket(), (sockaddr *)&newClient._csin, &newClient._crecsize);
@@ -131,8 +131,6 @@ void Connection::acceptSocket()
 					std::cout << "Accepted connection on port " << (*it)->getPort()  << std::endl;
 				}
 			}
-			//else
-				//std::cerr << "Connection limit reached on port " << (*it)->getPort() << std::endl;
 		}
 	}
 }
@@ -141,11 +139,9 @@ void Connection::acceptSocket()
 bool Connection::dead_or_alive(Client client, bool alive){
     if(alive)
         return false;
-    //FD_ZERO(&_read);
     client._server.decrementCurrentConnection();
     FD_CLR(client._csock, &_read);
     close(client._csock);
-
     std::cout << "\033[0;31m client close \033[0m" << client._csock << std::endl;
 
     std::vector<Client>::iterator it;
@@ -240,17 +236,17 @@ bool    Connection::request_ok(char *request)
 //    client.set_last_time_sec(tv);
 //    return false;
 //}
+
 void Connection::traitement()
 {
-
 	//Ces fonctions renvoient le nombre d'octets reçus si elles réussissent, ou -1 si elles échouent. La valeur de retour sera 0 si le pair a effectué un arrêt normal.
    for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
    {
-
     	if (FD_ISSET(it->_csock, &_read))
 		{
             std::cout << it->_csock << " socket cloent\n";
             std::cout << " rec size = " << it->_recSize << std::endl;
+
         	if(MAX_REQUEST_SIZE == it->_recSize)
         	{
                 send_error(400, *it, NULL);
@@ -265,17 +261,18 @@ void Connection::traitement()
             int ret = recv(it->_csock, it->_recBuffer, MAX_REQUEST_SIZE  , 0);
 
 //              probleme sur recsize plus mai;
-            if (it->_recSize > MAX_REQUEST_SIZE)
+            if (MAX_REQUEST_SIZE < it->_recSize)
             {
 
-                std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
                 send_error(413, *it, NULL);
+                std::cerr << "Error : 413 Connection::traitement() _reSize" << std::endl;
                 bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
                 if(dead)
                     it--;
                 //_client.erase(it);
                 continue;
             }
+
             if (ret == 0)
 			{
 				std::cerr << "Error : Connection::traitement recv() reception" << std::endl;
@@ -293,19 +290,19 @@ void Connection::traitement()
             if(request_ok(it->_recBuffer))
             {
 
-             Request req = Request(it->_csock);
-              int code;
-              if((code = req.parse(it->_recBuffer)))
-              {
+            Request req = Request(it->_csock);
+            int code;
+            if((code = req.parse(it->_recBuffer)))
+            {
 
-                  send_error(code, *it, NULL);
-                  bool dead = dead_or_alive(*it, live_request(&req._headers));
-                  if(dead)
-                      it--;
-                  continue;
-              }
+                send_error(code, *it, NULL);
+                bool dead = dead_or_alive(*it, live_request(&req._headers));
+                if(dead)
+                    it--;
+                continue;
+            }
                 //std::cout << " req is ok\n";
-                std::string port = req._headers["Host"].substr(req._headers["Host"].find(':') + 1);
+            std::string port = req._headers["Host"].substr(req._headers["Host"].find(':') + 1);
 
 //              if(it->_config.getHost() == "Host")
 //              {
@@ -368,9 +365,7 @@ void Connection::traitement()
 //         {
 //             std::cout << "loc existe\n";
 //         }
-
-        //else
-        {
+        //{
 //            if(rep_timeout(_client == true))
 //            {
 //                send_error(408, *it, NULL);
@@ -396,12 +391,13 @@ void Connection::traitement()
                 std::cout << "DELETE\n";
                 delete_method(*it, req._path);
             }
-        }
+     //   }
         bool dead = dead_or_alive(*it, live_request(&req._headers));
         if ( dead)
             it--;
 
         std::cout << "request completed\n";
+        std::cout << req._path << " : ----------path" << std::endl;
         //close(it->_csock);
         //FD_CLR(it->_csock, &_read);
        // _client.erase(it);     //je tets
