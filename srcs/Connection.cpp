@@ -21,6 +21,23 @@ Connection::Connection(std::vector<Server *> &servers) :
 {
 	_timeout.tv_sec = 1;
 	_timeout.tv_usec = 0;
+    test = 42;
+
+
+    _status_info.insert(std::pair<int, std::string>(200, "200 OK"));
+    _status_info.insert(std::pair<int, std::string>(201, "201 Created"));
+    _status_info.insert(std::pair<int, std::string>(204, "204 No Content"));
+    _status_info.insert(std::pair<int, std::string>(404, "404 Not Found"));
+    _status_info.insert(std::pair<int, std::string>(400, "400 Bad Request"));
+    _status_info.insert(std::pair<int, std::string>(405, "405 Method Not Allowed"));
+    _status_info.insert(std::pair<int, std::string>(408, "408 Request Timeout"));
+    _status_info.insert(std::pair<int, std::string>(413, "413 Content Too Large"));
+    _status_info.insert(std::pair<int, std::string>(414, "414 URI Too Long"));
+    _status_info.insert(std::pair<int, std::string>(500, "500 Internal Server Error"));
+    _status_info.insert(std::pair<int, std::string>(505, "505 HTTP Version Not Supported"));
+
+
+
 }
 
 Connection::Connection(const Connection & srcs)
@@ -32,7 +49,7 @@ Connection::~Connection()
 {
 	memset(&_read, 0, sizeof(_read));
 	memset(&_write, 0, sizeof(_write));
-	memset(&_errors, 0, sizeof(_errors));
+	//memset(&_errors, 0, sizeof(_errors));
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
 		std::cout << "\033[32mLiberation des sockets clients\033[0m\n";
@@ -50,6 +67,7 @@ Connection & Connection::operator=(const Connection &srcs)
 		_read = srcs._read;
 		_write = srcs._write;
 		_timeout = srcs._timeout;
+        _status_info = srcs._status_info;
 	}
 	return (*this);
 }
@@ -85,6 +103,7 @@ void Connection::runSelect()
 
 void Connection::acceptSocket()
 {
+
 	for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
 	{
 		if (FD_ISSET((*it)->getSocket(), &_read))
@@ -208,19 +227,35 @@ bool    Connection::request_ok(char *request)
     return true;
 }
 
+//bool Connection::rep_timeout(Client& client)
+//{
+//    static timeval tv;
+//
+//    gettimeofday(&tv, NULL);
+//    if (tv.tv_sec - client._last_time.tv_sec > client.server->recv_timeout.tv_sec)
+//        return true;
+//    client.set_last_time_sec(tv);
+//    return false;
+//}
 void Connection::traitement()
 {
+
 	//Ces fonctions renvoient le nombre d'octets reçus si elles réussissent, ou -1 si elles échouent. La valeur de retour sera 0 si le pair a effectué un arrêt normal.
    for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
-	{
-       std::cout << "Size de _client : " << _client.size() << std::endl;
+   {
+
     	if (FD_ISSET(it->_csock, &_read))
 		{
-			std::cout << "-------------gr ------------\n";
-        	if(MAX_REQUEST_SIZE <= it->_recSize)
+            std::cout << it->_csock << " socket cloent\n";
+            std::cout << " rec size = " << it->_recSize << std::endl;
+        	if(MAX_REQUEST_SIZE == it->_recSize)
         	{
-				std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
-        		//send_error(400, clients[i]);
+                send_error(400, *it, NULL);
+                std::cerr << "Error : _recSize Connection::traitement() " << std::endl;
+        		bool dead = dead_or_alive(*it, live_request(it->_recBuffer));
+                if(dead)
+                    it--;
+
 				_client.erase(it);
                 continue;
             }
@@ -241,11 +276,14 @@ void Connection::traitement()
             if (ret == 0)
 			{
 				std::cerr << "Error : Connection::traitement recv() reception" << std::endl;
+                dead_or_alive(*it);
 				it--;
 			}
 			else if (ret == SOCKET_ERROR)
 			{
 				std::cerr << "Error : 500 Connection::traitement recv() condition inattendue" << std::endl;
+                send_error(500, *it, NULL);
+                dead_or_alive(*it);
 				it--;
 			}
 
@@ -322,17 +360,17 @@ void Connection::traitement()
             std::cout << " tqille locaion" << it->_location.size() << std::endl;
 //            it->_location[1].
 //
-//        if redir status
-//        if !allow method
-//        if  (loc & is_gci)
-//        else{
-//            if time out
-//            if redir
-//            if GET
-//            if POST
-//            if DELETE
-//
-//        clear requet;
+//         check cgi
+//         if(it->_location.size() > 0 && 1)  //&& is_cgi
+//         {
+//             std::cout << "loc existe\n";
+//         }
+
+        //else
+        {
+//            if(rep_timeout(_client == true))
+//            {
+//                send_error(408, *it, NULL);
 //
 //            }
 

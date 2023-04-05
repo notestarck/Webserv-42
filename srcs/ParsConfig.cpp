@@ -74,6 +74,7 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 {
 	if (this != &srcs)
 	{
+		std::cout << "Constructeur d'operateur= de ParsConfig\n";
 		_host = srcs._host;
 		_port = srcs._port;
 		_name_server = srcs._name_server;
@@ -266,6 +267,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 			_allow.push_back(*it);
 		_root = srcs._root;
 		_index = srcs._index;
+        _cgi_pass = srcs._cgi_pass;
 	}
 	return (*this);
 }
@@ -281,3 +283,7 @@ const std::string & ParsConfig::Location::getRoot() const
 
 const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }
+
+//const std::string & ParsConfig::Location::getCgi() const{
+//    return (_cgi_pass);
+//}

@@ -46,6 +46,7 @@ class ParsConfig
 				std::string 				_url;
 				std::string 				_root;
 				std::string 				_index;
+                std::string                 _cgi_pass;
 				//ajouter le cgi_info
 		};// class Locartion
 

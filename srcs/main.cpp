@@ -64,7 +64,7 @@ int main(int argc, char ** argv)
 	//Initialisation des Server.
 	for (unsigned int i = 0; i < _nbrServer; i++)
 	{
-		Server *tmp = new Server(*_config[i]);
+		Server *tmp = new Server(_config[i]);
 		_server.push_back(tmp);
 	}
 
@@ -76,7 +76,7 @@ int main(int argc, char ** argv)
 		_connection.initConnection();
 		_connection.runSelect();
 		_connection.acceptSocket();
-		_connection.traitement();
+        _connection.traitement();
 	}
 	delProg();
 	std::cout << "Fin du Programme\n";

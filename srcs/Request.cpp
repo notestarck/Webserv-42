@@ -102,7 +102,7 @@ int Request::parse(std::string request)
     {
 
         return 505;}
-    std::cout << "HTTP protocol is OK\n";
+
     i = request.find_first_of("\n", j) + 1;
     while(i < request.size())
     {
@@ -144,3 +144,5 @@ bool Request::check_protocol(std::map<std::string, std::string>::mapped_type &te
         return true;
     return false;
 }
+
+

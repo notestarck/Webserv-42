@@ -58,3 +58,4 @@ bool	checkExtension(std::string extension)
 		return (false);
 	return (true);
 }
+

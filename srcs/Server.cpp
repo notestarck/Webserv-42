@@ -27,7 +27,8 @@ Server::Server(ParsConfig *server) :
 	listenTCP();
 }
 
-Server::Server(const Server &srcs)
+Server::Server(const Server &srcs) :
+	_config(srcs._config)
 { *this = srcs; }
 
 Server::~Server()
@@ -82,7 +83,7 @@ void Server::linkSocket()
 	_sin.sin_addr.s_addr = convertIp(getHost()); //Pour une estd::coute sur std::coutes les adresses htonl(INADDR_ANY)
 	_sin.sin_family = AF_INET;
 	_sockError = bind(_sock, (sockaddr*)&_sin, _recsize);
-	if (_sockError == SOCKET_ERROR)
+	if (_sockError != 0)
 	{
 		std::cerr << "\033[1;31mError : Server::linkSocket bind() " << strerror(errno) << "\033[0m" << std::endl;
 		exit(1);
@@ -142,25 +143,25 @@ Server	&Server::getServer()
 { return (*this); }
 
 std::string		Server::getHost() const
-{ return (_config.getHost()); }
+{ return (_config->getHost()); }
 		
 unsigned int Server::getPort() const
-{ return (_config.getPort()); }
+{ return (_config->getPort()); }
 
 std::string		Server::getNameServer() const
-{ return (_config.getNameServer()); }
+{ return (_config->getNameServer()); }
 
 std::string		Server::getRoot() const
-{ return (_config.getRoot()); }
+{ return (_config->getRoot()); }
 
 std::string		Server::getIndex() const
-{ return (_config.getIndex()); }
+{ return (_config->getIndex()); }
 
 std::string		Server::getErrorPage(int code) const
-{ return (_config.getErrorPage(code)); }
+{ return (_config->getErrorPage(code)); }
 
 size_t			Server::getNbrLocation() const
-{ return (_config.getNbrLocation()); }
+{ return (_config->getNbrLocation()); }
 
 ParsConfig &Server::getConfig()
 { return (*_config); }
