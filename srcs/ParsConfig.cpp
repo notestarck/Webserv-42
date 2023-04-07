@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/06 18:13:35 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/07 15:54:38 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -286,3 +286,13 @@ const std::string & ParsConfig::Location::getIndex() const
 
 const std::string & ParsConfig::Location::getCgiPath() const
 { return (_cgiPath); }
+
+bool ParsConfig::Location::isMethodAllowed(std::string method) const
+{
+	for (std::vector<std::string>::const_iterator it = _allow.begin(); it != _allow.end(); it++)
+	{
+		if (*it == method)
+			return (true);
+	}
+	return (false);
+}

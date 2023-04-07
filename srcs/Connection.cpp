@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 15:06:03 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/07 17:49:25 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,33 +313,82 @@ void Connection::handleRequest(Client &client)
 
 void Connection::handleGET(Client& client)
 {
-	if (client._uri.length() >= MAX_URI_SIZE)
-	{
+   if (client._uri.length() >= MAX_URI_SIZE)
+   {
         std::cerr << "Error : 414 URI Too Long from client: " << client._csock << std::endl;
-		sendErrorResponse(client, 414);
+      sendErrorResponse(client, 414);
         return;
-	}
+   }
     std::string filePath = getFilePath(client);
-    std::ifstream file(filePath, std::ios::in | std::ios::binary);
 
-    if (file.is_open())
-	{
-        std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        file.close();
-        sendHttpResponse(client, 200, getMimeType(filePath), body);
+    int file_fd = open(filePath.c_str(), O_RDONLY);
+    if(file_fd == -1){
+        //erreur ouvertue fichier"
+        close(client._csock);
+
     }
-	else
-	{
-        std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
-        sendErrorResponse(client, 404);
-	}
+    off_t file_size  = lseek(file_fd, 0, SEEK_END);
+    lseek(file_fd, 0, SEEK_SET);
+
+    //reponse
+    //sendHttpResponse(client, 200, getMimeType(filePath), body);
+    std::ostringstream response;
+    response << "HTTP/1.1 200 OK\r\n";
+    response << "Content-Type: " << getMimeType(filePath) <<"\r\n";
+    response << "Content-Length: " << file_size << "\r\n\r\n";
+
+    //envoyer la reponse
+
+    std::string response_str = response.str();
+    int bytes_sent = send(client._csock, response_str.c_str(), response_str.size(), 0);
+    if (bytes_sent == -1) {
+        //"Erreur lors de l'envoi de la réponse HTTP au client"
+        close(file_fd);
+        close(client._csock);
+
+    }
+
+    //envoie du fichier octet par octet
+    char file_buffer[1024];
+    while (true) {
+        int bytes_read = read(file_fd, file_buffer, sizeof(file_buffer));
+        if (bytes_read == -1) {
+            //Erreur lors de la lecture du fichier
+            break;
+
+        }
+
+        if (bytes_read == 0) {
+            // Fin du fichier atteinte
+            break;
+        }
+
+        bytes_sent = send(client._csock, file_buffer, bytes_read, 0);
+        if (bytes_sent == -1) {
+            //"Erreur lors de l'envoi du fichier au client"
+            break;
+        }
+    }
+        close(file_fd);
+    //std::ifstream file(filePath, std::ios::in | std::ios::binary);
+//    if (file.is_open())
+// {
+//        std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+//        file.close();
+//        sendHttpResponse(client, 200, getMimeType(filePath), body);
+//    }
+// else
+// {
+//        std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+//        sendErrorResponse(client, 404);
+// }
 }
 
 void Connection::handlePOST(Client& client)
 {
     // Vérification si l'URI correspond à une configuration de location
     ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
-    if (!location)
+    if (!location || !location->isMethodAllowed("POST"))
 	{
         std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
         sendErrorResponse(client, 405);
@@ -349,26 +398,40 @@ void Connection::handlePOST(Client& client)
 	// Si pas de cgiPath, on upload les donnees
 	if (location->getCgiPath().empty())
 	{
-		// Stocker les données reçues
-        std::string data = client._requestStr;
-        std::ofstream outFile("data.txt", std::ios_base::app);
-        if (outFile.is_open())
-		{
-            outFile << data << std::endl;
-            outFile.close();
-            //sendHTTPResponse(client, 200, "OK", "Données enregistrées avec succès.");
+        std::string uploadPath = location->getRoot();
+        if (uploadPath.empty())
+        {
+            std::cerr << "Error : 403 Forbidden from client: " << client._csock << std::endl;
+            sendErrorResponse(client, 403);
+            return;
         }
-		else
-		{
-            // Échec de l'ouverture du fichier, envoyer une erreur
-            //sendHTTPResponse(client, 500, "Internal Server Error", "Erreur lors de l'enregistrement des données.");
+	
+		// Extraire le nom du fichier à partir de l'URI
+        std::string fileName = client._uri.substr(client._uri.find_last_of('/') + 1);
+
+        // Créer le chemin complet vers le fichier à enregistrer
+        std::string filePath = uploadPath + "/" + fileName;
+		std::cout << "-----------------------> filePath" << filePath << std::endl;
+
+        // Stocker les données reçues
+        std::ofstream outFile(filePath, std::ios_base::binary);
+        if (outFile.is_open())
+        {
+            outFile.write(client._recBuffer, client._crecSize);
+            outFile.close();
+            sendHttpResponse(client, 201, "Created", "Fichier enregistré avec succès.");
+        }
+        else
+        {
+            std::cerr << "Error : 500 Internal Server Error from client: " << client._csock << std::endl;
+            sendErrorResponse(client, 500);
         }
     }
-	else
-	{
-		// Lancer le cgiPath avec les données reçues
+    else
+    {
+        // Lancer le cgiPath avec les données reçues
         executeCGI(client, location->getCgiPath());
-	}
+    }
 }
 
 void Connection::handleDELETE(Client& client)
@@ -401,12 +464,12 @@ std::string Connection::getMimeType(const std::string& filePath)
 
 ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, const std::vector<ParsConfig::Location>& locations)
 {
-    for (size_t i = 0; i < locations.size(); i++) {
-        if (uri.find(locations[i].getUrl()) == 0) {
-            return const_cast<ParsConfig::Location*>(&locations[i]);
-        }
+    for (size_t i = 0; i < locations.size(); i++)
+	{
+        if (uri.find(locations[i].getUrl()) == 0)
+            return (const_cast<ParsConfig::Location*>(&locations[i]));
     }
-    return nullptr;
+    return (nullptr);
 }
 
 void Connection::executeCGI(Client &client, const std::string &cgiPath)
