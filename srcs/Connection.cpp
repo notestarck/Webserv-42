@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 19:10:12 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/07 22:12:29 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -320,6 +320,7 @@ void Connection::handleGET(Client& client)
         return;
 	}
     std::string filePath = getFilePath(client);
+    //ios::binary pour indiquer que le fichier doit être traité en mode binaire plutôt qu'en mode texte. 
     std::ifstream file(filePath, std::ios::in | std::ios::binary);
 
     if (file.is_open())
