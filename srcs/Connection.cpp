@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 17:49:25 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/07 19:10:12 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -313,75 +313,26 @@ void Connection::handleRequest(Client &client)
 
 void Connection::handleGET(Client& client)
 {
-   if (client._uri.length() >= MAX_URI_SIZE)
-   {
+	if (client._uri.length() >= MAX_URI_SIZE)
+	{
         std::cerr << "Error : 414 URI Too Long from client: " << client._csock << std::endl;
-      sendErrorResponse(client, 414);
+		sendErrorResponse(client, 414);
         return;
-   }
+	}
     std::string filePath = getFilePath(client);
+    std::ifstream file(filePath, std::ios::in | std::ios::binary);
 
-    int file_fd = open(filePath.c_str(), O_RDONLY);
-    if(file_fd == -1){
-        //erreur ouvertue fichier"
-        close(client._csock);
-
+    if (file.is_open())
+	{
+        std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        file.close();
+        sendHttpResponse(client, 200, getMimeType(filePath), body);
     }
-    off_t file_size  = lseek(file_fd, 0, SEEK_END);
-    lseek(file_fd, 0, SEEK_SET);
-
-    //reponse
-    //sendHttpResponse(client, 200, getMimeType(filePath), body);
-    std::ostringstream response;
-    response << "HTTP/1.1 200 OK\r\n";
-    response << "Content-Type: " << getMimeType(filePath) <<"\r\n";
-    response << "Content-Length: " << file_size << "\r\n\r\n";
-
-    //envoyer la reponse
-
-    std::string response_str = response.str();
-    int bytes_sent = send(client._csock, response_str.c_str(), response_str.size(), 0);
-    if (bytes_sent == -1) {
-        //"Erreur lors de l'envoi de la réponse HTTP au client"
-        close(file_fd);
-        close(client._csock);
-
-    }
-
-    //envoie du fichier octet par octet
-    char file_buffer[1024];
-    while (true) {
-        int bytes_read = read(file_fd, file_buffer, sizeof(file_buffer));
-        if (bytes_read == -1) {
-            //Erreur lors de la lecture du fichier
-            break;
-
-        }
-
-        if (bytes_read == 0) {
-            // Fin du fichier atteinte
-            break;
-        }
-
-        bytes_sent = send(client._csock, file_buffer, bytes_read, 0);
-        if (bytes_sent == -1) {
-            //"Erreur lors de l'envoi du fichier au client"
-            break;
-        }
-    }
-        close(file_fd);
-    //std::ifstream file(filePath, std::ios::in | std::ios::binary);
-//    if (file.is_open())
-// {
-//        std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-//        file.close();
-//        sendHttpResponse(client, 200, getMimeType(filePath), body);
-//    }
-// else
-// {
-//        std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
-//        sendErrorResponse(client, 404);
-// }
+	else
+	{
+        std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+        sendErrorResponse(client, 404);
+	}
 }
 
 void Connection::handlePOST(Client& client)
