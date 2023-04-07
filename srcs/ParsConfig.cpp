@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:35:37 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/06 18:13:35 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -243,7 +243,7 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
             else if(key == "cgi_pass")
-                _cgi_pass = value.substr(0, value.size() - 1);
+                _cgiPath = value.substr(0, value.size() - 1);
 		}
 		line.clear();
 		ss.clear();
@@ -267,7 +267,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 			_allow.push_back(*it);
 		_root = srcs._root;
 		_index = srcs._index;
-        _cgi_pass = srcs._cgi_pass;
+        _cgiPath = srcs._cgiPath;
 	}
 	return (*this);
 }
@@ -284,6 +284,5 @@ const std::string & ParsConfig::Location::getRoot() const
 const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }
 
-//const std::string & ParsConfig::Location::getCgi() const{
-//    return (_cgi_pass);
-//}
+const std::string & ParsConfig::Location::getCgiPath() const
+{ return (_cgiPath); }

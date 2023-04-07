@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 15:58:28 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/23 16:07:15 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/06 12:13:22 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ class Server
 
 		/* Private Methode */
 		void		creatSocket();
+		void		closeSocket();
 		void		paramSocket();
 		void		linkSocket();
 		void		listenTCP();

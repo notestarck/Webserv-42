@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/23 16:14:04 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/06 14:02:37 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,16 @@
 
 #include "./Server.hpp"
 #include "./ParsConfig.hpp"
+#include "./HTTPRequest.hpp"
 
 #define MAX_REQUEST_SIZE 2048
+
+enum HTTPMethod {
+    GET,
+    POST,
+    DELETE,
+    UNKNOWN
+};
 
 struct Client
 {
@@ -28,19 +36,28 @@ struct Client
 
 	~Client();
 	Client &operator=(const Client &srcs);
+
+
     /* Socket et contexte d'adressage du client */
 	int					_csock;
 	sockaddr_storage	_csin;
-	socklen_t			_crecsize;
+	socklen_t			_crecSize;
 	timeval				_lastGetTime;
 
-	char				_recBuffer[MAX_REQUEST_SIZE + 1];
-	int					_recSize;
+	//Request du client
+	char								_recBuffer[MAX_REQUEST_SIZE + 1];
+	// Request HTTP parsee.
+	std::string							_requestStr;
+    HTTPMethod							_method;
+    /// @brief Uniform Resource Identifier, chaîne de caractères identifiant une ressource sur un réseau, la syntaxe respecte la norme World Wide Web.
+    std::string							_uri;
+    std::string							_httpVersion;
+    std::map<std::string, std::string>	_headers;
+
     //Config du serveur
     ParsConfig									&_config;
-    std::vector<ParsConfig::Location>			&_location;
 	Server										&_server;
-
+    std::vector<ParsConfig::Location>			&_location;
 
 };//struct Client
 

@@ -6,21 +6,22 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 11:08:07 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/23 16:14:15 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/07 00:35:34 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Client.hpp"
 
 Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Location> &location) :
+	_method(UNKNOWN),
+	_uri(""),
+	_httpVersion(""),
 	_config(config),
 	_server(server),
 	_location(location)
 
 {
-	std::cout << "test ------- >" << this->_server.getCurrentConnection() << std::endl;
 	_csock = 0;
-	_recSize = 0;
 }
 
 Client::Client(const Client &srcs) :
@@ -38,9 +39,8 @@ Client &Client::operator=(const Client &srcs)
 	{
 		_csock = srcs._csock;
 		_csin = srcs._csin;
-		_crecsize = srcs._crecsize;
+		_crecSize = srcs._crecSize;
 		_lastGetTime = srcs._lastGetTime;
-		_recSize = srcs._recSize;
 		_config = srcs._config;
 		_location = srcs._location;
 		_server = srcs._server;
