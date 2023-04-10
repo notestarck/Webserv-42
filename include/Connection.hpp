@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/06 23:42:46 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 14:11:15 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ class Connection
 		// @brief lit la requete client et la parse, gere les erreurs
 		// @param client client en cours de vecteur<Client> (*it)
 		// @return true si client toujours en vie.
-		bool readClientRequest(Client &client);
+		bool receiveClientRequest(Client &client);
 
 		/// @brief Check si la requete client est conforme
 		/// @param request request du client a check.

@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/06 14:02:37 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 15:46:02 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "./ParsConfig.hpp"
 #include "./HTTPRequest.hpp"
 
-#define MAX_REQUEST_SIZE 2048
+#define MAX_REQUEST_SIZE 1024
 
 enum HTTPMethod {
     GET,
@@ -44,15 +44,18 @@ struct Client
 	socklen_t			_crecSize;
 	timeval				_lastGetTime;
 
+	/* Le client va t'il vivre ou mourir */
+	bool				_keepAlive;
+
 	//Request du client
-	char								_recBuffer[MAX_REQUEST_SIZE + 1];
-	// Request HTTP parsee.
 	std::string							_requestStr;
+	// Request HTTP parsee.
+    std::string							_httpVersion;
+    std::string							_uri;
     HTTPMethod							_method;
     /// @brief Uniform Resource Identifier, chaîne de caractères identifiant une ressource sur un réseau, la syntaxe respecte la norme World Wide Web.
-    std::string							_uri;
-    std::string							_httpVersion;
     std::map<std::string, std::string>	_headers;
+	std::string							_body;
 
     //Config du serveur
     ParsConfig									&_config;

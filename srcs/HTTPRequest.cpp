@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 09:41:28 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 15:49:43 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,9 @@
 HTTPRequest::HTTPRequest()
 {}
 
-HTTPRequest::HTTPRequest(const std::string &requestStr, Client &client) :
-	_requestStr(requestStr)
+HTTPRequest::HTTPRequest(Client &client)
 {
+	std::cout << "-----------------------------------\n" << client._requestStr << std::endl;
 	parseRequest(client);
 }
 
@@ -31,16 +31,13 @@ HTTPRequest::~HTTPRequest()
 
 const HTTPRequest &HTTPRequest::operator=(const HTTPRequest &srcs)
 {
-	if (this != &srcs)
-	{
-		_requestStr = srcs._requestStr;
-	}
+	(void)srcs;
 	return (*this);
 }
 
 void HTTPRequest::parseRequest(Client &client)
 {
-	std::istringstream	requestStream(_requestStr);
+	std::istringstream	requestStream(client._requestStr);
 	std::string			line;
 
 	// Parse the request line
@@ -67,7 +64,7 @@ void HTTPRequest::parseRequest(Client &client)
 		if (separator != std::string::npos)
 		{
 			std::string headerName = line.substr(0, separator);
-			std::string headerValue = line.substr(separator + 2, line.size() - separator - 2 - 1); // -1 to exclude '\r'
+			std::string headerValue = line.substr(separator + 2, line.size() - separator - 2 - 1);
 			client._headers[headerName] = headerValue;
 		}
 	}
