@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 00:00:43 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 09:19:05 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
     response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
     response.append("Content-Type: " + contentType + "\r\n");
     response.append("Content-Length: " + std::to_string(body.length()) + "\r\n");
+    response.append("Accept-Charset: utf-8\r\n");
     response.append("Connection: Closed\r\n");
     response.append("\r\n");
     response.append(body);
@@ -85,6 +86,7 @@ void sendErrorResponse(Client &client, int code)
 
     response = "HTTP/1.1 " + std::to_string(code) + " " + message + "\r\n";
     response += "Content-Type: text/html\r\n";
+    response += "Accept-Charset: utf-8, iso-8859-1;q=0.5\r\n";
     response += "Connection: close\r\n";
     response += "\r\n";
     response += "<!DOCTYPE html>\n";

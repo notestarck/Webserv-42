@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 22:12:29 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 09:37:37 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ void Connection::initMime()
 	_mimeTypes.insert(std::make_pair(".gif", "image/gif"));
 	_mimeTypes.insert(std::make_pair(".mp4", "video/mp4"));
 	_mimeTypes.insert(std::make_pair(".ico", "image/vnd.microsoft.icon"));
-	std::cout << "MIME types initialized. Map size: " << _mimeTypes.size() << std::endl;
 }
 
 void Connection::initConnection()
@@ -87,16 +86,16 @@ void Connection::initSelect(int fd, fd_set& set)
 
 void Connection::runSelect()
 {
-    int res = select(_maxFd + 1, &_read, &_write, 0, 0);
+    int res = select(_maxFd + 1, &_read, &_write, 0, &_timeout);
     if (res < 0)
     {
         if (errno == EINTR) // Vérifier si l'erreur est due à un signal
-            return; // Retourner à la boucle principale
+            return;
         else
             throw std::runtime_error("select failed");
     }
 	else if (res == 0)
-		std::cerr << "Error : Timeout Select Connection::runSelect()" << std::endl;
+		std::cerr << "Client: wait Connection::runSelect()" << std::endl;
 }
 
 void Connection::acceptSocket()
@@ -280,12 +279,12 @@ bool Connection::readClientRequest(Client &client)
 	if (checkRequest(client._recBuffer))
     {
         client._recBuffer[bytesReceived] = '\0';
-        std::string requestStr(client._recBuffer);
+        client._requestStr = client._recBuffer;
         std::cout << std::endl << "\033[0;32mReceived request from client \033[0m"
 								<< client._csock << ": " << std::endl
-								<< requestStr
+								<< client._requestStr
 								<< "\033[0;32mEnd of request client \033[0m" << std::endl;
-		HTTPRequest httpRequest(requestStr, client);
+		HTTPRequest httpRequest(client._requestStr, client);
 		return (true);
     }
 	std::cerr << "Error : Connection::readClientRequest checkRequest(), request non conform" << std::endl;
@@ -350,34 +349,63 @@ void Connection::handlePOST(Client& client)
 	// Si pas de cgiPath, on upload les donnees
 	if (location->getCgiPath().empty())
 	{
-        std::string uploadPath = location->getRoot();
-        if (uploadPath.empty())
+        std::string boundary = "Content-Disposition: form-data; name=\"";
+        std::cout << "CLIENT >>" << client._requestStr << std::endl;
+        std::string::size_type boundaryPos = client._requestStr.find(boundary);
+    
+        if (boundaryPos == std::string::npos)
         {
-            std::cerr << "Error : 403 Forbidden from client: " << client._csock << std::endl;
-            sendErrorResponse(client, 403);
+            std::cout << "----------------------> la >>>> " << std::endl;
+            sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
             return;
         }
-	
-		// Extraire le nom du fichier à partir de l'URI
-        std::string fileName = client._uri.substr(client._uri.find_last_of('/') + 1);
-
-        // Créer le chemin complet vers le fichier à enregistrer
-        std::string filePath = uploadPath + "/" + fileName;
-		std::cout << "-----------------------> filePath" << filePath << std::endl;
-
-        // Stocker les données reçues
-        std::ofstream outFile(filePath, std::ios_base::binary);
-        if (outFile.is_open())
+    
+        std::string::size_type startPos = client._requestStr.find("filename=\"", boundaryPos);
+    
+        if (startPos == std::string::npos)
         {
-            outFile.write(client._recBuffer, client._crecSize);
-            outFile.close();
-            sendHttpResponse(client, 201, "Created", "Fichier enregistré avec succès.");
+            sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+            return;
         }
-        else
+    
+        startPos += 10; // Passer "filename=\""
+        std::string::size_type endPos = client._requestStr.find("\"", startPos);
+        std::string filename = client._requestStr.substr(startPos, endPos - startPos);
+    
+        std::string contentTypeHeader = "Content-Type: ";
+        startPos = client._requestStr.find(contentTypeHeader, endPos);
+    
+        if (startPos == std::string::npos)
         {
-            std::cerr << "Error : 500 Internal Server Error from client: " << client._csock << std::endl;
-            sendErrorResponse(client, 500);
+            sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+            return;
         }
+    
+        startPos += contentTypeHeader.length();
+        endPos = client._requestStr.find("\r\n", startPos);
+        std::string contentType = client._requestStr.substr(startPos, endPos - startPos);
+    
+        // Trouver le début des données du fichier
+        startPos = client._requestStr.find("\r\n\r\n", endPos);
+        startPos += 4;
+    
+        // Trouver la fin des données du fichier
+        endPos = client._requestStr.find("\r\n--", startPos);
+    
+        if (endPos == std::string::npos)
+        {
+            sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+            return;
+        }
+    
+        std::string fileData = client._requestStr.substr(startPos, endPos - startPos);
+    
+        // Écrire les données du fichier dans un fichier sur le serveur
+        std::ofstream outFile("uploads/" + filename, std::ios::binary);
+        outFile.write(fileData.c_str(), fileData.size());
+        outFile.close();
+    
+        sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
     }
     else
     {
@@ -394,6 +422,15 @@ void Connection::handleDELETE(Client& client)
     // Envoyez la réponse au client
 }
 
+std::string Connection::getMimeType(const std::string& filePath)
+{
+   std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+   if (_mimeTypes.find(fileExtension) != _mimeTypes.end())
+       return _mimeTypes[fileExtension];
+	else
+       return "application/octet-stream"; // Type MIME par défaut ?? ou "text/plain"
+}
+
 std::string Connection::getFilePath(const Client &client)
 {
     std::string basePath = client._config.getRoot();
@@ -403,15 +440,6 @@ std::string Connection::getFilePath(const Client &client)
         filePath += client._config.getIndex();
 
     return filePath;
-}
-
-std::string Connection::getMimeType(const std::string& filePath)
-{
-   std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
-   if (_mimeTypes.find(fileExtension) != _mimeTypes.end())
-       return _mimeTypes[fileExtension];
-	else
-       return "application/octet-stream"; // Type MIME par défaut ?? ou "text/plain"
 }
 
 ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, const std::vector<ParsConfig::Location>& locations)
