@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 09:37:37 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 10:24:52 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ void Connection::initMime()
 	_mimeTypes.insert(std::make_pair(".css", "text/css"));
 	_mimeTypes.insert(std::make_pair(".js", "application/javascript"));
 	_mimeTypes.insert(std::make_pair(".pdf", "application/pdf"));
+	_mimeTypes.insert(std::make_pair(".odt", "application/vnd.oasis.opendocument.text"));
+	_mimeTypes.insert(std::make_pair(".rtf", "application/rtf"));
 	_mimeTypes.insert(std::make_pair(".jpg", "image/jpeg"));
 	_mimeTypes.insert(std::make_pair(".png", "image/png"));
 	_mimeTypes.insert(std::make_pair(".gif", "image/gif"));
@@ -318,6 +320,7 @@ void Connection::handleGET(Client& client)
 		sendErrorResponse(client, 414);
         return;
 	}
+
     std::string filePath = getFilePath(client);
     //ios::binary pour indiquer que le fichier doit être traité en mode binaire plutôt qu'en mode texte. 
     std::ifstream file(filePath, std::ios::in | std::ios::binary);
@@ -340,22 +343,20 @@ void Connection::handlePOST(Client& client)
     // Vérification si l'URI correspond à une configuration de location
     ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
     if (!location || !location->isMethodAllowed("POST"))
-	{
+    {
         std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
         sendErrorResponse(client, 405);
         return;
     }
 
-	// Si pas de cgiPath, on upload les donnees
-	if (location->getCgiPath().empty())
-	{
-        std::string boundary = "Content-Disposition: form-data; name=\"";
-        std::cout << "CLIENT >>" << client._requestStr << std::endl;
+    // Si pas de cgiPath, on upload les données
+    if (location->getCgiPath().empty())
+        {
+            std::string boundary = "Content-Disposition: form-data; name=\"";
         std::string::size_type boundaryPos = client._requestStr.find(boundary);
     
         if (boundaryPos == std::string::npos)
         {
-            std::cout << "----------------------> la >>>> " << std::endl;
             sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
             return;
         }

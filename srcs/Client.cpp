@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 11:08:07 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 00:35:34 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 10:18:30 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,11 @@ Client &Client::operator=(const Client &srcs)
 		_csin = srcs._csin;
 		_crecSize = srcs._crecSize;
 		_lastGetTime = srcs._lastGetTime;
+		_requestStr = srcs._requestStr;
+		_method = srcs._method;
+		_uri = srcs._uri;
+		_httpVersion = srcs._httpVersion;
+		_headers = srcs._headers;
 		_config = srcs._config;
 		_location = srcs._location;
 		_server = srcs._server;
