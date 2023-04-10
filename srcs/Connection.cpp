@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 16:42:56 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/10 17:58:25 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Connection::Connection(std::vector<Server*>& servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	_timeout.tv_sec = 60;
+	_timeout.tv_sec = 0;
 	_timeout.tv_usec = 0;
 
 	initMime();
@@ -89,7 +89,6 @@ void Connection::initSelect(int fd, fd_set& set)
 void Connection::runSelect()
 {
 	int res = select(_maxFd + 1, &_read, &_write, 0, &_timeout);
-				std::cout << "=========------============" << std::endl;
 	if (res < 0)
 	{
 		if (errno == EINTR) // Vérifier si l'erreur est due à un signal
@@ -97,8 +96,10 @@ void Connection::runSelect()
 		else
 			throw std::runtime_error("select failed");
 	}
-	else if (res == 0)
+	else if (res == 0 && (_timeout.tv_sec != 0 || _timeout.tv_usec != 0))
+	{
 		std::cerr << "Client: wait Connection::runSelect()" << std::endl;
+	}
 }
 
 void Connection::acceptSocket()
@@ -181,12 +182,13 @@ void Connection::traitement()
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
 		if (FD_ISSET(it->_csock, &_read))
+			receiveClientRequest(*it);
+		//if (!FD_ISSET(it->_csock, &_read) && (*it)._keepAlive)
+		//	receiveClientRequest(*it);
+		if (!(*it)._keepAlive)
 		{
-			if (receiveClientRequest(*it))
-			{
 				HTTPRequest clientRequest(*it);
 				handleRequest(*it);
-			}
 			std::cout << "client : " << (*it)._csock << " keppAlive : " << (*it)._keepAlive << std::endl;
 			deadOrAlive(*it, (*it)._keepAlive);
 		}
@@ -195,10 +197,13 @@ void Connection::traitement()
 
 bool Connection::receiveClientRequest(Client &client)
 {
+	std::cout << "C'est nous\n";
 	// Allocation de mémoire pour le tampon de réception
     char recvBuffer[MAX_REQUEST_SIZE];
+	memset(recvBuffer, 0, MAX_REQUEST_SIZE);
     // Réception des données depuis le socket
     int bytesReceived = recv(client._csock, recvBuffer, MAX_REQUEST_SIZE, 0);
+	std::cout << bytesReceived << " : bytesReceived\n";
 	
     if (client._crecSize > MAX_REQUEST_SIZE || client._crecSize == MAX_REQUEST_SIZE)
     {
@@ -210,6 +215,12 @@ bool Connection::receiveClientRequest(Client &client)
 
     if (bytesReceived < 0)
     {
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+		{
+            std::cout << "Client disconnected: " << client._csock << std::endl;
+			client._keepAlive = false;
+        	return (true);
+        }
         std::cerr << "Error : 500 receiving data from client: " << client._csock << std::endl;
 		sendErrorResponse(client, 500);
 		client._keepAlive = false;
@@ -217,49 +228,16 @@ bool Connection::receiveClientRequest(Client &client)
     }
     else if (bytesReceived > 0)
 	{
-		recvBuffer[bytesReceived] = '\0';
 		client._requestStr.append(recvBuffer);
+	std::cout << "-----------------------------------\n" << client._requestStr << std::endl;
         std::cout << std::endl << "\033[0;32mReceived request from client \033[0m"
 								<< client._csock << ": " << std::endl
 								<< client._requestStr
 								<< "\033[0;32mEnd of request client \033[0m" << std::endl;
+				client._keepAlive = false;
 	}
-	else if (bytesReceived == 0)
-    {
-        std::cout << "Client disconnected: " << client._csock << std::endl;
-		client._keepAlive = false;
-        return (true);
-    }
 	return (false);
 }
-	
-	
-	// if (client._buffer.size() > MAX_REQUEST_SIZE || client._buffer.size() == MAX_REQUEST_SIZE)
-	// {
-	//     std::cerr << "Error : 413 Request size exceeds the limit (" << MAX_REQUEST_SIZE << " bytes) for client: " << client._csock << std::endl;
-	//     sendErrorResponse(client, 413);
-	//     return false;
-	// }
-	
-
-	
-// 	//if (checkRequest(&client._buffer[0], bytesReceived))
-// 	//{
-// 	    client._requestStr.assign(client._buffer.begin(), client._buffer.begin() + bytesReceived);
-// 		std::cout << client._requestStr << std::endl;
-// 	    std::cout << std::endl << "\033[0;32mReceived request from client \033[0m"
-// 	                            << client._csock << ": " << std::endl
-// 	                            << client._requestStr
-// 	                            << "\033[0;32mEnd of request client \033[0m" << std::endl;
-// 	    HTTPRequest httpRequest(client._requestStr, client);
-// 	    return true;
-// 	//}
-// 	// else
-// 	// {
-// 	//     std::cerr << "Error : Connection::readClientRequest checkRequest(), request non conform" << std::endl;
-// 	//     return false;
-// 	// }
-// }
 
 void Connection::handleRequest(Client &client)
 {
