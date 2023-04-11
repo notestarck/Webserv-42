@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 17:18:09 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/11 10:39:48 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ HTTPRequest::HTTPRequest()
 
 HTTPRequest::HTTPRequest(Client &client)
 {
+	std::cout << "----- ParsRequet Client =========\n";
 	parseRequest(client);
 }
 

@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 14:11:15 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/11 10:34:08 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,10 +76,7 @@ class Connection
 		ParsConfig::Location *findLocationForUri(const std::string& uri, const std::vector<ParsConfig::Location>& locations);
 		void executeCGI(Client &client, const std::string &cgiPath);
 		
-		bool deadOrAlive(Client client, bool alive = false);
-		bool liveRequest(std::map<std::string, std::string> *headers) const;
-		bool liveRequest(char *request) const;
-		
+		bool deadOrAlive(Client client, bool alive);
 
 	private :
 		/* Serveur */
