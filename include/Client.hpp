@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 21:19:16 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/11 11:27:54 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ struct Client
     ParsConfig									&_config;
 	Server										&_server;
     std::vector<ParsConfig::Location>			&_location;
-
+	
 };//struct Client
 
 #endif/* _CLIENT_HPP_ */

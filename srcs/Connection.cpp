@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 10:54:16 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/11 11:38:17 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ void Connection::runSelect()
 	else if (res == 0 && (_timeout.tv_sec != 0 || _timeout.tv_usec != 0))
 	{
 		std::cerr << "Client: wait Connection::runSelect()" << std::endl;
+		//FD_CLR(fd, &set); ??
 	}
 }
 
@@ -180,42 +181,38 @@ bool Connection::deadOrAlive(Client client, bool alive)
 
 void Connection::traitement()
 {
-	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
-	{
-		if (FD_ISSET(it->_csock, &_read))
-		{
-			if (receiveClientRequest(*it))
-			{
-				HTTPRequest clientRequest(*it);
-				handleRequest(*it);
-			}
-			deadOrAlive(*it, (*it)._keepAlive);
-		}
-	}
+    for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
+    {
+        if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
+        {
+            if (receiveClientRequest(*it))
+            {
+                HTTPRequest clientRequest(*it);
+                handleRequest(*it);
+            }
+            deadOrAlive(*it, (*it)._keepAlive);
+        }
+    }
 }
 
 bool Connection::receiveClientRequest(Client &client)
 {
     char recvBuffer[MAX_REQUEST_SIZE];
-    int bytesReceived = 0;
-    int totalBytesReceived = 0;
+    int bytesReceived = recv(client._csock, recvBuffer, MAX_REQUEST_SIZE - 1, 0);
 
-    while ((bytesReceived = recv(client._csock, recvBuffer, MAX_REQUEST_SIZE - 1, 0)) > 0)
+    if (bytesReceived > 0)
     {
-        totalBytesReceived += bytesReceived;
-        recvBuffer[bytesReceived] = '\0';
+		recvBuffer[bytesReceived] = '\0';
         client._requestStr.append(recvBuffer);
 
-        if (totalBytesReceived >= MAX_REQUEST_SIZE)
+        if (client._requestStr.size() >= MAX_REQUEST_SIZE)
         {
             std::cerr << "Error : 413 Request size exceeds the limit (" << MAX_REQUEST_SIZE << " bytes) for client: " << client._csock << std::endl;
             sendErrorResponse(client, 413);
             client._keepAlive = false;
-            return false;
         }
     }
-
-    if (bytesReceived < 0)
+    else if (bytesReceived < 0)
     {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
         {
@@ -226,10 +223,8 @@ bool Connection::receiveClientRequest(Client &client)
         std::cerr << "Error : 500 receiving data from client: " << client._csock << std::endl;
         sendErrorResponse(client, 500);
         client._keepAlive = false;
-        return false;
     }
-
-    return true;
+	return false;
 }
 
 void Connection::handleRequest(Client &client)
