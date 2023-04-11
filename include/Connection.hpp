@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 10:34:08 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/11 12:41:54 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Connection
 
 		/// @brief Gestion de la request parse afin de generer la reponse
 		/// @param client 
-		void handleRequest(Client &client);
+		void handleReponse(Client &client);
 
 		/// @brief gestion de Get
 		void handleGET(Client& client);
