@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 12:57:58 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/11 21:05:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,8 @@ Connection::Connection(std::vector<Server*>& servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	_timeout.tv_sec = 60;
+	_timeout.tv_sec = 5;
 	_timeout.tv_usec = 0;
-	// FD_ZERO(&_read);
-	// FD_ZERO(&_write);
-
 	initMime();
 }
 
@@ -73,12 +70,15 @@ void Connection::initMime()
 
 void Connection::initConnection()
 {
-	//FD_ZERO(&_read);
-	//FD_ZERO(&_write);
+	FD_ZERO(&_read);
+	FD_ZERO(&_write);
 	for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
+	{
 		initSelect(it->_csock, _read);
+		//initSelect(it->_csock, _write); rajoutee dans traitement()
+	}
 }
 
 void Connection::initSelect(int fd, fd_set& set)
@@ -99,10 +99,7 @@ void Connection::runSelect()
 			throw std::runtime_error("select failed");
 	}
 	else if (res == 0 && (_timeout.tv_sec != 0 || _timeout.tv_usec != 0))
-	{
 		std::cerr << "Client: wait Connection::runSelect()" << std::endl;
-		//FD_CLR(fd, &set); ??
-	}
 }
 
 void Connection::acceptSocket()
@@ -142,9 +139,6 @@ void Connection::acceptSocket()
 
 void Connection::clearClientSockets()
 {
-	//memset(&_read, 0, sizeof(_read));
-	//memset(&_write, 0, sizeof(_write));
-	//memset(&_errors, 0, sizeof(_errors));
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
 		std::cout << "\033[32mLiberation des sockets clients\033[0m\n";
@@ -161,23 +155,12 @@ bool Connection::deadOrAlive(Client client, bool alive)
 		return false;
 
 	client._server.decrementCurrentConnection();
-	int tmpSock = client._csock;
 	FD_CLR(client._csock, &_read);
 	shutdown(client._csock, SHUT_RDWR);
 	if (close(client._csock) != 0)
 		std::cerr << "Error while closing socket: " << strerror(errno) << std::endl;
 
 	std::cout << "\033[0;31mClient close \033[0m" << client._csock << std::endl;;
-
-	std::vector<Client>::iterator it;
-	for(it = _client.begin(); it != _client.end(); it++ )
-	{
-		if((*it)._csock == tmpSock)
-		{
-			_client.erase(it);
-			break;
-		}
-	}
 	return true;
 }
 
@@ -185,61 +168,66 @@ void Connection::traitement()
 {
     for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
     {
-		std::cout << "Entering traitement() function" << std::endl;
+			
         if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
-        {
-            if (receiveClientRequest(*it))
-				FD_SET((*it)._csock, &_write);
-			else
-				FD_SET((*it)._csock, &_read);
-        }
-		else
 		{
-            HTTPRequest clientRequest(*it);
-			std::cout << "Handling request for client: " << it->_csock << std::endl;
-            handleReponse(*it);
+            if (!receiveClientRequest(*it))
+			{
+				HTTPRequest httpRequest((*it));
+				FD_SET(it->_csock, &_write);
+			}
 		}
-		//if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
-        deadOrAlive(*it, (*it)._keepAlive);
-    }
-	std::cout << "Exiting traitement() function" << std::endl;
 
+        if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
+        {
+        	if (!handleReponse(*it))
+            	(*it)._keepAlive = false;
+        }
+
+        if (deadOrAlive((*it), (*it)._keepAlive))
+        {
+            it = _client.erase(it);
+        }
+    }
 }
 
 bool Connection::receiveClientRequest(Client &client)
 {
-    char recvBuffer[MAX_REQUEST_SIZE + 1];
-    int bytesReceived = recv(client._csock, recvBuffer, MAX_REQUEST_SIZE, 0);
+    char buffer[MAX_REQUEST_SIZE];
+	ssize_t bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE - 1, MSG_PEEK);
+	std::cout << "bytesRead 2 : " << bytesRead << "\n"; 
+	if (bytesRead < 0)
+    	return false;
+    bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE - 1, 0);
+	std::cout << "bytesRead : " << bytesRead << "\n"; 
 
-    if (bytesReceived > 0)
+	if (bytesRead <= 0)
     {
-		std::cout << "Received data: " << recvBuffer << std::endl;
-    std::cout << "Bytes received: " << bytesReceived << std::endl;
-        recvBuffer[bytesReceived] = '\0';
-        client._requestStr.append(recvBuffer);
+        if (bytesRead == 0)
+        {
+            std::cout << "Client disconnected on socket: " << client._csock << std::endl;
+        }
+		else
+        {
+			std::cerr << "Error : 500 receiving data from client: " << client._csock << std::endl;
+        	sendErrorResponse(client, 500);
+        }
+        return false;
+    }
 
-        if (client._requestStr.size() >= MAX_REQUEST_SIZE)
-        {
-            std::cerr << "Error : 413 Request size exceeds the limit (" << MAX_REQUEST_SIZE << " bytes) for client: " << client._csock << std::endl;
-            sendErrorResponse(client, 413);
-            client._keepAlive = false;
-        }
-    }
-    else if (bytesReceived < 0)
+	if (bytesRead > MAX_REQUEST_SIZE)
     {
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
-        {
-            std::cout << "Client disconnected: " << client._csock << std::endl;
-            return true;
-        }
-        std::cerr << "Error : 500 receiving data from client: " << client._csock << std::endl;
-        sendErrorResponse(client, 500);
-        client._keepAlive = false;
+        std::cerr << "Error : 413 Request size exceeds the limit (" << MAX_REQUEST_SIZE << " bytes) for client: " << client._csock << std::endl;
+        sendErrorResponse(client, 413);
+		return false;
     }
-    return false;
+
+    client._requestStr.append(buffer);
+    std::cout << "Data received from client on socket " << client._csock << " :\n" << buffer << std::endl;
+	return true;
 }
 
-void Connection::handleReponse(Client &client)
+bool Connection::handleReponse(Client &client)
 {
 	switch (client._method)
 	{
@@ -256,7 +244,7 @@ void Connection::handleReponse(Client &client)
 			// Gérer les méthodes inconnues
 			break;
 	}
-	client._keepAlive = false;
+	return false;
 }
 
 void Connection::handleGET(Client& client)
