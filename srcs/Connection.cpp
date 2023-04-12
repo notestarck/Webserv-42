@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/12 10:42:58 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/12 19:22:50 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Connection::Connection(std::vector<Server*>& servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	_timeout.tv_sec = 5;
+	_timeout.tv_sec = 30;
 	_timeout.tv_usec = 0;
 	initMime();
 }
@@ -171,16 +171,13 @@ void Connection::traitement()
         if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
             if (receiveClientRequest(*it))
-			{
-				HTTPRequest httpRequest((*it));
 				FD_SET(it->_csock, &_write);
-			}
 		}
 
         if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
         {
-        	if (!handleReponse(*it))
-            	(*it)._keepAlive = false;
+        	handleReponse(*it);
+            (*it)._keepAlive = false;
         }
 
         if (deadOrAlive((*it), (*it)._keepAlive))
@@ -194,13 +191,13 @@ bool Connection::receiveClientRequest(Client &client)
 {
     char buffer[MAX_REQUEST_SIZE];
     ssize_t bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE, 0);
-	std::cout << "bytesRead : " << bytesRead << "\n"; 
 
 	if (bytesRead <= 0)
     {
         if (bytesRead == 0)
         {
             std::cout << "Client disconnected on socket: " << client._csock << std::endl;
+			deadOrAlive(client, false);
         }
 		else
         {
@@ -216,14 +213,26 @@ bool Connection::receiveClientRequest(Client &client)
         sendErrorResponse(client, 413);
 		return false;
     }
-
-    client._requestStr.append(buffer);
-    std::cout << "Data received from client on socket " << client._csock << " :\n" << buffer << std::endl;
-	bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE - 1, MSG_PEEK);
-	std::cout << "bytesRead 2 : " << bytesRead << "\n"; 
-	if (bytesRead < 0)
-    	return true;
-	return false;
+	
+    client._requestStr += buffer;
+   	//std::cout << "Data received from client on socket " << buffer << std::endl;
+	usleep(10);
+	if (client._contentLenght == 0)
+	{
+		HTTPRequest httpRequest(client);
+		if (client._method != POST)
+			return true;
+	}
+	if (client._sizeBody != 0)
+		client._body.write(buffer, bytesRead);
+	client._body.seekg(0, client._body.end);
+	client._sizeBody = client._body.tellg();
+	client._body.seekg(0, client._body.beg);
+	memset(&buffer, 0, MAX_REQUEST_SIZE);
+	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " <<client._sizeBody << std::endl;
+	if (client._sizeBody < client._contentLenght)
+    	return false;
+	return true;
 }
 
 bool Connection::handleReponse(Client &client)
@@ -286,67 +295,83 @@ void Connection::handlePOST(Client& client)
 	// Si pas de cgiPath, on upload les données
 	if (location->getCgiPath().empty())
 	{
-		//std::cout << "client ----- > " << client._requestStr << std::endl;
-		std::string boundaryHeader = "Content-Type: multipart/form-data; boundary=";
-		std::string::size_type boundaryPos = client._requestStr.find(boundaryHeader);
-	
-		if (boundaryPos == std::string::npos)
+		//Recuperaton du Boundary
+		std::string boundaryHeader = "Content-Type";
+		std::string boundary = client._headers.find(boundaryHeader)->second.erase(0, std::strlen("multipart/form-data; boundary="));
+		if (boundary.empty())
 		{
 			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
 			return;
 		}
-	
-		std::string::size_type boundaryStart = boundaryPos + boundaryHeader.length();
-		std::string boundary = client._requestStr.substr(boundaryStart, client._requestStr.find("\r\n", boundaryStart) - boundaryStart);
 
-		std::string filePartHeader = "filename=\"";
-		std::string::size_type filePartHeaderPos = client._requestStr.find(filePartHeader);
-	
+		//Recuperation du filename
+		std::string 			filePartHeader = "filename=\"";
+		std::string::size_type	filePartHeaderPos = client._requestStr.find(filePartHeader);
 		if (filePartHeaderPos == std::string::npos)
 		{
-			//std::cout << "------------------------------------ la" << std::endl;
 			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
 			return;
 		}
-	
 		std::string::size_type startPos = filePartHeaderPos + filePartHeader.length();
 		std::string::size_type endPos = client._requestStr.find("\"", startPos);
 		std::string filename = client._requestStr.substr(startPos, endPos - startPos);
+
 	
+		//Check du content-type
 		std::string contentTypeHeader = "Content-Type: ";
 		startPos = client._requestStr.find(contentTypeHeader, endPos);
-	
 		if (startPos == std::string::npos)
 		{
 			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
 			return;
 		}
-	
 		startPos += contentTypeHeader.length();
 		endPos = client._requestStr.find("\r\n", startPos);
 		std::string contentType = client._requestStr.substr(startPos, endPos - startPos);
-	
+		for (std::map<std::string, std::string>::iterator it = _mimeTypes.begin(); (*it).second == contentType; it++)
+		{
+			if (it == _mimeTypes.end())
+			{
+				sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+				return;
+			}
+		}
+
 		// Trouver le début des données du fichier
-		startPos = client._requestStr.find("\r\n\r\n", endPos);
-		startPos += 4;
-	
+		std::string body(client._body.str());
+		startPos = body.find("\r\n\r\n");
+		startPos += 4; 
 		// Trouver la fin des données du fichier
-		endPos = client._requestStr.find("\r\n--", startPos);
-	
+		std::cout << "---------------- boundary : " << boundary << std::endl;
+		boundary.replace(boundary.length(), 1, "--");
+		std::cout << "---------------- boundary : " << boundary << " et size body " << body.size() << std::endl;
+		endPos = body.find(boundary, startPos);
+		endPos -= 4;
 		if (endPos == std::string::npos)
 		{
 			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
 			return;
 		}
-	
-		std::string fileData = client._requestStr.substr(startPos, endPos - startPos);
-	
+		std::string fileData = body.substr(startPos, endPos - startPos);
+
 		// Écrire les données du fichier dans un fichier sur le serveur
-		std::ofstream outFile("uploads/" + filename, std::ios::binary);
-		outFile.write(fileData.c_str(), fileData.size());
-		outFile.close();
-	
-		sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
+		// std::fstream outFile(filename, std::ios::binary | std::ios::in | std::ios::out);
+		// outFile.write(fileData.c_str(), fileData.size());
+		// outFile.close();
+
+		std::fstream outfile;
+		outfile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
+		if (outfile.is_open())
+		{
+			outfile << fileData;
+			sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
+		}
+		else 
+		{
+			sendHttpResponse(client, 400, "text/html", "Erreur lors de l'ouverture du fichier");
+			return;
+		}
+		outfile.close();
 	}
 	else
 	{

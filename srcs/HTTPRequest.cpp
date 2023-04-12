@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 10:58:32 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/12 18:45:24 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,6 @@ HTTPRequest::HTTPRequest()
 
 HTTPRequest::HTTPRequest(Client &client)
 {
-	std::cout << "----- ParsRequet Client =========\n";
-	std::cout << client._requestStr << std::endl;
 	parseRequest(client);
 }
 
@@ -59,14 +57,19 @@ void HTTPRequest::parseRequest(Client &client)
 	}
 
 	// Parse headers
-	while (std::getline(requestStream, line) && line != "\r")
+	while (std::getline(requestStream, line) && line.length() != 1)
 	{
 		size_t separator = line.find(": ");
 		if (separator != std::string::npos)
 		{
 			std::string headerName = line.substr(0, separator);
 			std::string headerValue = line.substr(separator + 2, line.size() - separator - 2 - 1);
+			if (headerName == "Content-Length")
+				client._contentLenght = std::atoi(headerValue.c_str());
 			client._headers[headerName] = headerValue;
 		}
 	}
+
+	while (std::getline(requestStream, line))
+		client._body << line + "\n";
 }
