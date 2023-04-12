@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 11:27:54 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/12 10:45:14 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "./ParsConfig.hpp"
 #include "./HTTPRequest.hpp"
 
-#define MAX_REQUEST_SIZE 1024
+#define MAX_REQUEST_SIZE 2048
 
 enum HTTPMethod {
     GET,

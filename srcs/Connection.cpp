@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 21:05:31 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/12 10:42:58 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,10 +168,9 @@ void Connection::traitement()
 {
     for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
     {
-			
         if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
-            if (!receiveClientRequest(*it))
+            if (receiveClientRequest(*it))
 			{
 				HTTPRequest httpRequest((*it));
 				FD_SET(it->_csock, &_write);
@@ -194,11 +193,7 @@ void Connection::traitement()
 bool Connection::receiveClientRequest(Client &client)
 {
     char buffer[MAX_REQUEST_SIZE];
-	ssize_t bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE - 1, MSG_PEEK);
-	std::cout << "bytesRead 2 : " << bytesRead << "\n"; 
-	if (bytesRead < 0)
-    	return false;
-    bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE - 1, 0);
+    ssize_t bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE, 0);
 	std::cout << "bytesRead : " << bytesRead << "\n"; 
 
 	if (bytesRead <= 0)
@@ -224,7 +219,11 @@ bool Connection::receiveClientRequest(Client &client)
 
     client._requestStr.append(buffer);
     std::cout << "Data received from client on socket " << client._csock << " :\n" << buffer << std::endl;
-	return true;
+	bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE - 1, MSG_PEEK);
+	std::cout << "bytesRead 2 : " << bytesRead << "\n"; 
+	if (bytesRead < 0)
+    	return true;
+	return false;
 }
 
 bool Connection::handleReponse(Client &client)
