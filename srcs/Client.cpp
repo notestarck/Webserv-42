@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 11:08:07 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/12 19:09:15 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/13 18:28:33 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Location> &location) :
 	_keepAlive(true),
-	_requestStr(""),
 	_contentLenght(0),
 	_sizeBody(0),
 	_httpVersion(""),
@@ -26,6 +25,7 @@ Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Locat
 	_location(location)
 
 {
+	_requestStr.str(std::string());
 	_csock = 0;
 }
 
@@ -47,7 +47,7 @@ Client &Client::operator=(const Client &srcs)
 		_crecSize = srcs._crecSize;
 		_lastGetTime = srcs._lastGetTime;
 		_keepAlive = srcs._keepAlive;
-		_requestStr = srcs._requestStr;
+		_requestStr << srcs._requestStr.str();
 		_contentLenght = srcs._contentLenght;
 		_sizeBody = srcs._sizeBody;
 		_method = srcs._method;

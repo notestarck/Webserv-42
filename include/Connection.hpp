@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/11 16:19:33 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/13 20:08:41 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ class Connection
 		void runSelect();
 
 		//Fonctionnement coté client
+		Client *findExistingClient(const sockaddr_in& csin);
 		void acceptSocket();
 		void traitement();
 		void clearClientSockets();
@@ -87,6 +88,7 @@ class Connection
 		int		_maxFd;
 		fd_set	_read;
 		fd_set	_write;
+		fd_set	_error;
 
 		// @brief est un pointeur vers une structure pour le temps maximum
 		// que select doit attendre et bloquer avant de retourner, une valeur de

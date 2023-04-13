@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/12 18:45:24 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/13 17:48:35 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ const HTTPRequest &HTTPRequest::operator=(const HTTPRequest &srcs)
 
 void HTTPRequest::parseRequest(Client &client)
 {
-	std::istringstream	requestStream(client._requestStr);
+	std::istringstream	requestStream(client._requestStr.str());
 	std::string			line;
 
 	// Parse the request line
@@ -69,7 +69,16 @@ void HTTPRequest::parseRequest(Client &client)
 			client._headers[headerName] = headerValue;
 		}
 	}
-
-	while (std::getline(requestStream, line))
-		client._body << line + "\n";
+	if (client._method != POST)
+	{
+		requestStream.clear();
+		line.clear();
+		return;
+	}
+	
+	 size_t posBody = client._requestStr.str().find("\r\n\r\n");
+	 client._requestStr.seekg(posBody + 4);
+	client._body.seekg(0, client._body.end);
+	client._sizeBody = client._body.tellg();
+	client._body.seekg(0, client._body.beg);
 }

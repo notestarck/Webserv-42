@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/12 19:22:50 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/13 20:19:53 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Connection::Connection(std::vector<Server*>& servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	_timeout.tv_sec = 30;
+	_timeout.tv_sec = 2;
 	_timeout.tv_usec = 0;
 	initMime();
 }
@@ -72,12 +72,13 @@ void Connection::initConnection()
 {
 	FD_ZERO(&_read);
 	FD_ZERO(&_write);
+	FD_ZERO(&_error);
 	for (std::vector<Server *>::iterator it = _servers.begin(); it < _servers.end(); it++)
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
 		initSelect(it->_csock, _read);
-		//initSelect(it->_csock, _write); rajoutee dans traitement()
+		initSelect(it->_csock, _error);
 	}
 }
 
@@ -90,16 +91,29 @@ void Connection::initSelect(int fd, fd_set& set)
 
 void Connection::runSelect()
 {
-	int res = select(_maxFd + 1, &_read, &_write, 0, &_timeout);
-	if (res < 0)
+	try
 	{
-		if (errno == EINTR) // Vérifier si l'erreur est due à un signal
-			return;
-		else
-			throw std::runtime_error("select failed");
+		int res = select(_maxFd + 1, &_read, &_write, &_error, &_timeout);
+		if (res < 0)
+		{
+			if (errno == EINTR) // Vérifier si l'erreur est due à un signal
+				return;
+			else
+				throw std::runtime_error("select failed");
+		}
+		else if (res == 0 && (_timeout.tv_sec != 0 || _timeout.tv_usec != 0))
+		{
+			for (std::vector<Client>::iterator it = _client.begin(); it != _client.end(); it++)
+				(*it)._keepAlive = false;
+		}
 	}
-	else if (res == 0 && (_timeout.tv_sec != 0 || _timeout.tv_usec != 0))
-		std::cerr << "Client: wait Connection::runSelect()" << std::endl;
+	catch (const std::runtime_error &e)
+	{
+		std::cerr << "Erreur lors de l'appel à la fonction select : " << e.what() << std::endl;
+		// Gérer l'exception ici, par exemple en fermant la connexion ou en renvoyant une erreur à l'utilisateur
+		for (std::vector<Client>::iterator it = _client.begin(); it != _client.end(); it++)
+			(*it)._keepAlive = false;
+	}
 }
 
 void Connection::acceptSocket()
@@ -153,7 +167,6 @@ bool Connection::deadOrAlive(Client client, bool alive)
 {
 	if (alive)
 		return false;
-
 	client._server.decrementCurrentConnection();
 	FD_CLR(client._csock, &_read);
 	shutdown(client._csock, SHUT_RDWR);
@@ -166,73 +179,86 @@ bool Connection::deadOrAlive(Client client, bool alive)
 
 void Connection::traitement()
 {
-    for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
-    {
-        if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
+	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
+	{
+		if (FD_ISSET(it->_csock, &_error))
+			(*it)._keepAlive = false;
+		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
-            if (receiveClientRequest(*it))
+			if (receiveClientRequest(*it))
 				FD_SET(it->_csock, &_write);
 		}
 
-        if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
-        {
-        	handleReponse(*it);
-            (*it)._keepAlive = false;
-        }
+		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
+			handleReponse(*it);
 
-        if (deadOrAlive((*it), (*it)._keepAlive))
-        {
-            it = _client.erase(it);
-        }
-    }
+		if (deadOrAlive((*it), (*it)._keepAlive))
+			it = _client.erase(it);
+	}
 }
 
 bool Connection::receiveClientRequest(Client &client)
 {
-    char buffer[MAX_REQUEST_SIZE];
-    ssize_t bytesRead = recv(client._csock, buffer, MAX_REQUEST_SIZE, 0);
+	//On recupere la taille du tampon sur le socket.
+	int optval = 0;
+	socklen_t  optlen = sizeof(optval);
+	if(getsockopt(client._csock, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
+	{
+		std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
+		sendErrorResponse(client, 500);
+		client._keepAlive = false;
+		return false;
+	}
+
+	//Recupere le tampon avec une taille adaptee
+	char buffer[optval];
+	ssize_t bytesRead = recv(client._csock, buffer, optval, 0);
 
 	if (bytesRead <= 0)
-    {
-        if (bytesRead == 0)
-        {
-            std::cout << "Client disconnected on socket: " << client._csock << std::endl;
-			deadOrAlive(client, false);
-        }
-		else
-        {
-			std::cerr << "Error : 500 receiving data from client: " << client._csock << std::endl;
-        	sendErrorResponse(client, 500);
-        }
-        return false;
-    }
-
-	if (bytesRead > MAX_REQUEST_SIZE)
-    {
-        std::cerr << "Error : 413 Request size exceeds the limit (" << MAX_REQUEST_SIZE << " bytes) for client: " << client._csock << std::endl;
-        sendErrorResponse(client, 413);
+	{
+		if (bytesRead == 0)
+			std::cout << "Client disconnected on socket: " << client._csock << std::endl;
+	  	else
+		{
+			std::cerr << "Error : 500 receiving data from client recv(): " << client._csock << std::endl;
+			sendErrorResponse(client, 500);
+		}
+		client._keepAlive = false;
 		return false;
-    }
-	
-    client._requestStr += buffer;
-   	//std::cout << "Data received from client on socket " << buffer << std::endl;
-	usleep(10);
+	}
+
+	if (bytesRead > optval)
+	{
+		std::cerr << "Error : 413 Request size exceeds the limit (" << optval << " bytes) for client: " << client._csock << std::endl;
+		sendErrorResponse(client, 413);
+		return false;
+	}
+
+	if (client._contentLenght == 0 && client._requestStr.str().empty() == 0)
+		client._requestStr.str(std::string());
+
+	client._requestStr << buffer;
+	//usleep(10);
 	if (client._contentLenght == 0)
 	{
 		HTTPRequest httpRequest(client);
 		if (client._method != POST)
+		{
+			memset(&buffer, 0, optval);
 			return true;
+		}
 	}
-	if (client._sizeBody != 0)
+	else
+	{
 		client._body.write(buffer, bytesRead);
-	client._body.seekg(0, client._body.end);
-	client._sizeBody = client._body.tellg();
-	client._body.seekg(0, client._body.beg);
-	memset(&buffer, 0, MAX_REQUEST_SIZE);
-	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " <<client._sizeBody << std::endl;
-	if (client._sizeBody < client._contentLenght)
-    	return false;
-	return true;
+		client._sizeBody += bytesRead;
+	}
+	
+	memset(&buffer, 0, optval);
+   	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " << client._sizeBody << std::endl;
+   	if (client._sizeBody < client._contentLenght)
+		return false;
+   	return true;
 }
 
 bool Connection::handleReponse(Client &client)
@@ -252,6 +278,7 @@ bool Connection::handleReponse(Client &client)
 			// Gérer les méthodes inconnues
 			break;
 	}
+	client._keepAlive = false;
 	return false;
 }
 
@@ -270,9 +297,8 @@ void Connection::handleGET(Client& client)
 
 	if (file.is_open())
 	{
-		std::string body((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		sendHttpResponse(client, 200, getMimeType(filePath), file);
 		file.close();
-		sendHttpResponse(client, 200, getMimeType(filePath), body);
 	}
 	else
 	{
@@ -300,39 +326,39 @@ void Connection::handlePOST(Client& client)
 		std::string boundary = client._headers.find(boundaryHeader)->second.erase(0, std::strlen("multipart/form-data; boundary="));
 		if (boundary.empty())
 		{
-			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+			sendErrorResponse(client, 400);
 			return;
 		}
 
 		//Recuperation du filename
 		std::string 			filePartHeader = "filename=\"";
-		std::string::size_type	filePartHeaderPos = client._requestStr.find(filePartHeader);
+		std::string::size_type	filePartHeaderPos = client._requestStr.str().find(filePartHeader);
 		if (filePartHeaderPos == std::string::npos)
 		{
-			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+			sendErrorResponse(client, 400);
 			return;
 		}
 		std::string::size_type startPos = filePartHeaderPos + filePartHeader.length();
-		std::string::size_type endPos = client._requestStr.find("\"", startPos);
-		std::string filename = client._requestStr.substr(startPos, endPos - startPos);
+		std::string::size_type endPos = client._requestStr.str().find("\"", startPos);
+		std::string filename = client._requestStr.str().substr(startPos, endPos - startPos);
 
 	
 		//Check du content-type
 		std::string contentTypeHeader = "Content-Type: ";
-		startPos = client._requestStr.find(contentTypeHeader, endPos);
+		startPos = client._requestStr.str().find(contentTypeHeader, endPos);
 		if (startPos == std::string::npos)
 		{
-			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+			sendErrorResponse(client, 400);
 			return;
 		}
 		startPos += contentTypeHeader.length();
-		endPos = client._requestStr.find("\r\n", startPos);
-		std::string contentType = client._requestStr.substr(startPos, endPos - startPos);
+		endPos = client._requestStr.str().find("\r\n", startPos);
+		std::string contentType = client._requestStr.str().substr(startPos, endPos - startPos);
 		for (std::map<std::string, std::string>::iterator it = _mimeTypes.begin(); (*it).second == contentType; it++)
 		{
 			if (it == _mimeTypes.end())
 			{
-				sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+				sendErrorResponse(client, 400);
 				return;
 			}
 		}
@@ -342,22 +368,16 @@ void Connection::handlePOST(Client& client)
 		startPos = body.find("\r\n\r\n");
 		startPos += 4; 
 		// Trouver la fin des données du fichier
-		std::cout << "---------------- boundary : " << boundary << std::endl;
 		boundary.replace(boundary.length(), 1, "--");
 		std::cout << "---------------- boundary : " << boundary << " et size body " << body.size() << std::endl;
 		endPos = body.find(boundary, startPos);
 		endPos -= 4;
 		if (endPos == std::string::npos)
 		{
-			sendHttpResponse(client, 400, "text/html", "Mauvaise requête");
+			sendErrorResponse(client, 400);
 			return;
 		}
 		std::string fileData = body.substr(startPos, endPos - startPos);
-
-		// Écrire les données du fichier dans un fichier sur le serveur
-		// std::fstream outFile(filename, std::ios::binary | std::ios::in | std::ios::out);
-		// outFile.write(fileData.c_str(), fileData.size());
-		// outFile.close();
 
 		std::fstream outfile;
 		outfile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
@@ -368,7 +388,7 @@ void Connection::handlePOST(Client& client)
 		}
 		else 
 		{
-			sendHttpResponse(client, 400, "text/html", "Erreur lors de l'ouverture du fichier");
+			sendErrorResponse(client, 400);
 			return;
 		}
 		outfile.close();
@@ -401,10 +421,8 @@ std::string Connection::getFilePath(const Client &client)
 {
 	std::string basePath = client._config.getRoot();
 	std::string filePath = basePath + client._uri;
-
 	if (filePath.back() == '/')
 		filePath += client._config.getIndex();
-
 	return filePath;
 }
 
@@ -456,7 +474,7 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		close(cgiInput[0]);
 		close(cgiOutput[1]);
 
-		write(cgiInput[1], client._requestStr.c_str(), client._requestStr.length());
+		write(cgiInput[1], client._requestStr.str().c_str(), client._requestStr.str().length());
 		close(cgiInput[1]);
 
 		// Lire la sortie du script CGI depuis le pipe de sortie

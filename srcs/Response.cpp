@@ -6,11 +6,50 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 09:19:05 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/13 17:49:11 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Response.hpp"
+
+void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, std::ifstream &body)
+{
+    std::string response;
+    std::string statusMessage;
+
+    switch (statusCode)
+    {
+        case 200:
+            statusMessage = "OK";
+            break;
+        case 201:
+            statusMessage = "Created";
+            break;
+        case 204:
+            statusMessage = "No Content";
+            break;
+        default:
+            statusMessage = "Unknown Status";
+    }
+
+    response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
+    response.append("Content-Type: " + contentType + "\r\n");
+    body.seekg(0, std::ios::end);
+    response.append("Content-Length: " + std::to_string(body.tellg()) + "\r\n");
+    body.seekg(0, std::ios::beg);
+    response.append("Accept-Charset: utf-8\r\n");
+    response.append("Connection: Closed\r\n");
+    response.append("\r\n");
+    std::string line;
+    while (getline(body, line))
+    {
+        response.append(line + "\n");
+        line.clear();
+    }
+    
+    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+        perror("Erreur lors de l'envoi de la réponse");
+}
 
 void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, const std::string &body)
 {
@@ -39,11 +78,10 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
     response.append("Connection: Closed\r\n");
     response.append("\r\n");
     response.append(body);
-
+    
+    std::cout << response.c_str() << std::endl;
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
-    {
         perror("Erreur lors de l'envoi de la réponse");
-    }
 }
 
 void sendErrorResponse(Client &client, int code)
