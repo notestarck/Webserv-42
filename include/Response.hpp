@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:48:44 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/13 17:39:38 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 15:42:20 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ struct Client;
 /// @param statusCode 
 /// @param contentType 
 /// @param body 
+	void sendHttpResponse(Client &client, int statusCode, const std::string &contentType);
 	void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, std::ifstream &body);
 	void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, const std::string &body);
 

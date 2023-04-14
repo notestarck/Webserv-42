@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 13:35:50 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 17:03:11 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ void Connection::initMime()
 	_mimeTypes.insert(std::make_pair(".odt", "application/vnd.oasis.opendocument.text"));
 	_mimeTypes.insert(std::make_pair(".rtf", "application/rtf"));
 	_mimeTypes.insert(std::make_pair(".jpg", "image/jpeg"));
+	_mimeTypes.insert(std::make_pair(".webp", "image/webp"));
 	_mimeTypes.insert(std::make_pair(".png", "image/png"));
 	_mimeTypes.insert(std::make_pair(".gif", "image/gif"));
 	_mimeTypes.insert(std::make_pair(".mp4", "video/mp4"));
@@ -77,7 +78,10 @@ void Connection::initConnection()
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
-		initSelect(it->_csock, _read);
+		if (!((*it)._requestPars))
+			initSelect(it->_csock, _read);
+		else
+			initSelect(it->_csock, _write);
 		initSelect(it->_csock, _error);
 	}
 }
@@ -186,11 +190,17 @@ void Connection::traitement()
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
 			if (receiveClientRequest(*it))
+			{
+				(*it)._requestPars = true;
 				FD_SET(it->_csock, &_write);
+			}
 		}
 
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
-			handleReponse(*it);
+		{
+			if (handleReponse(*it))
+				(*it)._keepAlive = false;
+		}
 
 		if (deadOrAlive((*it), (*it)._keepAlive))
 			it = _client.erase(it);
@@ -238,7 +248,7 @@ bool Connection::receiveClientRequest(Client &client)
 	if (client._contentLenght == 0 && client._requestStr.str().empty() == 0)
 	{
 		client._requestStr.str(std::string());
-		client._body.str(std::string());
+		client._bodyReq.str(std::string());
 	}
 
 	client._requestStr << buffer;
@@ -253,7 +263,7 @@ bool Connection::receiveClientRequest(Client &client)
 	}
 	else
 	{
-		client._body.write(buffer, bytesRead);
+		client._bodyReq.write(buffer, bytesRead);
 		client._sizeBody += bytesRead;
 	}
 	
@@ -265,10 +275,11 @@ bool Connection::receiveClientRequest(Client &client)
 
 bool Connection::handleReponse(Client &client)
 {
+	bool ret = false;
 	switch (client._method)
 	{
 		case GET:
-			handleGET(client);
+			ret = handleGET(client);
 			break;
 		case POST:
 			handlePOST(client);
@@ -281,33 +292,78 @@ bool Connection::handleReponse(Client &client)
 			sendErrorResponse(client, 405);
 			break;
 	}
-	client._keepAlive = false;
-	return false;
+	return (ret);
 }
 
-void Connection::handleGET(Client& client)
+bool Connection::handleGET(Client& client)
 {
+	if (hanglGetLocation(client))
+		return (true);
+	
 	if (client._uri.length() >= MAX_URI_SIZE)
 	{
 		std::cerr << "Error : 414 URI Too Long from client: " << client._csock << std::endl;
 		sendErrorResponse(client, 414);
-		return;
+		return (true);
 	}
 
-	std::string filePath = getFilePath(client);
-	//ios::binary pour indiquer que le fichier doit être traité en mode binaire plutôt qu'en mode texte. 
-	std::ifstream file(filePath, std::ios::in | std::ios::binary);
+	// On ouvre le fichier a renvoyer et on le stock dans client._bodyRep.
+	// Pour eviter de le faire a chaque tour, on check si client._sizeBodyRep == 0
+	if (client._sizeBodyRep == 0)
+	{
+		client._filePath = getFilePath(client);
+		std::ifstream	file(client._filePath, std::ios::in | std::ios::binary);
+		if (file.is_open())
+		{
+			std::stringstream buf;
+			//client._bodyRep("");
+			buf << file.rdbuf();
+			client._bodyRep = buf.str();
+			//file.seekg(0, std::ios::end);
+			client._sizeBodyRep = client._bodyRep.size();
+			//file.seekg(0, std::ios::beg);
+			file.close();
+			buf.clear();
+		}
+		else
+		{
+			std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+			sendErrorResponse(client, 404);
+		}
+	}
+	
+	sendHttpResponse(client, 200, getMimeType(client._filePath));
+	return (true);
+}
 
-	if (file.is_open())
+bool Connection::hanglGetLocation(Client &client)
+{
+	//Location and GET
+	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+	if (location)
 	{
-		sendHttpResponse(client, 200, getMimeType(filePath), file);
-		file.close();
+		if (!(location->isMethodAllowed("GET")))
+		{
+			std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
+			sendErrorResponse(client, 405);
+			return (true);
+		}
+		std::string filePath = getFilePath(client, location);
+		std::ifstream file(filePath, std::ios::in | std::ios::binary);
+		
+		if (file.is_open())
+		{
+			sendHttpResponse(client, 200, getMimeType(filePath), file);
+			file.close();
+		}
+		else
+		{
+			std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+			sendErrorResponse(client, 404);
+		}
+		return (true);
 	}
-	else
-	{
-		std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
-		sendErrorResponse(client, 404);
-	}
+	return (false);
 }
 
 void Connection::handlePOST(Client& client)
@@ -367,7 +423,7 @@ void Connection::handlePOST(Client& client)
 		}
 
 		// Trouver le début des données du fichier
-		std::string body(client._body.str());
+		std::string body(client._bodyReq.str());
 		startPos = body.find("\r\n\r\n");
 		startPos += 4; 
 		// Trouver la fin des données du fichier
@@ -445,6 +501,13 @@ std::string Connection::getFilePath(const Client &client)
 	std::string filePath = basePath + client._uri;
 	if (filePath.back() == '/')
 		filePath += client._config.getIndex();
+	return filePath;
+}
+
+std::string Connection::getFilePath(const Client &client,const ParsConfig::Location *location)
+{
+	std::string basePath = location->getRoot();
+	std::string filePath = client._server.getRoot() + basePath + "/" + location->getIndex();
 	return filePath;
 }
 

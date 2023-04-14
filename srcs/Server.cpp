@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 09:03:25 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 14:26:03 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,7 @@ void Server::closeSocket()
 //Setsockopt
 void Server::paramSocket()
 {
+	//a reverifier
 	int	optval = 1;
 	int tmp = setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
 	if (tmp != 0)
