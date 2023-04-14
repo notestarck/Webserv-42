@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/13 20:19:53 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 09:11:57 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ void Connection::acceptSocket()
 		if (FD_ISSET((*it)->getSocket(), &_read))
 		{
 			Client newClient((*it)->getConfig(), (*it)->getServer(), (*it)->getLocation());
-			memset(&newClient._csin, 0, sizeof(newClient._csin));
+			std::memset(&newClient._csin, 0, sizeof(newClient._csin));
 			newClient._crecSize = sizeof(newClient._csin);
 			if ((*it)->hasCapacity())
 			{
@@ -234,17 +234,21 @@ bool Connection::receiveClientRequest(Client &client)
 		return false;
 	}
 
+	//Clean avant ecriture sinon ca pose des problemes memoires d'overflow
 	if (client._contentLenght == 0 && client._requestStr.str().empty() == 0)
+	{
 		client._requestStr.str(std::string());
+		client._body.str(std::string());
+	}
 
 	client._requestStr << buffer;
-	//usleep(10);
+	std::cout << client._requestStr.str() << std::endl;
 	if (client._contentLenght == 0)
 	{
 		HTTPRequest httpRequest(client);
 		if (client._method != POST)
 		{
-			memset(&buffer, 0, optval);
+			std::memset(&buffer, 0, optval);
 			return true;
 		}
 	}
@@ -254,7 +258,7 @@ bool Connection::receiveClientRequest(Client &client)
 		client._sizeBody += bytesRead;
 	}
 	
-	memset(&buffer, 0, optval);
+	std::memset(&buffer, 0, optval);
    	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " << client._sizeBody << std::endl;
    	if (client._sizeBody < client._contentLenght)
 		return false;
@@ -275,7 +279,8 @@ bool Connection::handleReponse(Client &client)
 			handleDELETE(client);
 			break;
 		default:
-			// Gérer les méthodes inconnues
+			std::cerr << "Client " << client._csock << " connected with an unauthorized method." << std::endl;
+			sendErrorResponse(client, 405);
 			break;
 	}
 	client._keepAlive = false;
@@ -402,10 +407,7 @@ void Connection::handlePOST(Client& client)
 
 void Connection::handleDELETE(Client& client)
 {
-	(void)client;
-	// Vérifiez si la ressource existe et les conditions sont remplies
-	// Générez la réponse HTTP appropriée
-	// Envoyez la réponse au client
+	std::cout << "handleDELETE \n : " << client._requestStr.str() << std::endl;
 }
 
 std::string Connection::getMimeType(const std::string& filePath)

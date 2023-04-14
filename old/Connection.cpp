@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:47:35 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 09:03:00 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,8 @@ Connection::Connection(const Connection & srcs)
 
 Connection::~Connection()
 {
-	memset(&_read, 0, sizeof(_read));
-	memset(&_write, 0, sizeof(_write));
+	std::memset(&_read, 0, sizeof(_read));
+	std::memset(&_write, 0, sizeof(_write));
 	//memset(&_errors, 0, sizeof(_errors));
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{

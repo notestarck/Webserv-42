@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/06 13:03:57 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 09:03:25 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ void Server::paramSocket()
 //Bind socket
 void Server::linkSocket()
 {
-	memset(&_sin, 0, sizeof(_sin));
+	std::memset(&_sin, 0, sizeof(_sin));
 	_sin.sin_port = htons(getPort());
 	_sin.sin_addr.s_addr = convertIp(getHost()); //Pour une ecoute sur toutes les adresses htonl(INADDR_ANY)
 	_sin.sin_family = AF_INET;
