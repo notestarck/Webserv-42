@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/10 08:27:42 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 11:25:29 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,26 @@ std::vector<Server *>		_server;
 std::vector<ParsConfig *>	_config;
 Connection					_connection;
 volatile bool				boolStart = 1;
+
+void	creatFileDeleteMethod()
+{
+	std::ofstream outFile;
+    for (int i = 1; i <= 4; ++i)
+	{
+        std::stringstream fileName;
+        fileName << "fichier" << i << ".txt";
+
+        outFile.open("./www/a_supprimer/" + fileName.str(), std::ios::binary | std::ios::out);
+        if (outFile.is_open())
+		{
+            outFile << "Contenu du fichier " << i << std::endl;
+            outFile.close();
+            std::cout << "Fichier " << fileName.str() << " créé avec succès." << std::endl;
+        }
+		else
+            std::cerr << "Impossible de créer le fichier " << fileName.str() << std::endl;
+    }
+}
 
 int main(int argc, char ** argv)
 {
@@ -67,6 +87,9 @@ int main(int argc, char ** argv)
 		Server *tmp = new Server(_config[i]);
 		_server.push_back(tmp);
 	}
+
+	//On cree les fichiers necessaire pour le tester de la methode DELETE
+	creatFileDeleteMethod();
 
 	//Crate connection
 	Connection	_tmp(_server);

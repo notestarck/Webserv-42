@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/07 15:54:38 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 11:49:49 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ ParsConfig::ParsConfig(std::ifstream &file_config) :
 {
 	std::string	line;
 
-	while(getline(file_config, line) && line != "}")
+	while(std::getline(file_config, line) && line != "}")
 	{
 		std::string	key;
 		std::string	value;

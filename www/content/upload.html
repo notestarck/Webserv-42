@@ -48,15 +48,15 @@
 			</div>
 			<div class="test">
 				<h2>Test de suppression de fichier</h2>
-				<form method="delete" action="/deleteFile">
-					<label for="file">Sélectionnez un fichier à supprimer :</label>
-					<select name="file" id="file">
+				<form id="deleteForm" action="/deleteFile">
+					<label for="deleteFileSelect">Sélectionnez un fichier à supprimer :</label>
+					<select name="file" id="deleteFileSelect">
 						<option value="">Sélectionnez un fichier</option>
 						<option value="fichier1.txt">fichier1.txt</option>
 						<option value="fichier2.txt">fichier2.txt</option>
 						<option value="fichier3.txt">fichier3.txt</option>
 						<option value="fichier4.txt">fichier4.txt</option>
-					</select>
+				  </select>
 					<input type="submit" value="Supprimer" class="envoyer">
 				</form>
 				<p class="warning">
@@ -69,5 +69,37 @@
 		<footer>
 
 		</footer>
+		<script>
+			document.getElementById("deleteForm").addEventListener("submit", function(event) {
+			  event.preventDefault(); // Empêche la soumission normale du formulaire
+		  
+			  const fileSelect = document.getElementById("deleteFileSelect");
+			  const selectedFile = fileSelect.options[fileSelect.selectedIndex].value;
+		  
+			  if (!selectedFile) {
+				alert("Veuillez sélectionner un fichier à supprimer.");
+				return;
+			  }
+		  
+			  fetch("/deleteFile", {
+				method: "DELETE",
+				headers: {
+				  "Content-Type": "application/json",
+				},
+				body: JSON.stringify({ file: selectedFile }),
+			  })
+				.then((response) => {
+				  if (response.ok) {
+					alert("Le fichier a été supprimé avec succès.");
+				  } else {
+					alert("Erreur lors de la suppression du fichier.");
+				  }
+				})
+				.catch((error) => {
+				  console.error("Erreur lors de la suppression du fichier:", error);
+				  alert("Erreur lors de la suppression du fichier.");
+				});
+			});
+		  </script>
 	</body>
 </html>

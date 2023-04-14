@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 09:11:57 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 12:26:41 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,7 +242,6 @@ bool Connection::receiveClientRequest(Client &client)
 	}
 
 	client._requestStr << buffer;
-	std::cout << client._requestStr.str() << std::endl;
 	if (client._contentLenght == 0)
 	{
 		HTTPRequest httpRequest(client);
@@ -259,7 +258,6 @@ bool Connection::receiveClientRequest(Client &client)
 	}
 	
 	std::memset(&buffer, 0, optval);
-   	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " << client._sizeBody << std::endl;
    	if (client._sizeBody < client._contentLenght)
 		return false;
    	return true;
@@ -374,7 +372,6 @@ void Connection::handlePOST(Client& client)
 		startPos += 4; 
 		// Trouver la fin des données du fichier
 		boundary.replace(boundary.length(), 1, "--");
-		std::cout << "---------------- boundary : " << boundary << " et size body " << body.size() << std::endl;
 		endPos = body.find(boundary, startPos);
 		endPos -= 4;
 		if (endPos == std::string::npos)
@@ -384,11 +381,11 @@ void Connection::handlePOST(Client& client)
 		}
 		std::string fileData = body.substr(startPos, endPos - startPos);
 
-		std::fstream outfile;
-		outfile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
-		if (outfile.is_open())
+		std::fstream outFile;
+		outFile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
+		if (outFile.is_open())
 		{
-			outfile << fileData;
+			outFile << fileData;
 			sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
 		}
 		else 
@@ -396,7 +393,7 @@ void Connection::handlePOST(Client& client)
 			sendErrorResponse(client, 400);
 			return;
 		}
-		outfile.close();
+		outFile.close();
 	}
 	else
 	{
@@ -407,7 +404,29 @@ void Connection::handlePOST(Client& client)
 
 void Connection::handleDELETE(Client& client)
 {
-	std::cout << "handleDELETE \n : " << client._requestStr.str() << std::endl;
+	std::cout << client._requestStr.str() << std::endl;
+	// Vérification si l'URI correspond à une configuration de location
+	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+	if (!location || !location->isMethodAllowed("DELETE"))
+	{
+		std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
+		sendErrorResponse(client, 405);
+		return;
+	}
+
+	//On recupere le nom du fichier dans la rquete
+	std::istringstream	requestStream(client._requestStr.str());
+	std::string			fileName;
+	std::string			line;
+	while (std::getline(requestStream, line))
+	{
+		size_t separator = line.find("\"file\":");
+		if (separator != std::string::npos)
+			fileName = line.substr(separator + 8, line.size() - 11);
+	}
+	std::cout << "fileName :" << fileName  << " " << (location->getRoot() + "/" + fileName).c_str() << std::endl;
+	std::remove((location->getRoot() + "/" + fileName).c_str());
+	
 }
 
 std::string Connection::getMimeType(const std::string& filePath)
