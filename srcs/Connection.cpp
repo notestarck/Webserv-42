@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 17:03:11 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 09:11:57 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ void Connection::initMime()
 	_mimeTypes.insert(std::make_pair(".odt", "application/vnd.oasis.opendocument.text"));
 	_mimeTypes.insert(std::make_pair(".rtf", "application/rtf"));
 	_mimeTypes.insert(std::make_pair(".jpg", "image/jpeg"));
-	_mimeTypes.insert(std::make_pair(".webp", "image/webp"));
 	_mimeTypes.insert(std::make_pair(".png", "image/png"));
 	_mimeTypes.insert(std::make_pair(".gif", "image/gif"));
 	_mimeTypes.insert(std::make_pair(".mp4", "video/mp4"));
@@ -78,10 +77,7 @@ void Connection::initConnection()
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
-		if (!((*it)._requestPars))
-			initSelect(it->_csock, _read);
-		else
-			initSelect(it->_csock, _write);
+		initSelect(it->_csock, _read);
 		initSelect(it->_csock, _error);
 	}
 }
@@ -190,17 +186,11 @@ void Connection::traitement()
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
 			if (receiveClientRequest(*it))
-			{
-				(*it)._requestPars = true;
 				FD_SET(it->_csock, &_write);
-			}
 		}
 
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
-		{
-			if (handleReponse(*it))
-				(*it)._keepAlive = false;
-		}
+			handleReponse(*it);
 
 		if (deadOrAlive((*it), (*it)._keepAlive))
 			it = _client.erase(it);
@@ -248,10 +238,11 @@ bool Connection::receiveClientRequest(Client &client)
 	if (client._contentLenght == 0 && client._requestStr.str().empty() == 0)
 	{
 		client._requestStr.str(std::string());
-		client._bodyReq.str(std::string());
+		client._body.str(std::string());
 	}
 
 	client._requestStr << buffer;
+	std::cout << client._requestStr.str() << std::endl;
 	if (client._contentLenght == 0)
 	{
 		HTTPRequest httpRequest(client);
@@ -263,11 +254,12 @@ bool Connection::receiveClientRequest(Client &client)
 	}
 	else
 	{
-		client._bodyReq.write(buffer, bytesRead);
+		client._body.write(buffer, bytesRead);
 		client._sizeBody += bytesRead;
 	}
 	
 	std::memset(&buffer, 0, optval);
+   	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " << client._sizeBody << std::endl;
    	if (client._sizeBody < client._contentLenght)
 		return false;
    	return true;
@@ -275,11 +267,10 @@ bool Connection::receiveClientRequest(Client &client)
 
 bool Connection::handleReponse(Client &client)
 {
-	bool ret = false;
 	switch (client._method)
 	{
 		case GET:
-			ret = handleGET(client);
+			handleGET(client);
 			break;
 		case POST:
 			handlePOST(client);
@@ -292,78 +283,42 @@ bool Connection::handleReponse(Client &client)
 			sendErrorResponse(client, 405);
 			break;
 	}
-	return (ret);
+	client._keepAlive = false;
+	return false;
 }
 
-bool Connection::handleGET(Client& client)
+void Connection::handleGET(Client& client)
 {
-	if (hanglGetLocation(client))
-		return (true);
-	
 	if (client._uri.length() >= MAX_URI_SIZE)
 	{
 		std::cerr << "Error : 414 URI Too Long from client: " << client._csock << std::endl;
 		sendErrorResponse(client, 414);
-		return (true);
+		return;
 	}
 
-	// On ouvre le fichier a renvoyer et on le stock dans client._bodyRep.
-	// Pour eviter de le faire a chaque tour, on check si client._sizeBodyRep == 0
-	if (client._sizeBodyRep == 0)
-	{
-		client._filePath = getFilePath(client);
-		std::ifstream	file(client._filePath, std::ios::in | std::ios::binary);
-		if (file.is_open())
-		{
-			std::stringstream buf;
-			//client._bodyRep("");
-			buf << file.rdbuf();
-			client._bodyRep = buf.str();
-			//file.seekg(0, std::ios::end);
-			client._sizeBodyRep = client._bodyRep.size();
-			//file.seekg(0, std::ios::beg);
-			file.close();
-			buf.clear();
-		}
-		else
-		{
-			std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
-			sendErrorResponse(client, 404);
-		}
-	}
-	
-	sendHttpResponse(client, 200, getMimeType(client._filePath));
-	return (true);
-}
 
-bool Connection::hanglGetLocation(Client &client)
-{
-	//Location and GET
-	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
-	if (location)
+	if ( client._config. autoindex == true)
 	{
-		if (!(location->isMethodAllowed("GET")))
-		{
-			std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
-			sendErrorResponse(client, 405);
-			return (true);
-		}
-		std::string filePath = getFilePath(client, location);
-		std::ifstream file(filePath, std::ios::in | std::ios::binary);
-		
-		if (file.is_open())
-		{
-			sendHttpResponse(client, 200, getMimeType(filePath), file);
-			file.close();
-		}
-		else
-		{
-			std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
-			sendErrorResponse(client, 404);
-		}
-		return (true);
+		Autoindex   dir_list;
+		dir_list.create();
+
+
 	}
-	return (false);
+
+	std::string filePath = getFilePath(client);
+	//ios::binary pour indiquer que le fichier doit être traité en mode binaire plutôt qu'en mode texte. 
+	std::ifstream file(filePath, std::ios::in | std::ios::binary);
+
+	if (file.is_open())
+	{
+		sendHttpResponse(client, 200, getMimeType(filePath), file);
+		file.close();
+	}
+	else
+	{
+		std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+		sendErrorResponse(client, 404);
+	}
 }
 
 void Connection::handlePOST(Client& client)
@@ -423,11 +378,12 @@ void Connection::handlePOST(Client& client)
 		}
 
 		// Trouver le début des données du fichier
-		std::string body(client._bodyReq.str());
+		std::string body(client._body.str());
 		startPos = body.find("\r\n\r\n");
 		startPos += 4; 
 		// Trouver la fin des données du fichier
 		boundary.replace(boundary.length(), 1, "--");
+		std::cout << "---------------- boundary : " << boundary << " et size body " << body.size() << std::endl;
 		endPos = body.find(boundary, startPos);
 		endPos -= 4;
 		if (endPos == std::string::npos)
@@ -437,11 +393,11 @@ void Connection::handlePOST(Client& client)
 		}
 		std::string fileData = body.substr(startPos, endPos - startPos);
 
-		std::fstream outFile;
-		outFile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
-		if (outFile.is_open())
+		std::fstream outfile;
+		outfile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
+		if (outfile.is_open())
 		{
-			outFile << fileData;
+			outfile << fileData;
 			sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
 		}
 		else 
@@ -449,7 +405,7 @@ void Connection::handlePOST(Client& client)
 			sendErrorResponse(client, 400);
 			return;
 		}
-		outFile.close();
+		outfile.close();
 	}
 	else
 	{
@@ -460,30 +416,7 @@ void Connection::handlePOST(Client& client)
 
 void Connection::handleDELETE(Client& client)
 {
-	std::cout << client._requestStr.str() << std::endl;
-	// Vérification si l'URI correspond à une configuration de location
-	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
-	if (!location || !location->isMethodAllowed("DELETE"))
-	{
-		std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
-		sendErrorResponse(client, 405);
-		return;
-	}
-
-	//On recupere le nom du fichier dans la rquete
-	std::istringstream	requestStream(client._requestStr.str());
-	std::string			fileName;
-	std::string			line;
-	while (std::getline(requestStream, line))
-	{
-		size_t separator = line.find("\"file\":");
-		if (separator != std::string::npos)
-			fileName = line.substr(separator + 8, line.size() - 11);
-	}
-	
-	//On supprime le fichier
-	if (!(std::remove((location->getRoot() + "/" + fileName).c_str())))
-		sendHttpResponse(client, 200, "text/html", fileName + " deleted");
+	std::cout << "handleDELETE \n : " << client._requestStr.str() << std::endl;
 }
 
 std::string Connection::getMimeType(const std::string& filePath)
@@ -501,13 +434,6 @@ std::string Connection::getFilePath(const Client &client)
 	std::string filePath = basePath + client._uri;
 	if (filePath.back() == '/')
 		filePath += client._config.getIndex();
-	return filePath;
-}
-
-std::string Connection::getFilePath(const Client &client,const ParsConfig::Location *location)
-{
-	std::string basePath = location->getRoot();
-	std::string filePath = client._server.getRoot() + basePath + "/" + location->getIndex();
 	return filePath;
 }
 
