@@ -46,9 +46,69 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
         response.append(line + "\n");
         line.clear();
     }
-    
-    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
-        perror("Erreur lors de l'envoi de la réponse");
+
+
+	int optval = 0;
+	socklen_t  optlen = sizeof(optval);
+	if(getsockopt(client._csock, SOL_SOCKET, SO_SNDBUF, &optval, &optlen) == -1)
+	{
+		std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
+		sendErrorResponse(client, 500);
+//			client._keepAlive = false;
+//			return false;
+	}
+
+	//Recupere le tampon avec une taille adaptee
+	char buffer[optval];
+
+	strncpy(buffer, response.c_str(), optval -1);
+
+
+	//copie de file dans buffer
+//	std::cout << "optaval = " << optval <<std::endl;
+//	long long int length = 0;
+//	std::ifstream is;
+//	is.open (filePath, std::ios::binary );
+//	is.seekg (0, std::ios::end);
+//	length = is.tellg();
+//	std::cout << "optaval = " << optval <<std::endl;
+//	std::cout << "tille fichier = " << length << std::endl;
+//	is.seekg(0, std::ios::beg);
+//	is.close();
+	int i = send(client._csock, &buffer, optval, 0);
+	if (i == -1)
+		perror("Erreur lors de l'envoi de la réponse");
+	client._sizeResp = i;
+	if(static_cast<unsigned int>(client._sizeResp) == response.length())
+	{
+		client._keepAlive = false;
+	}
+	else
+		client._keepAlive = true;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//	int i = send(client._csock, response.c_str(), response.length(),0);
+//	std::cout << " reour send " << i << std::endl;
+// 	std::cout << " reonse leght = " << response.length() << std::endl;
+//	if( i < 0)
+//		perror("faux");
+//    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+//
+//        perror("Erreur lors de l'envoi de la réponse");
 }
 
 void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, const std::string &body)

@@ -16,6 +16,7 @@ Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Locat
 	_keepAlive(true),
 	_contentLenght(0),
 	_sizeBody(0),
+	_sizeResp(0),
 	_httpVersion(""),
 	_uri(""),
 	_method(UNKNOWN),
@@ -50,6 +51,7 @@ Client &Client::operator=(const Client &srcs)
 		_requestStr << srcs._requestStr.str();
 		_contentLenght = srcs._contentLenght;
 		_sizeBody = srcs._sizeBody;
+		_sizeResp = srcs._sizeResp;
 		_method = srcs._method;
 		_httpVersion = srcs._httpVersion;
 		_uri = srcs._uri;
