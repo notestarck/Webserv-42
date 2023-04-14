@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:37:03 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 09:03:25 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ Server::Server(const Server &srcs) :
 Server::~Server()
 {
 	std::cout << "\033[32mLiberation des sockets serveur : " << getNameServer() <<  "\033[0m" <<std::endl; 
-	close(_sock);
+	closeSocket();
 }
 
 Server & Server::operator=(const Server &srcs)
@@ -63,15 +63,36 @@ void Server::creatSocket()
 		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;
 		exit (1);
 	}
-	fcntl(_sock, F_SETFL, O_NONBLOCK);
+	if (fcntl(_sock, F_SETFL, O_NONBLOCK) < 0)
+	{
+		std::cerr << "\033[1;31mError : Server::creatSocket fcntl() " << strerror(errno) << "\033[0m" << std::endl;
+		exit (1);
+	}
 	std::cout << "\033[34mSocket created : \033[0m" << _sock << " en mode TCP/IP." << std::endl;
+}
+
+//Close socket
+void Server::closeSocket()
+{
+    try 
+	{
+        if (_sock != INVALID_SOCKET) 
+		{
+            close(_sock);
+            _sock = INVALID_SOCKET;
+        }
+    }
+    catch (const std::exception& e) 
+	{
+        std::cerr << "Erreur lors de la fermeture de la socket : " << e.what() << std::endl;
+    }
 }
 
 //Setsockopt
 void Server::paramSocket()
 {
-	int	tmp;
-	tmp = setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, (char *)&tmp, sizeof(tmp)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
+	int	optval = 1;
+	int tmp = setsockopt(_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)); //Eviter d'avoir les erreurs du bind(), voir si cela pose d'autres soucis.
 	if (tmp != 0)
 		std::cerr << "\033[1;31mError : Server::paramSocket() \033[0mparamSocket" << std::endl;
 }
@@ -79,8 +100,9 @@ void Server::paramSocket()
 //Bind socket
 void Server::linkSocket()
 {
+	std::memset(&_sin, 0, sizeof(_sin));
 	_sin.sin_port = htons(getPort());
-	_sin.sin_addr.s_addr = convertIp(getHost()); //Pour une estd::coute sur std::coutes les adresses htonl(INADDR_ANY)
+	_sin.sin_addr.s_addr = convertIp(getHost()); //Pour une ecoute sur toutes les adresses htonl(INADDR_ANY)
 	_sin.sin_family = AF_INET;
 	_sockError = bind(_sock, (sockaddr*)&_sin, _recsize);
 	if (_sockError != 0)

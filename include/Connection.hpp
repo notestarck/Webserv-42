@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/21 16:57:35 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/13 20:08:41 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,20 +22,13 @@
 
 #include "./Server.hpp"
 #include "./Client.hpp"
-#include "./Request.hpp"
+#include "./HTTPRequest.hpp"
 #include "./Response.hpp"
 
 #include <vector>
-#define MAX_URI_SIZE 64
 #define BSIZE 1024
-enum MethodType{
-    GET,
-    POST,
-    DELETE,
-    UNKNOWN
+#define MAX_URI_SIZE 64
 
-
-};
 class Connection
 {
 	public :
@@ -46,42 +39,56 @@ class Connection
 
 		Connection & operator=(const Connection &srcs);
 
-
-
+		//Initialisation de la connexion du serveur
+		void initMime();
 		void initConnection();
 		void initSelect(int fd, fd_set &set);
 		void runSelect();
+
+		//Fonctionnement coté client
+		Client *findExistingClient(const sockaddr_in& csin);
 		void acceptSocket();
 		void traitement();
-		//void send_error(int i);
+		void clearClientSockets();
 
-        //  clients
-        bool dead_or_alive(Client client, bool alive = false);
-        bool live_request(char *request) const;
-        bool request_ok(char *request);
-        bool live_request(std::map<std::string, std::string> *headers) const;
-        void get_method(Client &client, std::string path);
-        void post_method(Client &client, Request &request);
-        std::string find_path_in_root(std::string path, Client &client) const;
-        std::string longToString(long number);
-        const char *find_type(const char *path) const;
-        void delete_method(Client &client, std::string path);
-        std::string methodtype(MethodType method) const;
-        void send_error(int code, Client &client, std::vector<MethodType> *allow_methods);
-    int	write_in_path(Client &client, std::string content, std::string path);
-        std::string method_string(MethodType method) const;
-        bool    is_allowed_method(std::vector<MethodType> allow_methods, std::string method);
+		// @brief lit la requete client et la parse, gere les erreurs
+		// @param client client en cours de vecteur<Client> (*it)
+		// @return true si client toujours en vie.
+		bool receiveClientRequest(Client &client);
+
+		/// @brief Check si la requete client est conforme
+		/// @param request request du client a check.
+		/// @return bool true si confrome
+		bool checkRequest(char *request);
+
+		/// @brief Gestion de la request parse afin de generer la reponse
+		/// @param client 
+		bool handleReponse(Client &client);
+
+		/// @brief gestion de Get
+		void handleGET(Client& client);
+		/// @brief gestion de Post
+		void handlePOST(Client& client);
+		/// @brief gestion de Delete
+		void handleDELETE(Client& client);
+
+		std::string getFilePath(const Client &client);
+		std::string getMimeType(const std::string& filePath);
+		ParsConfig::Location *findLocationForUri(const std::string& uri, const std::vector<ParsConfig::Location>& locations);
+		void executeCGI(Client &client, const std::string &cgiPath);
+		
+		bool deadOrAlive(Client client, bool alive);
+
 	private :
 		/* Serveur */
-		std::vector<Server *>	_servers;
-		std::vector<Client>		_client;
-        int test;
-        std::map<int, std::string> _status_info;
+		std::vector<Server *>		_servers;
+		std::vector<Client>			_client;
 
 		/* Gestion des fd */ //Gestion des fd, FD_ZERO pour l'initialiser et FD_SET pour mettre les valeurs des sockets.
 		int		_maxFd;
 		fd_set	_read;
 		fd_set	_write;
+		fd_set	_error;
 
 		// @brief est un pointeur vers une structure pour le temps maximum
 		// que select doit attendre et bloquer avant de retourner, une valeur de
@@ -89,8 +96,8 @@ class Connection
 		// lire ou écrire.
 		timeval	_timeout;
 
-
-
+		// Types mime
+		std::map<std::string, std::string> _mimeTypes;
 };//class Connection
 
 #endif/* _CONNECTION_HPP_ */

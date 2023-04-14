@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:05:36 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/07 15:54:32 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,16 +39,18 @@ class ParsConfig
 				const std::vector<std::string> &	getAllow() const;
 				const std::string &					getRoot() const;
 				const std::string &					getIndex() const;
-				std::vector<std::string>			_allow;
+				const std::string &					getCgiPath() const;
+
+				bool isMethodAllowed(std::string method) const;
 
 			private :
 				Location();
+				std::vector<std::string>	_allow;
 				std::string 				_url;
 				std::string 				_root;
 				std::string 				_index;
-                std::string                 _cgi_pass;
-				//ajouter le cgi_info
-		};// class Locartion
+                std::string                 _cgiPath;
+		};// class Location
 
 		ParsConfig();
 		ParsConfig(std::ifstream &file_config);

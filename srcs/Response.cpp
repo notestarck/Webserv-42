@@ -1,87 +1,143 @@
-//
-// Created by stephane walter on 19/03/2023.
-//
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Response.cpp                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
+/*   Updated: 2023/04/13 17:49:11 by estarck          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../include/Response.hpp"
-#include <iostream>
 
-Response::Response(std::string status) {
-    //std::cout << "constuct Response\n";
-    this->status_code = status.substr(0, 3);  // code status
-    this->status_word = status.substr(4); // mot designant status
+void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, std::ifstream &body)
+{
+    std::string response;
+    std::string statusMessage;
 
+    switch (statusCode)
+    {
+        case 200:
+            statusMessage = "OK";
+            break;
+        case 201:
+            statusMessage = "Created";
+            break;
+        case 204:
+            statusMessage = "No Content";
+            break;
+        default:
+            statusMessage = "Unknown Status";
+    }
 
-    //std::cout << status_code << std::endl;
-    //std::cout << status_word << std::endl;
-
-
+    response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
+    response.append("Content-Type: " + contentType + "\r\n");
+    body.seekg(0, std::ios::end);
+    response.append("Content-Length: " + std::to_string(body.tellg()) + "\r\n");
+    body.seekg(0, std::ios::beg);
+    response.append("Accept-Charset: utf-8\r\n");
+    response.append("Connection: Closed\r\n");
+    response.append("\r\n");
+    std::string line;
+    while (getline(body, line))
+    {
+        response.append(line + "\n");
+        line.clear();
+    }
+    
+    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+        perror("Erreur lors de l'envoi de la réponse");
 }
 
-Response::~Response()
-{}
-
-void Response::append_header(std::string one, std::string two)
+void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, const std::string &body)
 {
-    headers.insert(std::make_pair(one, two));
+    std::string response;
+    std::string statusMessage;
 
+    switch (statusCode)
+    {
+        case 200:
+            statusMessage = "OK";
+            break;
+        case 201:
+            statusMessage = "Created";
+            break;
+        case 204:
+            statusMessage = "No Content";
+            break;
+        default:
+            statusMessage = "Unknown Status";
+    }
+
+    response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
+    response.append("Content-Type: " + contentType + "\r\n");
+    response.append("Content-Length: " + std::to_string(body.length()) + "\r\n");
+    response.append("Accept-Charset: utf-8\r\n");
+    response.append("Connection: Closed\r\n");
+    response.append("\r\n");
+    response.append(body);
+    
+    std::cout << response.c_str() << std::endl;
+    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+        perror("Erreur lors de l'envoi de la réponse");
 }
 
-int Response::get_body_size()
+void sendErrorResponse(Client &client, int code)
 {
-    return body.size();
-}
+    std::string response;
+    std::string message;
 
-void Response::set_body(std::string &str)
-{
-    this->body = str;
-}
+    switch (code)
+    {
+        case 400:
+            message = "Bad Request";
+            break;
+        case 403:
+            message = "Forbidden";
+            break;
+        case 404:
+            message = "Not Found";
+            break;
+        case 405:
+            message = "Method Not Allowed";
+            break;
+		case 408:
+			message = "Request Timeout";
+			break;
+		case 413:
+			message = "Content Too Large";
+			break;
+		case 414:
+			message = "URI Too Long";
+			break;
+        case 500:
+            message = "Internal Server Error";
+            break;
+		case 505:
+			message = "HTTP Version Not Supported";
+			break;
+        default:
+            message = "Unknown Error";
+    }
 
-std::string Response::make_header()
-{
-    std::string result;
+    response = "HTTP/1.1 " + std::to_string(code) + " " + message + "\r\n";
+    response += "Content-Type: text/html\r\n";
+    response += "Accept-Charset: utf-8, iso-8859-1;q=0.5\r\n";
+    response += "Connection: close\r\n";
+    response += "\r\n";
+    response += "<!DOCTYPE html>\n";
+    response += "<html lang=\"en\">\n";
+    response += "<head>\n";
+    response += "    <meta charset=\"UTF-8\">\n";
+    response += "    <title>" + std::to_string(code) + " " + message + "</title>\n";
+    response += "</head>\n";
+    response += "<body>\n";
+    response += "    <h1>Error " + std::to_string(code) + ": " + message + "</h1>\n";
+    response += "</body>\n";
+    response += "</html>";
 
-    result.append("HTTP/1.1 " + status_code + " " + status_word + "\r\n");
-    for (std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); i++)
-        result.append((*i).first + ": " + (*i).second + "\r\n");
-    result.append("\r\n");
-
-    return result;
-}
-
-void Response::make_status_body()
-{
-    std::string result;
-
-    result.append("<!DOCTYPE html><html><head><meta charset=\"UTF-8\"/><title>webserv</title></head>");
-    result.append("<body>");
-    result.append("<h1>" + status_code + "</h1>");
-    result.append("<h3>" + status_word + "</h3>");
-    result.append("<p>Click <a href=\"/\">here</a> to return home.</p>");
-    result.append("</body></html>");
-
-    body.clear();
-    body = result;
-}
-
-void Response::make_status_body(std::string url)
-{
-    std::string result;
-
-    result.append(url);
-
-    body.clear();
-    body = result;
-}
-
-std::string Response::run_resp()
-{
-    std::string result;
-
-    result.append("HTTP/1.1 " + status_code + " " + status_word + "\r\n");
-    for (std::map<std::string, std::string>::iterator i = headers.begin(); i != headers.end(); i++)
-        result.append((*i).first + ": " + (*i).second + "\r\n");
-    result.append("\r\n");
-    result.append(body);
-
-    return result;
+    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+        perror("Erreur lors de l'envoi de la réponse d'erreur");
 }

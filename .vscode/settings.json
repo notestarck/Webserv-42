@@ -66,6 +66,16 @@
 		"unordered_map": "cpp",
 		"utility": "cpp",
 		"vector": "cpp",
+<<<<<<< HEAD
 		"filesystem": "c"
+=======
+		"filesystem": "c",
+		"__bits": "cpp",
+		"clocale": "cpp",
+		"compare": "cpp",
+		"concepts": "cpp",
+		"variant": "cpp",
+		"__verbose_abort": "cpp"
+>>>>>>> manu
 	}
 }

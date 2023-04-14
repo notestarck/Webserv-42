@@ -18,6 +18,13 @@
 
 #include <map>
 
+enum MethodType{
+    GET,
+    POST,
+    DELETE,
+    UNKNOWN
+};
+
 class Request
 {
 	public:
