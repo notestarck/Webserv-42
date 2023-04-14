@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 13:33:09 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 13:35:50 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,7 +424,8 @@ void Connection::handleDELETE(Client& client)
 		if (separator != std::string::npos)
 			fileName = line.substr(separator + 8, line.size() - 11);
 	}
-	std::cout << "fileName :" << fileName  << " " << (location->getRoot() + "/" + fileName).c_str() << std::endl;
+	
+	//On supprime le fichier
 	if (!(std::remove((location->getRoot() + "/" + fileName).c_str())))
 		sendHttpResponse(client, 200, "text/html", fileName + " deleted");
 }
