@@ -49,6 +49,7 @@ struct Client
 	std::stringstream							_requestStr;
 	ssize_t										_contentLenght;
 	ssize_t										_sizeBody;
+	ssize_t                                     _sizeResp;
 	// Request HTTP parsee.
     std::string									_httpVersion;
     std::string									_uri;
