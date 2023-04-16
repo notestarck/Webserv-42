@@ -85,6 +85,7 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		for (size_t i = 0; i < srcs._location.size(); i++)
 			_location.push_back(srcs._location[i]);
 		_nbrLocation = srcs._nbrLocation;
+
 	}
 	return (*this);
 }
@@ -153,6 +154,7 @@ std::string	ParsConfig::getLocationIndex(std::string url) const
 	std::cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << std::endl;
 	exit (-3);
 }
+
 
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
@@ -244,6 +246,8 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 				_index = value.substr(0, value.size() - 1);
             else if(key == "cgi_pass")
                 _cgiPath = value.substr(0, value.size() - 1);
+            else if(key == "autoindex")
+                _autoindex == value.substr(0, valuue.size() - 1 );
 		}
 		line.clear();
 		ss.clear();
@@ -268,6 +272,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 		_root = srcs._root;
 		_index = srcs._index;
         _cgiPath = srcs._cgiPath;
+        _autoindex = srcs._autoindex;
 	}
 	return (*this);
 }
@@ -286,6 +291,9 @@ const std::string & ParsConfig::Location::getIndex() const
 
 const std::string & ParsConfig::Location::getCgiPath() const
 { return (_cgiPath); }
+
+const std::string & ParsConfig::Location::getAutoIndex() const
+{ return (_autoindex); }
 
 bool ParsConfig::Location::isMethodAllowed(std::string method) const
 {

@@ -40,6 +40,7 @@ class ParsConfig
 				const std::string &					getRoot() const;
 				const std::string &					getIndex() const;
 				const std::string &					getCgiPath() const;
+                const std::string &                 getAutoIndex() const;
 
 				bool isMethodAllowed(std::string method) const;
 
@@ -50,6 +51,7 @@ class ParsConfig
 				std::string 				_root;
 				std::string 				_index;
                 std::string                 _cgiPath;
+                std::string                 _autoindex;
 		};// class Location
 
 		ParsConfig();
@@ -73,6 +75,7 @@ class ParsConfig
 		std::vector<Location>			&getLocation();
 		size_t              			getNbrLocation() const;
 
+
 	private :
 		std::string              	_host;
 		unsigned int           		_port;
@@ -82,6 +85,7 @@ class ParsConfig
 		std::map<int, std::string>	_error_page;
 		std::vector<Location>	    _location;
 		size_t              		_nbrLocation;
+
 
 		//Setteur
 		void    setHost(std::string ip);
