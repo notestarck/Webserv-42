@@ -247,7 +247,7 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
             else if(key == "cgi_pass")
                 _cgiPath = value.substr(0, value.size() - 1);
             else if(key == "autoindex")
-                _autoindex == value.substr(0, valuue.size() - 1 );
+                _autoindex = value.substr(0, value.size() - 1 );
 		}
 		line.clear();
 		ss.clear();
