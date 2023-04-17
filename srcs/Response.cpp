@@ -6,13 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 16:59:04 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 15:30:44 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Response.hpp"
 
-void sendHttpResponse(Client &client, int statusCode, const std::string &contentType)
+void createHttpResponse(Client &client, int statusCode, const std::string &contentType)
 {
     std::string response;
     std::string statusMessage;
@@ -34,20 +34,41 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
 
     response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
     response.append("Content-Type: " + contentType + "\r\n");
-    response.append("Content-Length: " + std::to_string(client._sizeBodyRep) + "\r\n");
+    response.append("Content-Length: " + std::to_string(client._bodyRep.size()) + "\r\n");
     response.append("Accept-Charset: utf-8\r\n");
-    response.append("Connection: Closed\r\n");
     response.append("\r\n");
-    //std::string line;
-    // while (getline(client._bodyRep, line))
-    // {
-    //     response.append(line + "\n");
-    //     line.clear();
-    // }
     response.append(client._bodyRep);
-    //std::cout << client._filePath << std::endl;
-    //if (client._filePath == "./www/index.html")
-        //std::cout << "Response \n" << response << std::endl;
+
+    client._sizeRep = response.size();
+
+    //On enregistre l'ensemble de la reponse dans le client pour l'envoyer en plusieurs fois.
+    client._response = response;
+}
+
+void sendHttpResponse(Client &client)
+{
+    //On recupere la taille du tampon sur le socket.
+	int optval = 2048;
+	// socklen_t  optlen = sizeof(optval);
+	// if(getsockopt(client._csock, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
+	// {
+	// 	std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
+	// 	sendErrorResponse(client, 500);
+	// 	client._keepAlive = false;
+	// 	return;
+	// }
+    
+    std::string response;
+    
+    std::cout << "_sizeSend : " << client._sizeSend << " _sizeBodyRep : " << client._sizeRep << std::endl;
+    size_t remainingSize = client._sizeRep - client._sizeSend;
+    if (remainingSize > 0)
+    {
+        const char* bodyData = client._response.data() + client._sizeSend;
+        size_t bodySize = std::min(remainingSize, static_cast<size_t>(optval));
+        response.append(bodyData, bodySize);
+        client._sizeSend += bodySize;
+    }
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
         perror("Erreur lors de l'envoi de la réponse");
 }
@@ -89,72 +110,6 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
     
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
         perror("Erreur lors de l'envoi de la réponse");
-
-
-
-
-
-
-
-
-	// int optval = 0;
-	// socklen_t  optlen = sizeof(optval);
-	// if(getsockopt(client._csock, SOL_SOCKET, SO_SNDBUF, &optval, &optlen) == -1)
-	// {
-	// 	std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
-    //     sendErrorResponse(client, 500);
-	// 		client._keepAlive = false;
-	// 		return false;
-	// }
-
-	// //Recupere le tampon avec une taille adaptee
-	// char buffer[optval];
-
-	// strncpy(buffer, response.c_str(), optval -1);
-
-
-	// //copie de file dans buffer
-	// std::cout << "optaval = " << optval <<std::endl;
-	// long long int length = 0;
-	// std::ifstream is;
-	// is.open (filePath, std::ios::binary );
-	// is.seekg (0, std::ios::end);
-	// length = is.tellg();
-	// std::cout << "optaval = " << optval <<std::endl;
-	// std::cout << "tille fichier = " << length << std::endl;
-	// is.seekg(0, std::ios::beg);
-	// is.close();
-	// int i = send(client._csock, &buffer, optval, 0);
-	// if (i == -1)
-	// 	perror("Erreur lors de l'envoi de la réponse");
-	// client._sizeResp += i;
-	// if(static_cast<unsigned int>(client._sizeResp) == response.length())
-	// {
-	// 	client._keepAlive = false;
-	// }
-	// else
-	// 	client._keepAlive = true;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//	int i = send(client._csock, response.c_str(), response.length(),0);
-//	std::cout << " reour send " << i << std::endl;
-// 	std::cout << " reonse leght = " << response.length() << std::endl;
-//	if( i < 0)
-//		perror("faux");
 }
 
 void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, const std::string &body)

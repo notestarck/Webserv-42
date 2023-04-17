@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/10 16:08:03 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 14:26:03 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 15:13:41 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,8 @@ Server & Server::operator=(const Server &srcs)
 //Init socket
 void Server::creatSocket()
 {
-	_sock = socket(AF_INET, SOCK_STREAM, 0);
+	//_sock = socket(AF_INET, SOCK_STREAM, 0);
+	_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(_sock == INVALID_SOCKET)
 	{
 		std::cerr << "\033[1;31mError : Server::creatSocket socket() " << strerror(errno) << "\033[0m" << std::endl;

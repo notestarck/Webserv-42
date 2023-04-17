@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 17:03:11 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 16:07:34 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ Connection::Connection(std::vector<Server*>& servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	_timeout.tv_sec = 2;
+	_timeout.tv_sec = 3;
 	_timeout.tv_usec = 0;
 	initMime();
 }
@@ -139,10 +139,7 @@ void Connection::acceptSocket()
 					close(newClient._csock);
 					continue;
 				}
-				int flags = fcntl(newClient._csock, F_GETFL, 0);
-				if (flags < 0)
-					std::cout << "merde" << std::endl;
-				if (fcntl(newClient._csock, F_SETFL, flags | O_NONBLOCK) < 0)
+				if (fcntl(newClient._csock, F_SETFL, O_NONBLOCK) < 0)
 					std::cout << "zut" <<std::endl;
 				std::cout << "\033[0;32m\nAccepted connection \033[0m on port " << (*it)->getPort() << std::endl;
 				std::cout << "\033[0;32mClient connected \033[0m on socket: " << newClient._csock << std::endl;
@@ -185,8 +182,11 @@ void Connection::traitement()
 {
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
+		std::cout << "traitement()\n";
 		if (FD_ISSET(it->_csock, &_error))
+		{
 			(*it)._keepAlive = false;
+		}
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
 			if (receiveClientRequest(*it))
@@ -209,6 +209,7 @@ void Connection::traitement()
 
 bool Connection::receiveClientRequest(Client &client)
 {
+		std::cout << " rentre " << client._sizeBody << " " << client._contentLenght << std::endl;
 	//On recupere la taille du tampon sur le socket.
 	int optval = 0;
 	socklen_t  optlen = sizeof(optval);
@@ -223,7 +224,6 @@ bool Connection::receiveClientRequest(Client &client)
 	//Recupere le tampon avec une taille adaptee
 	char buffer[optval];
 	ssize_t bytesRead = recv(client._csock, buffer, optval, 0);
-
 	if (bytesRead <= 0)
 	{
 		if (bytesRead == 0)
@@ -266,6 +266,7 @@ bool Connection::receiveClientRequest(Client &client)
 		client._bodyReq.write(buffer, bytesRead);
 		client._sizeBody += bytesRead;
 	}
+		std::cout << " sort " << client._sizeBody << " " << client._contentLenght << std::endl;
 	
 	std::memset(&buffer, 0, optval);
    	if (client._sizeBody < client._contentLenght)
@@ -275,7 +276,7 @@ bool Connection::receiveClientRequest(Client &client)
 
 bool Connection::handleReponse(Client &client)
 {
-	bool ret = false;
+	bool ret = true;
 	switch (client._method)
 	{
 		case GET:
@@ -309,21 +310,20 @@ bool Connection::handleGET(Client& client)
 
 	// On ouvre le fichier a renvoyer et on le stock dans client._bodyRep.
 	// Pour eviter de le faire a chaque tour, on check si client._sizeBodyRep == 0
-	if (client._sizeBodyRep == 0)
+	if (client._sizeRep == 0)
 	{
 		client._filePath = getFilePath(client);
 		std::ifstream	file(client._filePath, std::ios::in | std::ios::binary);
 		if (file.is_open())
 		{
 			std::stringstream buf;
-			//client._bodyRep("");
 			buf << file.rdbuf();
 			client._bodyRep = buf.str();
-			//file.seekg(0, std::ios::end);
-			client._sizeBodyRep = client._bodyRep.size();
-			//file.seekg(0, std::ios::beg);
+			client._sizeRep = 0;
+			client._sizeSend = 0;
 			file.close();
 			buf.clear();
+			createHttpResponse(client, 200, getMimeType(client._filePath));
 		}
 		else
 		{
@@ -331,8 +331,10 @@ bool Connection::handleGET(Client& client)
 			sendErrorResponse(client, 404);
 		}
 	}
-	
-	sendHttpResponse(client, 200, getMimeType(client._filePath));
+
+	sendHttpResponse(client);
+	if (client._sizeSend < client._sizeRep)
+		return (false);
 	return (true);
 }
 
