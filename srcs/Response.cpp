@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/17 16:50:28 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 19:05:44 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
     response.append("Content-Type: " + contentType + "\r\n");
     response.append("Content-Length: " + std::to_string(client._bodyRep.size()) + "\r\n");
     response.append("Accept-Charset: utf-8\r\n");
+    response.append("Connection: Closed\r\n");
     response.append("\r\n");
     response.append(client._bodyRep);
 
@@ -47,30 +48,31 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
 
 void sendHttpResponse(Client &client)
 {
-    //On recupere la taille du tampon sur le socket.
-	int optval = 0;
-	socklen_t  optlen = sizeof(optval);
-	if(getsockopt(client._csock, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
-	{
-		std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
-		sendErrorResponse(client, 500);
-		client._keepAlive = false;
-		return;
-	}
-    
-    std::string response;
-    
-    std::cout << "_sizeSend : " << client._sizeSend << " _sizeBodyRep : " << client._sizeRep << std::endl;
-    size_t remainingSize = client._sizeRep - client._sizeSend;
-    if (remainingSize > 0)
+    int optval = 0;
+    socklen_t  optlen = sizeof(optval);
+    if(getsockopt(client._csock, SOL_SOCKET, SO_SNDBUF, &optval, &optlen) == -1 || optval <= 0)
     {
-        const char* bodyData = client._response.data() + client._sizeSend;
-        size_t bodySize = std::min(remainingSize, static_cast<size_t>(optval));
-        response.append(bodyData, bodySize);
-        client._sizeSend += bodySize;
+        std::cerr << "Error : 500 sending data to client getsockopt(): " << client._csock << std::endl;
+        sendErrorResponse(client, 500);
+        client._keepAlive = false;
+        return;
     }
-    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+    
+    ssize_t remainingSize = client._sizeRep - client._sizeSend;
+    
+    const char* bodyData = client._response.data() + client._sizeSend;
+    ssize_t bodySize = std::min(remainingSize, static_cast<ssize_t>(optval));
+    std::string response(bodyData, bodySize);
+
+    ssize_t sentBytes = send(client._csock, response.data(), response.size(), 0);
+    client._sizeSend += sentBytes;
+    std::cout << "optval : " << optval << " _sizeSend : " << client._sizeSend << " bodySize : " << bodySize << " sentByte : " << sentBytes << "_sizeBodyRep : " << client._sizeRep << std::endl;
+    //sleep(1);
+    if (sentBytes == -1)
+    {
         perror("Erreur lors de l'envoi de la réponse");
+        //client._keepAlive = false;
+    }
 }
 
 void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, std::ifstream &body)
