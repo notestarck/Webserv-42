@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/17 19:05:44 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 19:16:53 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,12 +66,10 @@ void sendHttpResponse(Client &client)
 
     ssize_t sentBytes = send(client._csock, response.data(), response.size(), 0);
     client._sizeSend += sentBytes;
-    std::cout << "optval : " << optval << " _sizeSend : " << client._sizeSend << " bodySize : " << bodySize << " sentByte : " << sentBytes << "_sizeBodyRep : " << client._sizeRep << std::endl;
-    //sleep(1);
     if (sentBytes == -1)
     {
         perror("Erreur lors de l'envoi de la réponse");
-        //client._keepAlive = false;
+        client._keepAlive = false;
     }
 }
 
