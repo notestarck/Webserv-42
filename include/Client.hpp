@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/17 14:45:19 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 17:49:04 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,8 +62,8 @@ struct Client
 	std::string									_filePath;
 	std::string									_bodyRep;
 	std::string									_response;
-	size_t										_sizeSend;
-	size_t										_sizeRep;
+	ssize_t										_sizeSend;
+	ssize_t										_sizeRep;
 	
     // Config du serveur
     ParsConfig									&_config;

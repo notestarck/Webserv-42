@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/17 16:07:34 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 19:14:04 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,7 +182,6 @@ void Connection::traitement()
 {
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
-		std::cout << "traitement()\n";
 		if (FD_ISSET(it->_csock, &_error))
 		{
 			(*it)._keepAlive = false;
@@ -209,7 +208,6 @@ void Connection::traitement()
 
 bool Connection::receiveClientRequest(Client &client)
 {
-		std::cout << " rentre " << client._sizeBody << " " << client._contentLenght << std::endl;
 	//On recupere la taille du tampon sur le socket.
 	int optval = 0;
 	socklen_t  optlen = sizeof(optval);
@@ -261,12 +259,8 @@ bool Connection::receiveClientRequest(Client &client)
 			return true;
 		}
 	}
-	else
-	{
-		client._bodyReq.write(buffer, bytesRead);
-		client._sizeBody += bytesRead;
-	}
-		std::cout << " sort " << client._sizeBody << " " << client._contentLenght << std::endl;
+	client._bodyReq.write(buffer, bytesRead);
+	client._sizeBody += bytesRead;
 	
 	std::memset(&buffer, 0, optval);
    	if (client._sizeBody < client._contentLenght)
