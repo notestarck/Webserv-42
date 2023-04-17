@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../style/style.css">
+		<link rel="stylesheet" href="../style/documentation.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
+		<title>Test-WebServ</title>
+		<script src="https://unpkg.com/css-doodle@0.34.6/css-doodle.min.js"></script>
+	</head>
+
+	<body>
+		<header>
+			<div class="barre_nav">
+				<img src="../image/logoWebServ-42.png" alt="Logo WebServ-42">
+				<p>WebServ-42</p>
+				<nav>
+					<a href="../index.html">Accueil</a>
+					<a href="./team.html">Team</a>
+					<a href="https://github.com/notestarck/Webserv-42" target="_blank">GitHub</a>
+				</nav>
+			</div>
+		</header>
+		
+		<main >
+			<h1>Documentation</h1>
+			<div class="corp">
+				<section class="doc_pdf">
+					<h2>Schéma pdf</h2>
+					<a href="../documentation/Shema_server/FonctionnementGlobal.pdf" alt="Fonctionnement du serveur" target="_blank">
+						<i class="fa fa-file-pdf-o" aria-hidden="true"></i>Fonctionnement global
+					</a>
+					<a href="../documentation/Shema_server/Client.pdf" alt="Fonctionnement cote client" target="_blank">
+						Internet du coté client
+					</a>
+					<a href="../documentation/Shema_server/Serveur.pdf" alt="Fonctionnement coté serveur" target="_blank">
+						Internet coté serveur
+					</a>
+					<a href="../documentation/Shema_server/Lessockets.pdf" alt="Fonctionnement des sockets" target="_blank">
+						Fonctionnement des sockets
+					</a>
+					<a href="../documentation/Shema_server/Basededonnee.pdf" alt="Fonctionnement base de donnee" target="_blank">
+						Coté base de donnée
+					</a>
+				</section>
+				<section class="algo">
+					<h2>Algorithme de Nagle</h2>
+					<div class="text">
+						<p>
+							L'algorithme de Nagle est un algorithme de contrôle de congestion utilisé dans les réseaux TCP/IP.
+							Son objectif est d'améliorer l'efficacité du réseau en réduisant le nombre de paquets envoyés sur le réseau.
+							En pratique, l'algorithme de Nagle permet de regrouper plusieurs petits paquets de données en un seul paquet
+							plus grand avant de les envoyer sur le réseau. Cela permet de réduire le nombre de paquets envoyés,
+							ce qui peut réduire la congestion du réseau et améliorer les performances.
+						</p>
+						<p>
+							Cependant, l'algorithme de Nagle peut également introduire un certain temps de latence,
+							en particulier pour les applications qui envoient de petites quantités de données.
+							Pour cette raison, il peut être judicieux de désactiver l'algorithme de Nagle dans certains cas,
+							par exemple pour les applications qui nécessitent une communication en temps réel ou qui envoient
+							de petites quantités de données fréquemment.
+						</p>
+						<p>
+							La désactivation de l'algorithme de Nagle peut être effectuée en utilisant
+							l'option TCP_NODELAY avec la fonction setsockopt(), comme mentionné précédemment.
+						</p>
+					</div>
+				</section>
+				<section class="liens">
+					<h2>Liens externes</h2>
+					<a href="https://bousk.developpez.com/cours/reseau-c++/TCP/01-premiers-pas/" alt="Premiers pas avec TCP" target="_blank">
+						Premiers pas avec TCP
+					</a>
+					<a href="https://bousk.developpez.com/cours/reseau-c++/TCP/05-envoi-reception-serveur/" alt="Envoi et reception depuis un serveur" target="_blank">
+						Envoi et reception depuis un serveur
+					</a>
+					<a href="https://www.frameip.com/c-mode-connecte/" alt="Mode connecté en C++" target="_blank">
+						Mode connecté en C++
+					</a>
+					<a href="https://www.developpez.net/forums/d1585590/c-cpp/cpp/cours-programmation-reseau/" alt="Cours sur la programmation réseau" target="_blank">
+						Cours sur la programmation réseau
+					</a>
+					<a href="http://sdz.tdct.org/sdz/les-sockets.html" alt="Les sockets" target="_blank">
+						Les sockets
+					</a>
+					<a href="https://www.pierre-giraud.com/http-reseau-securite-cours/requete-reponse-session/" alt="Requête, réponse et session HTTP" target="_blank">
+						Requête, réponse et session HTTP
+					</a>
+				</section>
+			</div>
+		</main>
+		<footer>
+				
+		</footer>
+	</body>
+</html>

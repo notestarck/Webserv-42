@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../style/style.css">
+		<link rel="stylesheet" href="../style/location.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
+		<title>Test-WebServ</title>
+		<link rel="stylesheet" href="path/to/prism.css">
+		<script src="path/to/prism.js"></script>
+	</head>
+
+	<body>
+		<header>
+			<div class="barre_nav">
+				<img src="../image/logoWebServ-42.png" alt="Logo WebServ-42">
+				<p>WebServ-42</p>
+				<nav>
+					<a href="../index.html">Accueil</a>
+					<a href="team.html">Team</a>
+					<a href="documentation.html">Documentation</a>
+				</nav>
+			</div>
+		</header>
+
+		<main>
+			<h1>Tester les locations</h1>
+			<div class="definition">
+				<h2>Qu'est ce qu'une location ?</h2>
+				<p>
+					Une "location" dans un fichier de configuration Nginx est un bloc de directives qui 
+					commence par la directive "location" suivie d'un motif d'URL. Le motif d'URL peut 
+					être une chaîne de caractères littérale ou une expression régulière qui correspond 
+					à une ou plusieurs URL spécifiques.<br>
+
+				<br>Voici un exemple de bloc "location" dans un fichier de configuration nginx :
+				<pre><code>&nbsp;location /images/ {
+&nbsp;&nbsp;&nbsp;&nbsp;root /content;
+&nbsp;&nbsp;&nbsp;&nbsp;allow GET;
+&nbsp;&nbsp;&nbsp;&nbsp;index portfolio.html";
+&nbsp;}			</code></pre>
+				</p>
+			</div>
+			<div class="test">
+				<h2>Les tests</h2>
+				<ol>
+					<li>
+						Pour ce premier test, en rajoutant <kbd>'/page1'</kbd> à l'url (ex: 127.0.0.1:1042/page1), vous devriez 
+						arriver sur la page de presentation de la <a href="./team.html">team.</a>
+					</li> <br>
+					<li>
+						Pour le second test, <code>'location /page2'</code> a été defini à deux reprises 
+						dans le fichier nginx. Uniquement le deuxième doit être pris en compte. Vous devriez 
+						arriver sur la page de <a href="documentation.html">documentation</a> du projet.
+					</li><br>
+					<li>
+						Pour ce trosieme test, la <code>'location /page3'</code> n'a pas la bonne methode,
+						vous devez recevoir le code erreur 405 Method Not Allowed.
+					</li>
+				</ol>
+			</div>
+		</main>
+
+		<footer>
+
+		</footer>
+	</body>
+</html>

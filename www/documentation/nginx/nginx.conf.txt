@@ -1,0 +1,44 @@
+https://grafikart.fr/tutoriels/nginx-692
+
+Pour verifier si le fichier config est valide avec nginx : sudo nginx -t
+Si pas d’IP on fait localhost donc 127.0.0.1
+
+Si location = /x.html //  si on met = l’URL correspond pile pile a x.html
+Si location ~ /\. // avec ~ c’est une expression régulière 
+autoindex on : permet de créer un index des dossier/fichier de la location
+
+server {
+	listen 80; 							//Port d’ecoute.
+		(ou) listen 1.1.1.1:80; 		//Adresse et port d’écoute.
+	server_name	monsupersite.fr;	//nom du server
+	root ./site.html; 					//chemin du dossier ou est le contenu du site web
+	index index.htm;l					//premiere page du dossier
+
+	location /page1 { //URL
+		allow GET;						// Methode HTML
+		root /dossier1;					// dossier
+		index page1.html;				// page
+		max_client_body_size 10;	// Taille en MO maximal du body
+	}
+
+	location ~ /\. {
+		deny all;						// 403 Forbidden acmes refuse
+		access_log off;
+		log_not_found off;
+	}
+
+	error_log	/PATH/error_log; 			//localisation des log error
+	error_page 404 … /404.html;			//gestion erreur 404
+	error_page 500 502 503 504  /50x.html; // si erreur il faut charger 50x.html
+		location = /50x.html {					
+		root /usr/share/nginx/html;			//on charge la page d’erreur indique ici.
+	}
+}
+
+
+// Reoriente un www.mon… sur monsur...
+Server {
+	listen 80;
+	server_name www.monsupersite.fr;
+	return 301 http://monsupersite.fr:80$request_uri;
+}

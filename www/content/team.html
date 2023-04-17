@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="../style/style.css">
+		<link rel="stylesheet" href="../style/team.css">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
+		<title>Test-WebServ</title>
+		<script src="https://unpkg.com/css-doodle@0.34.6/css-doodle.min.js"></script>
+	</head>
+
+	<body>
+		<header>
+			<div class="barre_nav">
+				<img src="../image/logoWebServ-42.png" alt="Logo WebServ-42">
+				<p>WebServ-42</p>
+				<nav>
+					<a href="../index.html">Accueil</a>
+					<a href="./documentation.html">Documentation</a>
+					<a href="https://github.com/notestarck/Webserv-42" target="_blank">GitHub</a>
+				</nav>
+			</div>
+		</header>
+		
+		<div id="background">
+			<css-doodle click-to-update> 
+				:doodle {
+					@grid: 18 / 100vmax;
+					background: #0a0c27;
+				}
+				--hue: calc(210 + 1.5 * @row * @col);
+				background: hsl(var(--hue), 60%, 30%);
+				margin: -.5px;
+				transition: @r(.5s) ease;
+				clip-path: polygon(@pick(
+					'0 0, 100% 0, 100% 100%',
+					'0 0, 100% 0, 0 100%',
+					'0 0, 100% 100%, 0 100%',
+					'100% 0, 100% 100%, 0 100%'
+					));
+				</css-doodle>
+			</div>
+			<main >
+				<h1>La team</h1>
+				<div class="swalter">
+					<a href="https://profile.intra.42.fr/users/swalter" target="_blank" alt="Portrait de swalter">
+						<img src="../image/swalter.png"><p>Profil 42 de Stephane Walter</p>
+					</a>
+				</div>
+				<div class="estarck">
+					<a href="https://profile.intra.42.fr/users/estarck" target="_blank" alt="Portrait de estarck">
+						<img src="../image/estarck.png"><p>Profil 42 de Emmanuel Starck</p>
+					</a>
+				</div>
+				<div class="reclaire">
+					<a href="https://profile.intra.42.fr/users/reclaire" target="_blank" alt="Portrait de reclaire">
+						<img src="../image/reclaire.png"><p>Profil 42 de Remi Claire</p>
+					</a>
+				</div>
+				
+			</main>
+			<footer>
+				
+			</footer>
+		</body>
+</html>
