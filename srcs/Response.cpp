@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/17 15:30:44 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 16:50:28 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,15 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
 void sendHttpResponse(Client &client)
 {
     //On recupere la taille du tampon sur le socket.
-	int optval = 2048;
-	// socklen_t  optlen = sizeof(optval);
-	// if(getsockopt(client._csock, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
-	// {
-	// 	std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
-	// 	sendErrorResponse(client, 500);
-	// 	client._keepAlive = false;
-	// 	return;
-	// }
+	int optval = 0;
+	socklen_t  optlen = sizeof(optval);
+	if(getsockopt(client._csock, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
+	{
+		std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
+		sendErrorResponse(client, 500);
+		client._keepAlive = false;
+		return;
+	}
     
     std::string response;
     
