@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/17 19:16:53 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 10:04:21 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,6 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
     response.append("\r\n");
     response.append(body);
     
-    std::cout << response.c_str() << std::endl;
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
         perror("Erreur lors de l'envoi de la réponse");
 }

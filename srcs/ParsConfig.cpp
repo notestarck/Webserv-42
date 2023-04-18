@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 11:49:49 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 10:03:23 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,6 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 {
 	if (this != &srcs)
 	{
-		std::cout << "Constructeur d'operateur= de ParsConfig\n";
 		_host = srcs._host;
 		_port = srcs._port;
 		_name_server = srcs._name_server;
