@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 12:05:17 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 17:22:32 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,8 @@ class ParsConfig
 				const std::vector<std::string> &	getAllow() const;
 				const std::string &					getRoot() const;
 				const std::string &					getIndex() const;
+				const std::string &					getPath() const;
+				const bool &						getAutoIndex() const;
 				const std::string &					getReturn() const;
 				const std::string &					getCgiPath() const;
 
@@ -50,6 +52,8 @@ class ParsConfig
 				std::string 				_url;
 				std::string 				_root;
 				std::string 				_index;
+				std::string					_path;
+				bool						_autoIndex;
 				std::string					_return;
                 std::string                 _cgiPath;
 		};// class Location
@@ -72,6 +76,8 @@ class ParsConfig
 		std::vector<std::string>		getLocationAllow(std::string url) const;
 		std::string              		getLocationRoot(std::string url) const;
 		std::string              		getLocationIndex(std::string url) const;
+		std::string              		getLocationPath(std::string url) const;
+		bool              				getLocationAutoIndex(std::string url) const;
 		std::string              		getLocationReturn(std::string url) const;
 		std::vector<Location>			&getLocation();
 		size_t              			getNbrLocation() const;

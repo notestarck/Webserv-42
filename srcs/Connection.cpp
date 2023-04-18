@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 12:37:41 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 17:28:05 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -347,6 +347,13 @@ bool Connection::hanglGetLocation(Client &client)
 		{
 			std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 405);
+			return (true);
+		}
+
+		if (location->getAutoIndex())
+		{
+			std::cout << location->getPath();
+			startAutoIndex(client, getFilePath(client, location), location->getPath());
 			return (true);
 		}
 		std::string filePath = getFilePath(client, location);
