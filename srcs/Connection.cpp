@@ -6,11 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 17:28:05 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 18:39:50 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Connection.hpp"
+#include "./utils.hpp"
+
 
 #include <stdexcept>
 #include <iostream>
@@ -259,6 +261,16 @@ bool Connection::receiveClientRequest(Client &client)
 			std::memset(&buffer, 0, optval);
 			return true;
 		}
+		if (client._uri == "/test_max")
+		{
+			ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+			if (location->getMaxSize() < client._contentLenght)
+			{
+				sendErrorResponse(client, 413);
+				client._keepAlive = false;
+				return false;
+			}
+		}
 	}
 	else
 	{
@@ -398,6 +410,11 @@ void Connection::handlePOST(Client& client)
 		std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
 		sendErrorResponse(client, 405);
 		return;
+	}
+	if (location->getUrl() == "/test_max")
+	{
+		createHttpResponse(client, 200, "text/html");
+		sendHttpResponse(client);
 	}
 	
 	// Si pas de cgiPath, on upload les données
@@ -574,9 +591,11 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		dup2(cgiInput[0], STDIN_FILENO);
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
-		char *argv[] = {const_cast<char *>(cgiPath.c_str()), NULL};
-		char *envp[] = {NULL};
-		if (execve(cgiPath.c_str(), argv, envp) == -1)
+		std::string truc = client._bodyReq.str();
+		std::string _login = truc.substr(truc.find('=') + 1);
+
+		char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
+		if (execve(cgiPath.c_str(), argv, _env) == -1)
 		{
 			sendErrorResponse(client, 500);
 			exit(EXIT_FAILURE);

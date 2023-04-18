@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/17 15:02:17 by estarck           #+#    #+#             */
-/*   Updated: 2023/03/17 15:16:36 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 17:42:26 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ extern std::vector<Server *>		_server;
 extern std::vector<ParsConfig *>	_config;
 extern Connection					_connection;
 extern volatile bool				boolStart;
+extern char							**_env;
 
 void	delProg();
 

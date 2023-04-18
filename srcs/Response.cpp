@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 16:36:25 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 18:19:35 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,13 +93,13 @@ void sendErrorResponse(Client &client, int code)
             message = "Method Not Allowed";
             break;
 		case 408:
-			message = "Request Timeout";
+			message = "Request Time-out";
 			break;
 		case 413:
-			message = "Content Too Large";
+			message = "Request Entity Too Large";
 			break;
 		case 414:
-			message = "URI Too Long";
+			message = "Request-URI Too Long";
 			break;
         case 500:
             message = "Internal Server Error";

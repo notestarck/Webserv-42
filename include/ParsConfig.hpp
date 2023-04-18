@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 17:22:32 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 18:05:22 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class ParsConfig
 				const bool &						getAutoIndex() const;
 				const std::string &					getReturn() const;
 				const std::string &					getCgiPath() const;
+				const int &							getMaxSize() const;
 
 				bool isMethodAllowed(std::string method) const;
 
@@ -56,6 +57,7 @@ class ParsConfig
 				bool						_autoIndex;
 				std::string					_return;
                 std::string                 _cgiPath;
+				int							_maxSize;
 		};// class Location
 
 		ParsConfig();
@@ -79,6 +81,7 @@ class ParsConfig
 		std::string              		getLocationPath(std::string url) const;
 		bool              				getLocationAutoIndex(std::string url) const;
 		std::string              		getLocationReturn(std::string url) const;
+		int			              		getLocationMaxSize(std::string url) const;
 		std::vector<Location>			&getLocation();
 		size_t              			getNbrLocation() const;
 
