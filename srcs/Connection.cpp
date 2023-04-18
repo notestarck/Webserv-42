@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 11:36:28 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 12:37:41 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,7 +352,7 @@ bool Connection::hanglGetLocation(Client &client)
 		std::string filePath = getFilePath(client, location);
 		std::ifstream file(filePath, std::ios::in | std::ios::binary);
 		
-		if (file.is_open())
+		if (file.is_open() && location->getReturn().empty())
 		{
 			std::string line;
 			while (getline(file, line))
@@ -362,13 +362,21 @@ bool Connection::hanglGetLocation(Client &client)
     		}
 			createHttpResponse(client, 200, getMimeType(filePath));
 			sendHttpResponse(client);
-			file.close();
+		}
+		else if (!(location->getReturn().empty()))
+		{
+			client._response.append("HTTP/1.1 301 Moved Permanently\r\n");
+			client._response.append("Location: " + location->getReturn() + "\r\n\r\n");
+			client._sizeRep = client._response.size();
+			sendHttpResponse(client);
 		}
 		else
 		{
 			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
+		
+		file.close();
 		return (true);
 	}
 	return (false);
@@ -428,8 +436,6 @@ void Connection::handlePOST(Client& client)
 				return;
 			}
 		}
-
-		//std::cout << client._bodyReq.str();
 
 		// Trouver le début des données du fichier
 		std::string body(client._bodyReq.str());

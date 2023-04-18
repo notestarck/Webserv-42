@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 10:03:23 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 12:08:01 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,7 @@ ParsConfig::ParsConfig(std::ifstream &file_config) :
 		else if (key == "root")
 			setRoot(value.substr(0, value.size() - 1));
 		else if (key == "index")
-		{
 			_index = (value.substr(0, value.size() - 1));
-		}
 		else if (key == "error_page")
 		{
 			std::string s_value;
@@ -241,6 +239,8 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 				_root = value.substr(0, value.size() - 1);
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
+			else if (key == "return")
+				_return = value.substr(0, value.size() - 1);
             else if(key == "cgi_pass")
                 _cgiPath = value.substr(0, value.size() - 1);
 		}
@@ -266,6 +266,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 			_allow.push_back(*it);
 		_root = srcs._root;
 		_index = srcs._index;
+		_return = srcs._return;
         _cgiPath = srcs._cgiPath;
 	}
 	return (*this);
@@ -282,6 +283,9 @@ const std::string & ParsConfig::Location::getRoot() const
 
 const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }
+
+const std::string & ParsConfig::Location::getReturn() const
+{ return (_return); }
 
 const std::string & ParsConfig::Location::getCgiPath() const
 { return (_cgiPath); }
