@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/13 20:08:41 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/14 15:17:27 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,13 +66,15 @@ class Connection
 		bool handleReponse(Client &client);
 
 		/// @brief gestion de Get
-		void handleGET(Client& client);
+		bool handleGET(Client& client);
+		bool hanglGetLocation(Client &client);
 		/// @brief gestion de Post
 		void handlePOST(Client& client);
 		/// @brief gestion de Delete
 		void handleDELETE(Client& client);
 
 		std::string getFilePath(const Client &client);
+		std::string getFilePath(const Client &client, const ParsConfig::Location *location);
 		std::string getMimeType(const std::string& filePath);
 		ParsConfig::Location *findLocationForUri(const std::string& uri, const std::vector<ParsConfig::Location>& locations);
 		void executeCGI(Client &client, const std::string &cgiPath);

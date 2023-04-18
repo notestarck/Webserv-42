@@ -6,13 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/13 17:49:11 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 11:38:26 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Response.hpp"
 
-void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, std::ifstream &body)
+void createHttpResponse(Client &client, int statusCode, const std::string &contentType)
 {
     std::string response;
     std::string statusMessage;
@@ -34,54 +34,43 @@ void sendHttpResponse(Client &client, int statusCode, const std::string &content
 
     response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
     response.append("Content-Type: " + contentType + "\r\n");
-    body.seekg(0, std::ios::end);
-    response.append("Content-Length: " + std::to_string(body.tellg()) + "\r\n");
-    body.seekg(0, std::ios::beg);
+    response.append("Content-Length: " + std::to_string(client._bodyRep.size()) + "\r\n");
     response.append("Accept-Charset: utf-8\r\n");
     response.append("Connection: Closed\r\n");
     response.append("\r\n");
-    std::string line;
-    while (getline(body, line))
-    {
-        response.append(line + "\n");
-        line.clear();
-    }
-    
-    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
-        perror("Erreur lors de l'envoi de la réponse");
+    response.append(client._bodyRep);
+
+    client._sizeRep = response.size();
+
+    //On enregistre l'ensemble de la reponse dans le client pour l'envoyer en plusieurs fois.
+    client._response = response;
 }
 
-void sendHttpResponse(Client &client, int statusCode, const std::string &contentType, const std::string &body)
+void sendHttpResponse(Client &client)
 {
-    std::string response;
-    std::string statusMessage;
-
-    switch (statusCode)
+    int optval = 0;
+    socklen_t  optlen = sizeof(optval);
+    if(getsockopt(client._csock, SOL_SOCKET, SO_SNDBUF, &optval, &optlen) == -1 || optval <= 0)
     {
-        case 200:
-            statusMessage = "OK";
-            break;
-        case 201:
-            statusMessage = "Created";
-            break;
-        case 204:
-            statusMessage = "No Content";
-            break;
-        default:
-            statusMessage = "Unknown Status";
+        std::cerr << "Error : 500 sending data to client getsockopt(): " << client._csock << std::endl;
+        sendErrorResponse(client, 500);
+        client._keepAlive = false;
+        return;
     }
-
-    response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
-    response.append("Content-Type: " + contentType + "\r\n");
-    response.append("Content-Length: " + std::to_string(body.length()) + "\r\n");
-    response.append("Accept-Charset: utf-8\r\n");
-    response.append("Connection: Closed\r\n");
-    response.append("\r\n");
-    response.append(body);
     
-    std::cout << response.c_str() << std::endl;
-    if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+    ssize_t remainingSize = client._sizeRep - client._sizeSend;
+    
+    const char* bodyData = client._response.data() + client._sizeSend;
+    ssize_t bodySize = std::min(remainingSize, static_cast<ssize_t>(optval));
+    std::string response(bodyData, bodySize);
+
+    ssize_t sentBytes = send(client._csock, response.data(), response.size(), 0);
+    client._sizeSend += sentBytes;
+    if (sentBytes == -1)
+    {
         perror("Erreur lors de l'envoi de la réponse");
+        client._keepAlive = false;
+    }
 }
 
 void sendErrorResponse(Client &client, int code)

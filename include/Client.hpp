@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/13 17:39:05 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 17:49:04 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,19 +45,27 @@ struct Client
 	/* Le client va t'il vivre ou mourir */
 	bool				_keepAlive;
 
-	//Request du client
+	// Request du client
 	std::stringstream							_requestStr;
 	ssize_t										_contentLenght;
 	ssize_t										_sizeBody;
+	bool										_requestPars;
+
 	// Request HTTP parsee.
     std::string									_httpVersion;
     std::string									_uri;
     HTTPMethod									_method;
-    /// @brief Uniform Resource Identifier, chaîne de caractères identifiant une ressource sur un réseau, la syntaxe respecte la norme World Wide Web.
     std::map<std::string, std::string>			_headers;
-	std::stringstream							_body;
+	std::stringstream							_bodyReq;
 
-    //Config du serveur
+	// Reponse du serveur
+	std::string									_filePath;
+	std::string									_bodyRep;
+	std::string									_response;
+	ssize_t										_sizeSend;
+	ssize_t										_sizeRep;
+	
+    // Config du serveur
     ParsConfig									&_config;
 	Server										&_server;
     std::vector<ParsConfig::Location>			&_location;

@@ -47,13 +47,22 @@
 				<h2>Les tests</h2>
 				<ol>
 					<li>
-						Pour ce premier test, en rajoutant <kbd>'/page1'</kbd> à l'url, vous devriez 
+						Pour ce premier test, en rajoutant <kbd>'/page1'</kbd> à l'url (ex: 127.0.0.1:1042/page1), vous devriez 
 						arriver sur la page de presentation de la <a href="./team.html">team.</a>
 					</li> <br>
 					<li>
 						Pour le second test, <code>'location /page2'</code> a été defini à deux reprises 
 						dans le fichier nginx. Uniquement le deuxième doit être pris en compte. Vous devriez 
 						arriver sur la page de <a href="documentation.html">documentation</a> du projet.
+					</li><br>
+					<li>
+						Pour ce trosieme test, la <code>'location /page3'</code> n'a pas la bonne methode,
+						vous devez recevoir le code erreur 405 Method Not Allowed.
+					</li><br>
+					<li>
+						Pour ce dernier test, nous allons tester les redirections. Dans le fichier de <code>'.conf'</code>, une
+						redirection a ete mise en place : <code>'location /redir'</code>. En rajoutant ceci a l'url, vous serez rediriges,
+						vers la page index.
 					</li>
 				</ol>
 			</div>
