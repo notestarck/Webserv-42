@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 11:21:08 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 11:36:28 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -354,7 +354,14 @@ bool Connection::hanglGetLocation(Client &client)
 		
 		if (file.is_open())
 		{
-			sendHttpResponse(client, 200, getMimeType(filePath), file);
+			std::string line;
+			while (getline(file, line))
+    		{
+				client._bodyRep.append(line + "\n");
+    		    line.clear();
+    		}
+			createHttpResponse(client, 200, getMimeType(filePath));
+			sendHttpResponse(client);
 			file.close();
 		}
 		else
@@ -445,7 +452,9 @@ void Connection::handlePOST(Client& client)
 		if (outFile.is_open())
 		{
 			outFile << fileData;
-			sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
+			client._bodyRep = "Fichier créé avec succès";
+			createHttpResponse(client, 201, "text/html");
+			sendHttpResponse(client);
 		}
 		else 
 		{
@@ -485,7 +494,11 @@ void Connection::handleDELETE(Client& client)
 	
 	//On supprime le fichier
 	if (!(std::remove((location->getRoot() + "/" + fileName).c_str())))
-		sendHttpResponse(client, 200, "text/html", fileName + " deleted");
+	{
+		client._bodyRep = fileName + " deleted";
+		createHttpResponse(client, 200, "text/html");
+		sendHttpResponse(client);
+	}
 }
 
 std::string Connection::getMimeType(const std::string& filePath)
