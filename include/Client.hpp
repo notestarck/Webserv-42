@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 10:32:36 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 16:51:26 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 15:27:33 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,12 @@ struct Client
 	// Reponse du serveur
 	std::string									_filePath;
 	std::string									_bodyRep;
-	ssize_t										_sizeBodyRep;
+	std::string									_response;
+	ssize_t										_sizeSend;
+	ssize_t										_sizeRep;
+
+	//Autoindex
+	std::vector<std::pair<std::pair<std::string, std::string>, int> > _autoIndex;
 	
     // Config du serveur
     ParsConfig									&_config;

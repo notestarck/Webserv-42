@@ -3,38 +3,42 @@
 	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" href="../style/style.css">
-		<link rel="stylesheet" href="../style/index.css">
+		<link rel="stylesheet" href="../style/autoIndex.css">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
-		<title>Test-WebServ</title>
+		<title>Test-WebServ AutoIndex</title>
 	</head>
-
 	<body>
 		<header>
 			<div class="barre_nav">
 				<img src="../image/logoWebServ-42.png" alt="Logo WebServ-42">
 				<p>WebServ-42</p>
 				<nav>
-					<div></div>
-					<div></div>
 					<a href="../index.html">Accueil</a>
+					<a href="./team.html">Team</a>
+					<a href="https://github.com/notestarck/Webserv-42" target="_blank">GitHub</a>
 				</nav>
 			</div>
-			<div class="presentation-header">
-				<div class="text-header">
-					<h1>Ceci est une page de test pour l'erreur 403. Elle s'affiche si deny = off dans la location.</h1>
-				</div>
-				<img src="../image/redirection.png">
-			</div>
 		</header>
+		
+		<main >
 
 		<main>
-
-		</main>
-
-		<footer>
-
-		</footer>
+		<h1>%DIRECTORY%</h1>
+		<div class="corp">
+			<div>
+				<h2>Type</h2>
+				<p>%TYPE%</p>
+			</div>
+			<div>
+				<h2>Name</h2>
+				<p>%NAME%</p>
+			</div>
+			<div>
+				<h2>Size/Date</h2>
+				<p>%DATE%</p>
+			</div>
+		</div>
 	</body>
 </html>

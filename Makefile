@@ -6,7 +6,7 @@
 #    By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/10 15:31:10 by estarck           #+#    #+#              #
-#    Updated: 2023/04/06 13:55:25 by estarck          ###   ########.fr        #
+#    Updated: 2023/04/18 13:42:46 by estarck          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,7 +22,8 @@ _SRCS		=	main.cpp \
 				Client.cpp \
 				HTTPRequest.cpp \
 				Response.cpp \
-				utils.cpp
+				utils.cpp \
+				Autoindex.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin
@@ -39,7 +40,7 @@ DELOBJS		=	printf "$(_YELLOW)Deleting .o files\n$(_END)"
 DELNAME		=	printf "$(_RED)$(_BOLD)Remove $(NAME)\n$(_END)"
 
 # Compilation
-CC			=	c++
+CC			=	g++
 CFLAGS		=	-Wall -Wextra -Werror -std=c++98
 CFLAGS		+=	-g
 

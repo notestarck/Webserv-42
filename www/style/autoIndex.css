@@ -1,0 +1,27 @@
+header {
+	background: linear-gradient(to right, #1e3c72, #2a5298);
+    height: 65px;
+	border-radius: 0% 0% 90% 10% / 0% 0% 32% 10% ;
+}
+
+main {
+	padding-top: 20px;
+}
+
+h1 {
+	text-align: center;
+}
+
+h2 {
+	text-decoration: underline;
+}
+
+.corp {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	margin: 20px;
+}
+
+.corp div {
+	margin: 100px;
+}

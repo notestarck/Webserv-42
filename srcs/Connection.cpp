@@ -6,11 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 09:11:57 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 16:22:02 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Connection.hpp"
+#include "./utils.hpp"
+
 
 #include <stdexcept>
 #include <iostream>
@@ -23,7 +25,7 @@ Connection::Connection(std::vector<Server*>& servers) :
 	_servers(servers),
 	_maxFd(-1)
 {
-	_timeout.tv_sec = 2;
+	_timeout.tv_sec = 3;
 	_timeout.tv_usec = 0;
 	initMime();
 }
@@ -109,8 +111,7 @@ void Connection::runSelect()
 	}
 	catch (const std::runtime_error &e)
 	{
-		std::cerr << "Erreur lors de l'appel à la fonction select : " << e.what() << std::endl;
-		// Gérer l'exception ici, par exemple en fermant la connexion ou en renvoyant une erreur à l'utilisateur
+		std::cerr << "\033[0;31mErreur lors de l'appel à la fonction select : " << e.what() << "\033[0m" << std::endl;
 		for (std::vector<Client>::iterator it = _client.begin(); it != _client.end(); it++)
 			(*it)._keepAlive = false;
 	}
@@ -131,20 +132,16 @@ void Connection::acceptSocket()
 				newClient._csock = accept((*it)->getSocket(), (sockaddr*)&newClient._csin, &newClient._crecSize);
 				if (newClient._csock < 0)
 				{
-					std::cerr << "Failed to accept connection on port " << (*it)->getPort() << ", error code: " << errno << ", error message: " << strerror(errno) << std::endl;
+					std::cerr << "\033[31mFailed to accept connection \033[0mon port " << (*it)->getPort() << ", error code: " << errno << ", error message: " << strerror(errno) << std::endl;
 					close(newClient._csock);
 					continue;
 				}
-				int flags = fcntl(newClient._csock, F_GETFL, 0);
-				if (flags < 0)
-					std::cout << "merde" << std::endl;
-				if (fcntl(newClient._csock, F_SETFL, flags | O_NONBLOCK) < 0)
-					std::cout << "zut" <<std::endl;
-				std::cout << "\033[0;32m\nAccepted connection \033[0m on port " << (*it)->getPort() << std::endl;
-				std::cout << "\033[0;32mClient connected \033[0m on socket: " << newClient._csock << std::endl;
+				if (fcntl(newClient._csock, F_SETFL, O_NONBLOCK) < 0)
+					std::cerr << "\033[31mError : fcntl Connection::acceptSocket()\033[0m" <<std::endl;
+				std::cerr << "\033[0;32m\nAccepted connection \033[0m on port " << (*it)->getPort() << std::endl;
+				std::cerr << "\033[0;32mClient connected \033[0m on socket: " << newClient._csock << std::endl;
 
 				(*it)->incrementCurrentConnection();
-
 				_client.push_back(newClient);
 			}
 		}
@@ -157,7 +154,7 @@ void Connection::clearClientSockets()
 	{
 		std::cout << "\033[32mLiberation des sockets clients\033[0m\n";
 		if (close((*it)._csock) != 0)
-			std::cerr << "Error while closing socket: " << strerror(errno) << std::endl;
+			std::cerr << "\033[0;31mError while closing socket:\033[0m " << strerror(errno) << std::endl;
 	}
 	_client.clear();
 }
@@ -168,10 +165,14 @@ bool Connection::deadOrAlive(Client client, bool alive)
 	if (alive)
 		return false;
 	client._server.decrementCurrentConnection();
+	// Supprime le fd du socket read write error
 	FD_CLR(client._csock, &_read);
+	FD_CLR(client._csock, &_write);
+	FD_CLR(client._csock, &_error);
+	// ferme la connexion du socket client en spécifiant qu'il ne peut plus envoyer ni recevoir de données.
 	shutdown(client._csock, SHUT_RDWR);
 	if (close(client._csock) != 0)
-		std::cerr << "Error while closing socket: " << strerror(errno) << std::endl;
+		std::cerr << "\033[0;31mError while closing socket:\033[0m " << strerror(errno) << std::endl;
 
 	std::cout << "\033[0;31mClient close \033[0m" << client._csock << std::endl;;
 	return true;
@@ -183,6 +184,7 @@ void Connection::traitement()
 	{
 		if (FD_ISSET(it->_csock, &_error))
 			(*it)._keepAlive = false;
+
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
 			if (receiveClientRequest(*it))
@@ -204,7 +206,7 @@ bool Connection::receiveClientRequest(Client &client)
 	socklen_t  optlen = sizeof(optval);
 	if(getsockopt(client._csock, SOL_SOCKET, SO_RCVBUF, &optval, &optlen) == -1)
 	{
-		std::cerr << "Error : 500 receiving data from client getsockopt(): " << client._csock << std::endl;
+		std::cerr << "\033[0;31mError : 500 receiving data from client getsockopt():\033[0m " << client._csock << std::endl;
 		sendErrorResponse(client, 500);
 		client._keepAlive = false;
 		return false;
@@ -213,14 +215,13 @@ bool Connection::receiveClientRequest(Client &client)
 	//Recupere le tampon avec une taille adaptee
 	char buffer[optval];
 	ssize_t bytesRead = recv(client._csock, buffer, optval, 0);
-
 	if (bytesRead <= 0)
 	{
 		if (bytesRead == 0)
 			std::cout << "Client disconnected on socket: " << client._csock << std::endl;
 	  	else
 		{
-			std::cerr << "Error : 500 receiving data from client recv(): " << client._csock << std::endl;
+			std::cerr << "\033[0;31mError : 500 receiving data from client recv():\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 500);
 		}
 		client._keepAlive = false;
@@ -229,7 +230,7 @@ bool Connection::receiveClientRequest(Client &client)
 
 	if (bytesRead > optval)
 	{
-		std::cerr << "Error : 413 Request size exceeds the limit (" << optval << " bytes) for client: " << client._csock << std::endl;
+		std::cerr << "\033[0;31mError : 413 Request size exceeds the limit (" << optval << " bytes) for client:\033[0m " << client._csock << std::endl;
 		sendErrorResponse(client, 413);
 		return false;
 	}
@@ -241,8 +242,7 @@ bool Connection::receiveClientRequest(Client &client)
 		client._bodyReq.str(std::string());
 	}
 
-	client._requestStr << buffer;
-	std::cout << client._requestStr.str() << std::endl;
+	client._requestStr.write(buffer, bytesRead);
 	if (client._contentLenght == 0)
 	{
 		HTTPRequest httpRequest(client);
@@ -251,12 +251,23 @@ bool Connection::receiveClientRequest(Client &client)
 			std::memset(&buffer, 0, optval);
 			return true;
 		}
+		if (client._uri == "/test_max")
+		{
+			ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+			if (location->getMaxSize() < client._contentLenght)
+			{
+				sendErrorResponse(client, 413);
+				client._keepAlive = false;
+				return false;
+			}
+		}
 	}
 	else
 	{
 		client._bodyReq.write(buffer, bytesRead);
 		client._sizeBody += bytesRead;
 	}
+
 	
 	std::memset(&buffer, 0, optval);
    	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " << client._sizeBody << std::endl;
@@ -267,6 +278,7 @@ bool Connection::receiveClientRequest(Client &client)
 
 bool Connection::handleReponse(Client &client)
 {
+	bool ret = true;
 	switch (client._method)
 	{
 		case GET:
@@ -294,37 +306,38 @@ bool Connection::handleGET(Client& client)
 
 	if (client._uri.length() >= MAX_URI_SIZE)
 	{
-		std::cerr << "Error : 414 URI Too Long from client: " << client._csock << std::endl;
+		std::cerr << "\033[0;31mError : 414 URI Too Long from client:\033[0m " << client._csock << std::endl;
 		sendErrorResponse(client, 414);
 		return (true);
 	}
 
 	// On ouvre le fichier a renvoyer et on le stock dans client._bodyRep.
 	// Pour eviter de le faire a chaque tour, on check si client._sizeBodyRep == 0
-	if (client._sizeBodyRep == 0)
+	if (client._sizeRep == 0)
 	{
 		client._filePath = getFilePath(client);
 		std::ifstream	file(client._filePath, std::ios::in | std::ios::binary);
 		if (file.is_open())
 		{
 			std::stringstream buf;
-			//client._bodyRep("");
 			buf << file.rdbuf();
 			client._bodyRep = buf.str();
-			//file.seekg(0, std::ios::end);
-			client._sizeBodyRep = client._bodyRep.size();
-			//file.seekg(0, std::ios::beg);
+			client._sizeRep = 0;
+			client._sizeSend = 0;
 			file.close();
 			buf.clear();
+			createHttpResponse(client, 200, getMimeType(client._filePath));
 		}
 		else
 		{
-			std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
 	}
 
-	sendHttpResponse(client, 200, getMimeType(client._filePath));
+	sendHttpResponse(client);
+	if (client._sizeSend < client._sizeRep)
+		return (false);
 	return (true);
 }
 
@@ -334,25 +347,56 @@ bool Connection::hanglGetLocation(Client &client)
 	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
 	if (location)
 	{
+		if (location->getDeny())
+		{
+			std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
+			sendErrorResponse(client, 403);
+			return (true);
+		}
+		
 		if (!(location->isMethodAllowed("GET")))
 		{
-			std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
+			std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 405);
 			return (true);
 		}
-		std::string filePath = getFilePath(client, location);
-		std::ifstream file(filePath, std::ios::in | std::ios::binary);
 
-		if (file.is_open())
+		if (location->getAutoIndex())
 		{
-			sendHttpResponse(client, 200, getMimeType(filePath), file);
-			file.close();
+			std::cout << location->getPath();
+			startAutoIndex(client, location->getPath());
+			return (true);
+		}
+		std::string filePath = getFilePath(client, location);
+		std::cout << "path : " << filePath << std::endl;
+		std::ifstream file(filePath, std::ios::in | std::ios::binary);
+		
+		if (file.is_open() && location->getReturn().empty())
+		{
+			std::string line;
+			while (getline(file, line))
+    		{
+				client._bodyRep.append(line + "\n");
+    		    line.clear();
+    		}
+			createHttpResponse(client, 200, getMimeType(filePath));
+			sendHttpResponse(client);
+		}
+		else if (!(location->getReturn().empty()))
+		{
+			client._response.append("HTTP/1.1 301 Moved Permanently\r\n");
+			client._response.append("Location: " + location->getReturn() + "\r\n\r\n");
+			client._sizeRep = client._response.size();
+			sendHttpResponse(client);
 		}
 		else
 		{
-			std::cerr << "Error : 404 Not Found from client: " << client._csock << std::endl;
+		std::cout << "Je suis la : " << location->getDeny() << std::endl;
+			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
+		
+		file.close();
 		return (true);
 	}
 	return (false);
@@ -364,8 +408,20 @@ void Connection::handlePOST(Client& client)
 	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
 	if (!location || !location->isMethodAllowed("POST"))
 	{
-		std::cerr << "Error : 405 Method Not Allowed from client: " << client._csock << std::endl;
+		std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
 		sendErrorResponse(client, 405);
+		return;
+	}
+	if (location->getDeny())
+	{
+		std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
+		sendErrorResponse(client, 403);
+		return;
+	}
+	if (location->getUrl() == "/test_max")
+	{
+		createHttpResponse(client, 200, "text/html");
+		sendHttpResponse(client);
 		return;
 	}
 	
@@ -392,7 +448,6 @@ void Connection::handlePOST(Client& client)
 		std::string::size_type startPos = filePartHeaderPos + filePartHeader.length();
 		std::string::size_type endPos = client._requestStr.str().find("\"", startPos);
 		std::string filename = client._requestStr.str().substr(startPos, endPos - startPos);
-
 	
 		//Check du content-type
 		std::string contentTypeHeader = "Content-Type: ";
@@ -417,7 +472,8 @@ void Connection::handlePOST(Client& client)
 		// Trouver le début des données du fichier
 		std::string body(client._bodyReq.str());
 		startPos = body.find("\r\n\r\n");
-		startPos += 4; 
+		startPos += 4;
+
 		// Trouver la fin des données du fichier
 		boundary.replace(boundary.length(), 1, "--");
 		std::cout << "---------------- boundary : " << boundary << " et size body " << body.size() << std::endl;
@@ -434,8 +490,10 @@ void Connection::handlePOST(Client& client)
 		outfile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
 		if (outfile.is_open())
 		{
-			outfile << fileData;
-			sendHttpResponse(client, 201, "text/html", "Fichier créé avec succès");
+			outFile << fileData;
+			client._bodyRep = "Fichier créé avec succès";
+			createHttpResponse(client, 201, "text/html");
+			sendHttpResponse(client);
 		}
 		else 
 		{
@@ -453,16 +511,42 @@ void Connection::handlePOST(Client& client)
 
 void Connection::handleDELETE(Client& client)
 {
-	std::cout << "handleDELETE \n : " << client._requestStr.str() << std::endl;
+	// Vérification si l'URI correspond à une configuration de location
+	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+	if (!location || !location->isMethodAllowed("DELETE"))
+	{
+		std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
+		sendErrorResponse(client, 405);
+		return;
+	}
+
+	//On recupere le nom du fichier dans la rquete
+	std::istringstream	requestStream(client._requestStr.str());
+	std::string			fileName;
+	std::string			line;
+	while (std::getline(requestStream, line))
+	{
+		size_t separator = line.find("\"file\":");
+		if (separator != std::string::npos)
+			fileName = line.substr(separator + 8, line.size() - 11);
+	}
+	
+	//On supprime le fichier
+	if (!(std::remove((location->getRoot() + "/" + fileName).c_str())))
+	{
+		client._bodyRep = fileName + " deleted";
+		createHttpResponse(client, 200, "text/html");
+		sendHttpResponse(client);
+	}
 }
 
 std::string Connection::getMimeType(const std::string& filePath)
 {
-   std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
-   if (_mimeTypes.find(fileExtension) != _mimeTypes.end())
-	   return _mimeTypes[fileExtension];
+   	std::string fileExtension = filePath.substr(filePath.find_last_of('.'));
+   	if (_mimeTypes.find(fileExtension) != _mimeTypes.end())
+		return _mimeTypes[fileExtension];
 	else
-	   return "application/octet-stream"; // Type MIME par défaut ?? ou "text/plain"
+		return "application/octet-stream"; // Type MIME par défaut ?? ou "text/plain"
 }
 
 std::string Connection::getFilePath(const Client &client)
@@ -509,15 +593,18 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 	}
 	if (pid == 0)
 	{
+		signal(SIGPIPE, signal_handler);
 		close(cgiInput[1]);
 		close(cgiOutput[0]);
 
 		dup2(cgiInput[0], STDIN_FILENO);
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
-		char *argv[] = {const_cast<char *>(cgiPath.c_str()), NULL};
-		char *envp[] = {NULL};
-		if (execve(cgiPath.c_str(), argv, envp) == -1)
+		std::string truc = client._bodyReq.str();
+		std::string _login = truc.substr(truc.find('=') + 1);
+
+		char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
+		if (execve(cgiPath.c_str(), argv, _env) == -1)
 		{
 			sendErrorResponse(client, 500);
 			exit(EXIT_FAILURE);
@@ -547,12 +634,19 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		{
-			// Envoyer la réponse CGI au client
-			send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
+			int sentBytes = send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
+			if (sentBytes == 0)
+   			{
+   			    std::cerr << "\033[31mErreur send90 n'a pas envoye de donnee client : \033[0m" << client._csock << std::endl;
+   			    client._keepAlive = false;
+   			}
+   			else if (sentBytes == -1)
+   			{
+   			    std::cerr << "\033[31mErreur de send() client : \00[0m" << client._csock << std::endl;
+   			    client._keepAlive = false;
+   			}
 		}
 		else
-		{
 			sendErrorResponse(client, 500);
-		}
 	}
 }

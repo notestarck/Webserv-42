@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 11:49:49 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 16:22:21 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,7 @@ ParsConfig::ParsConfig(std::ifstream &file_config) :
 		else if (key == "root")
 			setRoot(value.substr(0, value.size() - 1));
 		else if (key == "index")
-		{
 			_index = (value.substr(0, value.size() - 1));
-		}
 		else if (key == "error_page")
 		{
 			std::string s_value;
@@ -74,7 +72,6 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 {
 	if (this != &srcs)
 	{
-		std::cout << "Constructeur d'operateur= de ParsConfig\n";
 		_host = srcs._host;
 		_port = srcs._port;
 		_name_server = srcs._name_server;
@@ -155,6 +152,60 @@ std::string	ParsConfig::getLocationIndex(std::string url) const
 	exit (-3);
 }
 
+std::string	ParsConfig::getLocationPath(std::string url) const
+{
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	{
+		if(it->getUrl() == url)
+			return (it->getPath());
+	}
+	std::cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << std::endl;
+	exit (-3);
+}
+
+bool	ParsConfig::getLocationAutoIndex(std::string url) const
+{
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	{
+		if(it->getUrl() == url)
+			return (it->getAutoIndex());
+	}
+	std::cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << std::endl;
+	exit (-3);
+}
+
+std::string	ParsConfig::getLocationReturn(std::string url) const
+{
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	{
+		if(it->getUrl() == url)
+			return (it->getReturn());
+	}
+	std::cerr << "\033[1;31mgetLocationReturn : url don't exist ! \033[0m" << std::endl;
+	exit (-3);
+}
+
+int	ParsConfig::getLocationMaxSize(std::string url) const
+{
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	{
+		if(it->getUrl() == url)
+			return (it->getMaxSize());
+	}
+	std::cerr << "\033[1;31mgetLocationReturn : url don't exist ! \033[0m" << std::endl;
+	exit (-3);
+}
+
+bool	ParsConfig::getLocationDeny(std::string url) const
+{
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	{
+		if(it->getUrl() == url)
+			return (it->getDeny());
+	}
+	std::cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << std::endl;
+	exit (-3);
+}
 
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
@@ -208,7 +259,9 @@ void    ParsConfig::setLocation(std::ifstream &file_config, std::string url)
 /*************************** Class Location ****************************/
 
 ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
-	_url(url)
+	_url(url),
+	_autoIndex(false),
+	_deny(false)
 {
 	std::string			line;
 
@@ -244,10 +297,24 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 				_root = value.substr(0, value.size() - 1);
 			else if (key == "index")
 				_index = value.substr(0, value.size() - 1);
-            else if(key == "cgi_pass")
+			else if (key == "path")
+				_path = value.substr(0, value.size() - 1);
+			else if (key == "autoindex")
+			{
+				if(value.substr(0, value.size() - 1) == "on")
+					_autoIndex = true;
+			}
+			else if (key == "return")
+				_return = value.substr(0, value.size() - 1);
+            else if(key == "cgi_path")
                 _cgiPath = value.substr(0, value.size() - 1);
-            else if(key == "autoindex")
-                _autoindex = value.substr(0, value.size() - 1 );
+			else if(key == "client_max_body_size")
+                _maxSize = std::atoi(value.substr(0, value.size() - 1).c_str());
+			else if (key == "deny")
+			{
+				if(value.substr(0, value.size() - 1) == "on")
+					_deny = true;
+			}
 		}
 		line.clear();
 		ss.clear();
@@ -271,8 +338,12 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 			_allow.push_back(*it);
 		_root = srcs._root;
 		_index = srcs._index;
+		_path = srcs._path;
+		_autoIndex = srcs._autoIndex;
+		_return = srcs._return;
         _cgiPath = srcs._cgiPath;
-        _autoindex = srcs._autoindex;
+		_maxSize = srcs._maxSize;
+		_deny = srcs._deny;
 	}
 	return (*this);
 }
@@ -289,11 +360,23 @@ const std::string & ParsConfig::Location::getRoot() const
 const std::string & ParsConfig::Location::getIndex() const
 { return (_index); }
 
+const std::string &	ParsConfig::Location::getPath() const
+{ return (_path); }
+
+const bool & ParsConfig::Location::getAutoIndex() const
+{ return (_autoIndex); }
+
+const std::string & ParsConfig::Location::getReturn() const
+{ return (_return); }
+
 const std::string & ParsConfig::Location::getCgiPath() const
 { return (_cgiPath); }
 
-const std::string & ParsConfig::Location::getAutoIndex() const
-{ return (_autoindex); }
+const int & ParsConfig::Location::getMaxSize() const
+{ return (_maxSize); }
+
+const bool & ParsConfig::Location::getDeny() const
+{ return (_deny); }
 
 bool ParsConfig::Location::isMethodAllowed(std::string method) const
 {

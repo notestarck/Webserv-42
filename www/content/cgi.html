@@ -24,7 +24,7 @@
 		</header>
 
 		<main>
-			<h1>Upload</h1>
+			<h1>Test du CGI</h1>
 			<div class="definition">
 				<h2>Comment ca marche ?</h2>
 				<p>
@@ -35,9 +35,9 @@
 			</div>
 			<div class="test">
 				<h2>Les tests</h2>
-				<form action="test_login.py" method="post">
+				<form action="/cgi" method="post">
 					<label for="login">Login 42:</label>
-					<input type="text" id="login" name="login"><br><br>
+					<input type="text" class="login" id="login" name="login"><br><br>
 					<input type="submit" value="Lancer le test" class="envoyer">
 				</form>
 			</div>

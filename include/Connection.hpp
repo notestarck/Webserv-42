@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 15:17:27 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/18 17:49:56 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include "./Client.hpp"
 #include "./HTTPRequest.hpp"
 #include "./Response.hpp"
+#include "./Autodindex.hpp"
 
 #include <vector>
 #define BSIZE 1024

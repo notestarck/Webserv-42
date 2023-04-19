@@ -114,4 +114,33 @@ section {
 	opacity: 0.5;
 }
 
+@media screen and (max-width: 1000px) {
+	.logo {
+		margin-left: 0px;
+	}
+	nav {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+
+	header,
+	footer {
+	padding: 20px 20px;
+	}
+
+	h1 {
+	font-size: 2em;
+	}
+
+	section {
+	padding: 50px 20px 50px 20px;
+	}
+
+	nav a {
+	margin-left: 10px;
+	margin-right: 10px;
+	}
+}
+
 /*Couleur #2E3244 #C5C6C6 white #F1895C #516079*/

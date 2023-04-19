@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/23 11:08:07 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 16:52:23 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/17 13:59:30 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@ Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Locat
 	_bodyReq(""),
 	_filePath(""),
 	_bodyRep(""),
-	_sizeBodyRep(0),
+	_response(""),
+	_sizeSend(0),
+	_sizeRep(0),
 	_config(config),
 	_server(server),
 	_location(location)
@@ -62,7 +64,9 @@ Client &Client::operator=(const Client &srcs)
 		_bodyReq << srcs._bodyReq.str();
 		_filePath = srcs._filePath;
 		_bodyRep = srcs._bodyRep;
-		_sizeBodyRep = srcs._sizeBodyRep;
+		_response = srcs._response;
+		_sizeSend = srcs._sizeSend;
+		_sizeRep = srcs._sizeRep;
 		_config = srcs._config;
 		_server = srcs._server;
 		_location = srcs._location;
