@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 12:21:51 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 12:50:45 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -601,6 +601,7 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 	}
 	if (pid == 0)
 	{
+		signal(SIGPIPE, signal_handler);
 		close(cgiInput[1]);
 		close(cgiOutput[0]);
 
