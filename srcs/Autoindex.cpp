@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   autoindex.cpp                                      :+:      :+:    :+:   */
+/*   Autoindex.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:44:04 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 17:10:25 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 12:24:08 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,24 +105,27 @@ t_dir show_dir_content(std::string path)
 	return ret;
 }
 
-void	startAutoIndex(Client &client, std::string filePath, std::string path)
+void	startAutoIndex(Client &client, std::string path)
 {
 	client._autoIndex = show_dir_content(path.data());
 	
-	std::ifstream	file(filePath, std::ios::in | std::ios::binary);
+	std::ifstream	file("./www/content/autoIndex.html", std::ios::in | std::ios::binary);
 	if (file.is_open())
 	{
 		std::string line;
 		while (getline(file, line))
     	{
-			std::cout << line.find("%DIRECTORY%") << std::endl;
-			
 			if(line.find("%DIRECTORY%") != std::string::npos)
 				client._bodyRep.append("<h1>Auto Index : " + path + "</h1>");
 			else if(line.find("%TYPE%") != std::string::npos)
 			{
 				for(size_t i = 0; i < client._autoIndex.size(); i++ )
-					client._bodyRep.append("<p>" + std::to_string(client._autoIndex[i].second) + "</p>");
+				{
+					if (client._autoIndex[i].second == 1)
+						client._bodyRep.append("<p>Directory</p>");
+					else
+						client._bodyRep.append("<p>File</p>");
+				}
 			}
 			else if(line.find("%NAME%") != std::string::npos)
 			{
@@ -136,7 +139,6 @@ void	startAutoIndex(Client &client, std::string filePath, std::string path)
 			}
 			else
 				client._bodyRep.append(line + "\n");
-			//std::cout << client._bodyRep << std::endl;
     	    line.clear();
     	}
 		createHttpResponse(client, 200, "text/html");

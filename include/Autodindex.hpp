@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:43:54 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 16:33:03 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 12:21:11 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ enum
     ISFILE = 2
 };
 
-void	startAutoIndex(Client &client, std::string filePath, std::string path);
+void	startAutoIndex(Client &client, std::string path);
 
 
 #endif /* WEBSERV_42_AUTOINDEX_HPP */

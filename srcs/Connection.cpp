@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 11:59:21 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 12:21:51 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -372,7 +372,7 @@ bool Connection::hanglGetLocation(Client &client)
 		if (location->getAutoIndex())
 		{
 			std::cout << location->getPath();
-			startAutoIndex(client, getFilePath(client, location), location->getPath());
+			startAutoIndex(client, location->getPath());
 			return (true);
 		}
 		std::string filePath = getFilePath(client, location);
