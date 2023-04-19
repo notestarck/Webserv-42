@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 18:09:06 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 11:19:30 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,6 +195,17 @@ int	ParsConfig::getLocationMaxSize(std::string url) const
 	exit (-3);
 }
 
+bool	ParsConfig::getLocationDeny(std::string url) const
+{
+	for(std::vector<Location>::const_iterator it = _location.begin(); it != _location.end(); it++)
+	{
+		if(it->getUrl() == url)
+			return (it->getDeny());
+	}
+	std::cerr << "\033[1;31mgetLocationIndex : url don't exist ! \033[0m" << std::endl;
+	exit (-3);
+}
+
 size_t	ParsConfig::getNbrLocation() const
 { return (_nbrLocation); }
 
@@ -248,7 +259,8 @@ void    ParsConfig::setLocation(std::ifstream &file_config, std::string url)
 
 ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 	_url(url),
-	_autoIndex(false)
+	_autoIndex(false),
+	_deny(false)
 {
 	std::string			line;
 
@@ -297,6 +309,11 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
                 _cgiPath = value.substr(0, value.size() - 1);
 			else if(key == "client_max_body_size")
                 _maxSize = std::atoi(value.substr(0, value.size() - 1).c_str());
+			else if (key == "deny")
+			{
+				if(value.substr(0, value.size() - 1) == "on")
+					_deny = true;
+			}
 		}
 		line.clear();
 		ss.clear();
@@ -325,6 +342,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 		_return = srcs._return;
         _cgiPath = srcs._cgiPath;
 		_maxSize = srcs._maxSize;
+		_deny = srcs._deny;
 	}
 	return (*this);
 }
@@ -355,6 +373,9 @@ const std::string & ParsConfig::Location::getCgiPath() const
 
 const int & ParsConfig::Location::getMaxSize() const
 { return (_maxSize); }
+
+const bool & ParsConfig::Location::getDeny() const
+{ return (_deny); }
 
 bool ParsConfig::Location::isMethodAllowed(std::string method) const
 {

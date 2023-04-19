@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 10:07:52 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 11:59:21 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,6 +355,13 @@ bool Connection::hanglGetLocation(Client &client)
 	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
 	if (location)
 	{
+		if (location->getDeny())
+		{
+			std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
+			sendErrorResponse(client, 403);
+			return (true);
+		}
+		
 		if (!(location->isMethodAllowed("GET")))
 		{
 			std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
@@ -369,6 +376,7 @@ bool Connection::hanglGetLocation(Client &client)
 			return (true);
 		}
 		std::string filePath = getFilePath(client, location);
+		std::cout << "path : " << filePath << std::endl;
 		std::ifstream file(filePath, std::ios::in | std::ios::binary);
 		
 		if (file.is_open() && location->getReturn().empty())
@@ -391,6 +399,7 @@ bool Connection::hanglGetLocation(Client &client)
 		}
 		else
 		{
+		std::cout << "Je suis la : " << location->getDeny() << std::endl;
 			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
@@ -411,10 +420,17 @@ void Connection::handlePOST(Client& client)
 		sendErrorResponse(client, 405);
 		return;
 	}
+	if (location->getDeny())
+	{
+		std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
+		sendErrorResponse(client, 403);
+		return;
+	}
 	if (location->getUrl() == "/test_max")
 	{
 		createHttpResponse(client, 200, "text/html");
 		sendHttpResponse(client);
+		return;
 	}
 	
 	// Si pas de cgiPath, on upload les données
