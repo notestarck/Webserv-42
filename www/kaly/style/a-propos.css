@@ -45,3 +45,27 @@ th {
 td {
 	padding: 80px;
 }
+
+@media screen and (max-width: 1000px) {
+	.a-propos-main h1{
+		padding: 100px 20px 20px 20px;
+	}
+
+	.carre-contenu {
+		width: 80%;
+		padding: 0px 20px 20px 20px;
+	}
+
+	h2 {
+		margin-top: 20px;
+	}
+
+	table {
+		margin-bottom: 20px;
+	}
+
+	td,
+	th {
+		padding: 20px;
+	}
+}

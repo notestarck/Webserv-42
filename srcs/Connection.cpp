@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 18:39:50 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 10:07:52 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -624,13 +624,8 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		waitpid(pid, &status, 0);
 
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-		{
-			// Envoyer la réponse CGI au client
 			send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
-		}
 		else
-		{
 			sendErrorResponse(client, 500);
-		}
 	}
 }

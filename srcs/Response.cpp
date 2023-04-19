@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 18:19:35 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 10:53:47 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,23 @@ void sendErrorResponse(Client &client, int code)
     response += "    <title>" + std::to_string(code) + " " + message + "</title>\n";
     response += "</head>\n";
     response += "<body>\n";
-    response += "    <h1>Error " + std::to_string(code) + ": " + message + "</h1>\n";
+    std::string errorPage = client._config.getErrorPage(code);
+    if (errorPage != "notFound")
+    {
+        std::cout << client._config.getRoot() << errorPage << std::endl;
+        std::ifstream file(client._config.getRoot() + errorPage, std::ios::in | std::ios::binary);
+        if (file.is_open())
+        {
+            std::stringstream buf;
+            buf << file.rdbuf();
+            response += buf.str();
+            file.close();
+        }
+        else
+            std::cerr << "Page not open !\n";    
+    }
+    else
+        response += "    <h1>Error " + std::to_string(code) + ": " + message + "</h1>\n";
     response += "</body>\n";
     response += "</html>";
 
