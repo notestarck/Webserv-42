@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 12:50:45 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 16:14:45 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -641,7 +641,19 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		waitpid(pid, &status, 0);
 
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
-			send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
+		{
+			int sentBytes = send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
+			if (sentBytes == 0)
+   			{
+   			    std::cerr << "\033[31mErreur send90 n'a pas envoye de donnee client : \033[0m" << client._csock << std::endl;
+   			    client._keepAlive = false;
+   			}
+   			else if (sentBytes == -1)
+   			{
+   			    std::cerr << "\033[31mErreur de send() client : \00[0m" << client._csock << std::endl;
+   			    client._keepAlive = false;
+   			}
+		}
 		else
 			sendErrorResponse(client, 500);
 	}

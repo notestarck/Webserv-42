@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 11:27:38 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 14:08:28 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,9 +66,14 @@ void sendHttpResponse(Client &client)
 
     ssize_t sentBytes = send(client._csock, response.data(), response.size(), 0);
     client._sizeSend += sentBytes;
-    if (sentBytes == -1)
+    if (sentBytes == 0)
     {
-        perror("Erreur lors de l'envoi de la réponse");
+        std::cerr << "\033[31mErreur send90 n'a pas envoye de donnee client : \033[0m" << client._csock << std::endl;
+        client._keepAlive = false;
+    }
+    else if (sentBytes == -1)
+    {
+        std::cerr << "\033[31mErreur de send() client : \00[0m" << client._csock << std::endl;
         client._keepAlive = false;
     }
 }

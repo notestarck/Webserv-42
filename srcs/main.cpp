@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 17:46:06 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 15:20:05 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ void	creatFileDeleteMethod()
 		{
             outFile << "Contenu du fichier " << i << std::endl;
             outFile.close();
-            std::cout << "Fichier " << fileName.str() << " créé avec succès." << std::endl;
         }
 		else
             std::cerr << "Impossible de créer le fichier " << fileName.str() << std::endl;

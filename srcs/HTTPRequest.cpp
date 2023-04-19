@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 11:19:59 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 16:14:42 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,6 @@ void HTTPRequest::parseRequest(Client &client)
 		line.clear();
 		return;
 	}
-
 	size_t posBody = client._requestStr.str().find("\r\n\r\n");
 	client._bodyReq << client._requestStr.str().substr(posBody + 4);
 	client._sizeBody = client._bodyReq.str().size();

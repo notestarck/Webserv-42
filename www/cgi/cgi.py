@@ -256,7 +256,7 @@ if (__name__ == "__main__"):
 
 	if (len(sys.argv) != 2):
 		print ("Bad argument count")
-		exit(1)
+		exit(0)
 
 	filters = {"filter[login]":sys.argv[1]}
 
@@ -264,6 +264,10 @@ if (__name__ == "__main__"):
 
 
 	users = get_42mulhouse_users(apiintra, filters=filters)
+
+	if (len(users) == 0):
+		print("No users found")
+		exit(0)
 
 	user_corrections_total = {}
 	corrections_tmp = {}
