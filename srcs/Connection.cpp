@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 16:22:02 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 16:14:45 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ void Connection::initMime()
 	_mimeTypes.insert(std::make_pair(".odt", "application/vnd.oasis.opendocument.text"));
 	_mimeTypes.insert(std::make_pair(".rtf", "application/rtf"));
 	_mimeTypes.insert(std::make_pair(".jpg", "image/jpeg"));
+	_mimeTypes.insert(std::make_pair(".webp", "image/webp"));
 	_mimeTypes.insert(std::make_pair(".png", "image/png"));
 	_mimeTypes.insert(std::make_pair(".gif", "image/gif"));
 	_mimeTypes.insert(std::make_pair(".mp4", "video/mp4"));
@@ -79,7 +80,10 @@ void Connection::initConnection()
 		initSelect((*it)->getSocket(), _read);
 	for (std::vector<Client>::iterator it = _client.begin(); it < _client.end(); it++)
 	{
-		initSelect(it->_csock, _read);
+		if (!((*it)._requestPars))
+			initSelect(it->_csock, _read);
+		else
+			initSelect(it->_csock, _write);
 		initSelect(it->_csock, _error);
 	}
 }
@@ -188,11 +192,17 @@ void Connection::traitement()
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_read))
 		{
 			if (receiveClientRequest(*it))
+			{
+				(*it)._requestPars = true;
 				FD_SET(it->_csock, &_write);
+			}
 		}
 
 		if ((*it)._keepAlive && FD_ISSET(it->_csock, &_write))
-			handleReponse(*it);
+		{
+			if (handleReponse(*it))
+				(*it)._keepAlive = false;
+		}
 
 		if (deadOrAlive((*it), (*it)._keepAlive))
 			it = _client.erase(it);
@@ -270,7 +280,6 @@ bool Connection::receiveClientRequest(Client &client)
 
 	
 	std::memset(&buffer, 0, optval);
-   	std::cout << "Taille contentLenght : " << client._contentLenght << " taille Body : " << client._sizeBody << std::endl;
    	if (client._sizeBody < client._contentLenght)
 		return false;
    	return true;
@@ -282,7 +291,7 @@ bool Connection::handleReponse(Client &client)
 	switch (client._method)
 	{
 		case GET:
-			handleGET(client);
+			ret = handleGET(client);
 			break;
 		case POST:
 			handlePOST(client);
@@ -295,15 +304,14 @@ bool Connection::handleReponse(Client &client)
 			sendErrorResponse(client, 405);
 			break;
 	}
-	client._keepAlive = false;
-	return false;
+	return (ret);
 }
 
 bool Connection::handleGET(Client& client)
 {
 	if (hanglGetLocation(client))
 		return (true);
-
+	
 	if (client._uri.length() >= MAX_URI_SIZE)
 	{
 		std::cerr << "\033[0;31mError : 414 URI Too Long from client:\033[0m " << client._csock << std::endl;
@@ -476,7 +484,6 @@ void Connection::handlePOST(Client& client)
 
 		// Trouver la fin des données du fichier
 		boundary.replace(boundary.length(), 1, "--");
-		std::cout << "---------------- boundary : " << boundary << " et size body " << body.size() << std::endl;
 		endPos = body.find(boundary, startPos);
 		endPos -= 4;
 		if (endPos == std::string::npos)
@@ -486,9 +493,9 @@ void Connection::handlePOST(Client& client)
 		}
 		std::string fileData = body.substr(startPos, endPos - startPos);
 
-		std::fstream outfile;
-		outfile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
-		if (outfile.is_open())
+		std::fstream outFile;
+		outFile.open(location->getRoot() + "/" + filename, std::ios::binary | std::ios::out);
+		if (outFile.is_open())
 		{
 			outFile << fileData;
 			client._bodyRep = "Fichier créé avec succès";
@@ -500,7 +507,7 @@ void Connection::handlePOST(Client& client)
 			sendErrorResponse(client, 400);
 			return;
 		}
-		outfile.close();
+		outFile.close();
 	}
 	else
 	{
@@ -557,6 +564,7 @@ std::string Connection::getFilePath(const Client &client)
 		filePath += client._config.getIndex();
 	return filePath;
 }
+
 std::string Connection::getFilePath(const Client &client,const ParsConfig::Location *location)
 {
 	std::string basePath = location->getRoot();

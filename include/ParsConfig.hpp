@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 16:21:24 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 11:00:13 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,6 @@ class ParsConfig
 		std::vector<Location>			&getLocation();
 		size_t              			getNbrLocation() const;
 
-
 	private :
 		std::string              	_host;
 		unsigned int           		_port;
@@ -98,7 +97,6 @@ class ParsConfig
 		std::map<int, std::string>	_error_page;
 		std::vector<Location>	    _location;
 		size_t              		_nbrLocation;
-
 
 		//Setteur
 		void    setHost(std::string ip);

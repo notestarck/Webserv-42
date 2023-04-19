@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 16:22:21 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 11:19:30 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,6 @@ ParsConfig & ParsConfig::operator=(const ParsConfig &srcs)
 		for (size_t i = 0; i < srcs._location.size(); i++)
 			_location.push_back(srcs._location[i]);
 		_nbrLocation = srcs._nbrLocation;
-
 	}
 	return (*this);
 }
