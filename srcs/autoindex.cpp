@@ -1,24 +1,20 @@
-//
-// Created by Stephane Walter on 4/17/23.
-//
-#include <iostream>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <string>
-#include <iomanip>
-#include <sstream>
-#include <vector>
-#include <utility>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Autoindex.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/04/18 13:44:04 by estarck           #+#    #+#             */
+/*   Updated: 2023/04/19 12:24:08 by estarck          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../include/Autodindex.hpp"
 
 typedef std::vector<std::pair<std::pair<std::string, std::string>, int> > t_dir;
 typedef std::pair<std::string, std::string> t_spair;
 
-
-enum
-{
-	ISDIR = 1,
-	ISFILE = 2
-};
 static std::string getsize(long long st_size)
 {
 	std::stringstream stream;
@@ -42,6 +38,7 @@ static std::string getsize(long long st_size)
 		return result + "G";
 	}
 }
+
 std::string	getDate(struct stat &st)
 {
 	std::string	date;
@@ -57,14 +54,18 @@ std::string	getDate(struct stat &st)
 }
 
 
-t_dir show_dir_content(std::string path) {
+t_dir show_dir_content(std::string path)
+{
 	DIR *d = opendir(path.c_str());
-	t_dir ret;
+	t_dir	ret;
 
-	if (d) {
+	if (d)
+	{
 		struct dirent *dir;
-		while ((dir = readdir(d))) {
-			if (dir->d_type != DT_DIR && dir->d_name[0] != '.') {
+		while ((dir = readdir(d)))
+		{
+			if (dir->d_type != DT_DIR && dir->d_name[0] != '.')
+			{
 				struct stat stats;
 
 				stat((std::string(path) + "/" + std::string(dir->d_name)).c_str(), &stats);
@@ -80,7 +81,9 @@ t_dir show_dir_content(std::string path) {
 				PairAndType.second = ISFILE;
 
 				ret.push_back(PairAndType);
-			} else if (dir->d_type == DT_DIR && dir->d_name[0] != '.') {
+			}
+			else if (dir->d_type == DT_DIR && dir->d_name[0] != '.')
+			{
 				struct stat stats;
 
 				stat((std::string(path) + "/" + std::string(dir->d_name)).c_str(), &stats);
@@ -102,19 +105,44 @@ t_dir show_dir_content(std::string path) {
 	return ret;
 }
 
-
-int main() {
-
-	t_dir test;
-	test = show_dir_content("../Webserv-42/www/style");
-
-
-	std::sort(test.begin(), test.end());
-
-	for(int i = 0; i < test.size(); i++ ) {
-		std::cout << test[i].second << " " << test[i].first.first << " " << test[i].first.second << std::endl;
-
-
+void	startAutoIndex(Client &client, std::string path)
+{
+	client._autoIndex = show_dir_content(path.data());
+	
+	std::ifstream	file("./www/content/autoIndex.html", std::ios::in | std::ios::binary);
+	if (file.is_open())
+	{
+		std::string line;
+		while (getline(file, line))
+    	{
+			if(line.find("%DIRECTORY%") != std::string::npos)
+				client._bodyRep.append("<h1>Auto Index : " + path + "</h1>");
+			else if(line.find("%TYPE%") != std::string::npos)
+			{
+				for(size_t i = 0; i < client._autoIndex.size(); i++ )
+				{
+					if (client._autoIndex[i].second == 1)
+						client._bodyRep.append("<p>Directory</p>");
+					else
+						client._bodyRep.append("<p>File</p>");
+				}
+			}
+			else if(line.find("%NAME%") != std::string::npos)
+			{
+				for(size_t i = 0; i < client._autoIndex.size(); i++ )
+					client._bodyRep.append("<p>" + client._autoIndex[i].first.first + "</p>");
+			}
+			else if(line.find("%DATE%") != std::string::npos)
+			{
+				for(size_t i = 0; i < client._autoIndex.size(); i++ )
+					client._bodyRep.append("<p>" + client._autoIndex[i].first.second + "</p>");
+			}
+			else
+				client._bodyRep.append(line + "\n");
+    	    line.clear();
+    	}
+		createHttpResponse(client, 200, "text/html");
+		sendHttpResponse(client);
 	}
-	return 0;
+	file.close();
 }
