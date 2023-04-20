@@ -33,6 +33,7 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
     }
 
     response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
+	response.append("Set-Cookie: delicieux_cookie=choco\r\n");
     response.append("Content-Type: " + contentType + "\r\n");
     response.append("Content-Length: " + std::to_string(client._bodyRep.size()) + "\r\n");
     response.append("Accept-Charset: utf-8\r\n");
@@ -44,6 +45,8 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
 
     //On enregistre l'ensemble de la reponse dans le client pour l'envoyer en plusieurs fois.
     client._response = response;
+
+
 }
 
 void sendHttpResponse(Client &client)

@@ -78,9 +78,11 @@ void HTTPRequest::parseRequest(Client &client)
 			if (headerName == "Content-Length")
 				client._contentLenght = std::atoi(headerValue.c_str());
 			client._headers[headerName] = headerValue;
-			if(headerName == "Cookie")
+			if(headerName == "Cookie") {
 				client._cookie = headerValue.c_str();
+				//std::cout << "cookie recu: " << client._cookie << std::endl;
 
+			}
 		}
 	}
 	if (client._method != POST)
