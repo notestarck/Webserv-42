@@ -14,7 +14,7 @@ Cgi::Cgi(Client &client)
 	_envCgi["PATH_INFO"] = client._uri;
 	_envCgi["PATH_TRANSLATED"] =     //chemin absolue du scritp
 	_envCgi["SCRIPT_NAME"] =        // chemin d acces relatif
-	_envCgi["QUERY_STRING"] =
+	_envCgi["QUERY_STRING"] = client._query;
 	_envCgi["REMOTE_HOST"] =
 	_envCgi["REMOTE_ADDR"] =
 	_envCgi["AUTH_TYPE"] =
@@ -28,3 +28,6 @@ Cgi::Cgi(Client &client)
 	_envCgi["HTTP_COOKIE"] = client._cookie;
 	_envCgi["HTTP_REFERER"] =
 }
+
+Cgi::~Cgi() {}
+
