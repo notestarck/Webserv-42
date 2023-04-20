@@ -57,6 +57,8 @@ struct Client
     HTTPMethod									_method;
     std::map<std::string, std::string>			_headers;
 	std::stringstream							_bodyReq;
+	std::string                                 _cookie;
+	std::string                                 _query;
 
 	// Reponse du serveur
 	std::string									_filePath;

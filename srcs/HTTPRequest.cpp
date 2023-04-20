@@ -44,7 +44,19 @@ void HTTPRequest::parseRequest(Client &client)
 	{
 		std::istringstream	lineStream(line);
 		std::string			methodStr;
+
 		lineStream >> methodStr >> client._uri >> client._httpVersion;
+
+
+		// recuperation du qery si existe
+		std::string::size_type pos = client._uri.find("?");
+		if(pos != std::string::npos)
+		{
+			client._query = client._uri.substr(pos);
+			client._uri.erase(pos);
+		}
+
+		//std::cout << "uri :" << client._uri << " query : " << client._query << std::endl;
 
 		if (methodStr == "GET")
 			client._method = GET;
