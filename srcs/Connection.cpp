@@ -613,6 +613,7 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 
 		char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
 		if (execve(cgiPath.c_str(), argv, _env) == -1)
+				//	1 er chemin py, argv = chemin script et arg
 		{
 			sendErrorResponse(client, 500);
 			exit(EXIT_FAILURE);

@@ -7,6 +7,12 @@
 
 Cgi::Cgi(Client &client):
 {
+
+
+
+
+	_envCgi = client._config.getLocation()
+
 	_cgiBody << client._bodyReq;
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
 	_envCgi["SERVER_SOFTWARE"] = "Webserv";
@@ -32,6 +38,8 @@ Cgi::Cgi(Client &client):
 	_envCgi["HTTP_USER_AGENT"] =;
 	_envCgi["HTTP_COOKIE"] = client._cookie;
 	_envCgi["HTTP_REFERER"] =;
+
+
 }
 
 Cgi::~Cgi() {}
@@ -52,7 +60,7 @@ std::string Cgi::exec_cgi() {
 char **Cgi::getenv() const{
 	char **env = new char*[_envCgi.size() + 1];
 	int i = 0;
-	for(std::map<std::string, std::string>::const_iterator j = _envCgi.begin(); j != _envCgi.end()) {
+	for(std::map<std::string, std::string>::const_iterator j = _envCgi.begin(); j != _envCgi.end(); j++) {
 		std::string res = j->first + "=" + j->second;
 		env[i] = new char[res.size() + 1];
 		env[i] = strcpy(env[i], (const char*)res.c_str());
@@ -61,3 +69,25 @@ char **Cgi::getenv() const{
 	env[i] = NULL;
 	return env;
 }
+
+char **Cgi::arg() {
+	char **argv;
+
+	if (_cgiScript.find(".py") != std::string::npos) {
+		argv = new char *[3];
+		argv[0] = new char[strlen(_cgiPath.c_str()) + 1];
+		argv[1] = new char[strlen(_cgiScript.c_str()) + 1];
+		std::strcpy(argv[0], _cgiPath.c_str());
+		std::strcpy(argv[1], _cgiScript.c_str());
+		argv[2] = 0;
+	} else {
+		argv = new char *[2];
+		argv[0] = new char[_cgiScript.size() + 1];
+		std::strcpy(argv[0], _cgiPath.c_str());
+		argv[1] = 0;
+	}
+	return (argv);
+}
+
+
+

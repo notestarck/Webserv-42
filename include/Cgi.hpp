@@ -22,7 +22,10 @@ public:
 
 private:
 	std::map<std::string, std::string>  _envCgi;
-	std::stringstream  _cgiBody;
+	std::stringstream                   _cgiBody;
+	std::string                         _cgiPath;    // chemin du bin
+	std::string                         _cgiScript;  // chemin du script cgi
+	char                                **arg();
 	char **getenv() const;
 
 
