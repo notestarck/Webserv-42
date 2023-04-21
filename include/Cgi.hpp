@@ -22,7 +22,8 @@ public:
 
 private:
 	std::map<std::string, std::string>  _envCgi;
-
+	std::stringstream  _cgiBody;
+	char **getenv() const;
 
 
 
