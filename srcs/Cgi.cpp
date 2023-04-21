@@ -9,8 +9,9 @@ Cgi::Cgi(Client &client):
 {
 
 
-
-
+	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+	ParsConfig::Location  *config;
+	config.
 	_envCgi = client._config.getLocation()
 
 	_cgiBody << client._bodyReq;

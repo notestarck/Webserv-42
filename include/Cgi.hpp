@@ -7,7 +7,7 @@
 #include "Connection.hpp"
 
 
-
+class ParsConfig;
 class Client;
 class Cgi{
 public:
