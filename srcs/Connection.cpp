@@ -512,6 +512,8 @@ void Connection::handlePOST(Client& client)
 	else
 	{
 		// Lancer le cgiPath avec les données reçues
+
+
 		executeCGI(client, location->getCgiPath());
 	}
 }
@@ -610,6 +612,8 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 
 		std::string truc = client._bodyReq.str();
 		std::string _login = truc.substr(truc.find('=') + 1);
+        // ici on lance CGI pour crreee env et argv
+
 
 		char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
 		if (execve(cgiPath.c_str(), argv, _env) == -1)

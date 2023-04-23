@@ -5,14 +5,15 @@
 #include "../include/Client.hpp"
 
 
-Cgi::Cgi(Client &client):
+Cgi::Cgi(Client &client, std::string &cgipqath):
 {
 
 
-	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
-	ParsConfig::Location  *config;
-	config.
-	_envCgi = client._config.getLocation()
+	_cgiPath = ;
+    _cgiScript = ;
+
+
+	_envCgi = client._config.getLocation();
 
 	_cgiBody << client._bodyReq;
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;

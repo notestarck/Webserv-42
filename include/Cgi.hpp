@@ -12,7 +12,7 @@ class Client;
 class Cgi{
 public:
 	Cgi();
-	Cgi(Client &client);
+	Cgi(Client &client, std::string &cgipqath);
 	~Cgi();
 
 	Cgi(const Cgi &srcs);
@@ -20,13 +20,16 @@ public:
 
 	std::string exec_cgi();
 
+
+
+
 private:
 	std::map<std::string, std::string>  _envCgi;
 	std::stringstream                   _cgiBody;
 	std::string                         _cgiPath;    // chemin du bin
 	std::string                         _cgiScript;  // chemin du script cgi
 	char                                **arg();
-	char **getenv() const;
+	char                                **getenv() const;
 
 
 
