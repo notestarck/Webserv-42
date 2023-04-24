@@ -23,7 +23,8 @@ _SRCS		=	main.cpp \
 				HTTPRequest.cpp \
 				Response.cpp \
 				utils.cpp \
-				Autoindex.cpp
+				Autoindex.cpp \
+				Cgi.cpp
 SRCS		=	$(patsubst %,$(SDIR)/%,$(_SRCS))
 
 ODIR		=	./bin

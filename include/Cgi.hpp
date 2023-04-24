@@ -7,18 +7,17 @@
 #include "Connection.hpp"
 
 
-class ParsConfig;
-class Client;
+
 class Cgi{
 public:
 	Cgi();
-	Cgi(Client &client, std::string &cgipqath);
+	Cgi(Client &client, std::string gipqath);
 	~Cgi();
 
 	Cgi(const Cgi &srcs);
 	Cgi &operator=(const Cgi &srcs);
 
-	std::string exec_cgi();
+	//std::string exec_cgi();
 
 
 

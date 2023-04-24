@@ -513,7 +513,7 @@ void Connection::handlePOST(Client& client)
 	{
 		// Lancer le cgiPath avec les données reçues
 
-
+		std::cout << location->getCgiPath() << std::endl;
 		executeCGI(client, location->getCgiPath());
 	}
 }
@@ -610,9 +610,13 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		dup2(cgiInput[0], STDIN_FILENO);
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
+
+		std::cout << cgiPath << std::endl;
 		std::string truc = client._bodyReq.str();
 		std::string _login = truc.substr(truc.find('=') + 1);
         // ici on lance CGI pour crreee env et argv
+
+		Cgi cgi(client,  cgiPath);
 
 
 		char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
