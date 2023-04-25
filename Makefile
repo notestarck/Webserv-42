@@ -42,7 +42,7 @@ DELNAME		=	printf "$(_RED)$(_BOLD)Remove $(NAME)\n$(_END)"
 
 # Compilation
 CC			=	g++
-CFLAGS		=	-Wall -Wextra -Werror -std=c++98
+CFLAGS		=	-Wall -Wextra -Werror -fsanitize=address -std=c++98
 CFLAGS		+=	-g
 
 # Formatting

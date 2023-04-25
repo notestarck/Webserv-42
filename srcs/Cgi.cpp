@@ -8,35 +8,39 @@
 Cgi::Cgi(Client &client, std::string cgipath)
 {
 
+	(void)cgipath;
+	_cgiScript = "www/cgi/test.php";
+	_cgiPath = "/usr/bin/php";
 
-	_cgiScript = cgipath;
-	_cgiPath = "";
+	//_cgiScript = "www/cgi/"
 
 	_cgiBody << client._bodyReq;
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
 	_envCgi["SERVER_SOFTWARE"] = "Webserv";
 	_envCgi["SERVER_PORT"] =    client._server.getPort();
+	_envCgi["SERVER_NAME"] = "toto";
 	_envCgi["REQUEST_METHOD"] = client._method;
-	_envCgi["PATH_INFO"] = client._uri;
-	_envCgi["PATH_TRANSLATED"] = client._uri;     //chemin absolue du scritp
-	_envCgi["SCRIPT_NAME"] = client._filePath;     // chemin d acces relatif
+	_envCgi["REQUEST_URI"] = _cgiPath;
+	_envCgi["PATH_INFO"] = _cgiPath;
+	_envCgi["PATH_TRANSLATED"] =  _cgiScript;     //chemin absolue du scritp
+	_envCgi["SCRIPT_NAME"] = _cgiPath;     // chemin d acces relatif
 	_envCgi["QUERY_STRING"] = client._query;
 	_envCgi["REDIR_STATUS"] = "200";   // pour cgi-php
-	_envCgi["REMOTE_HOST"] = client._server.getHost();
+	//_envCgi["REMOTE_HOST"] = client._server.getHost();
 	_envCgi["GETEWAY_INTERFACE"] = "CGI/1.1";
-	_envCgi["REMOTE_ADDR"] = "";
-	_envCgi["AUTH_TYPE"] = "";
-	_envCgi["REMOTE_USER"] = "";
-	_envCgi["REMOTE_IDENT"] = "";
+	_envCgi["REMOTE_ADDR"] = "1";
+	//_envCgi["AUTH_TYPE"] = "1";
+	//_envCgi["REMOTE_USER"] = "1";
+	//_envCgi["REMOTE_IDENT"] = "1";
 	if (client._method == POST) {
 		_envCgi["CONTENT_TYPE"] = client._headers["Content-Type"].c_str();  //content type """ a tester""
 		_envCgi["CONTENT_LENGTH"] = client._contentLenght;
 	}
-	_envCgi["HTTP_ACCEPT"] = "";
-	_envCgi["HTTP_ACCEPT_LANGUAGE"] = "";
-	_envCgi["HTTP_USER_AGENT"] = "";
+	//_envCgi["HTTP_ACCEPT"] = "1";
+	//_envCgi["HTTP_ACCEPT_LANGUAGE"] = "1";
+	//_envCgi["HTTP_USER_AGENT"] = "1";
 	_envCgi["HTTP_COOKIE"] = client._cookie;
-	_envCgi["HTTP_REFERER"] = "";
+	//_envCgi["HTTP_REFERER"] = "1";
 
 
 }
@@ -46,6 +50,9 @@ Cgi::~Cgi() {}
 Cgi &Cgi::operator=(Cgi const &src){
 	if(this != &src)
 	{
+		_cgiPath   = src._cgiPath;
+
+		_cgiScript = src._cgiScript;
 		_cgiBody << src._cgiBody;
 		_envCgi = src._envCgi;
 	}
@@ -69,10 +76,14 @@ char **Cgi::getenv() const{
 	return env;
 }
 
-char **Cgi::arg() {
+char **Cgi::arg(Client &client) {
 	char **argv;
-
+	std::cout << "je lance fonction arg\n";
 	if (_cgiScript.find(".py") != std::string::npos) {
+		std::string truc = client._bodyReq.str();
+		std::string _login = truc.substr(truc.find('=') + 1);
+
+
 		argv = new char *[3];
 		argv[0] = new char[strlen(_cgiPath.c_str()) + 1];
 		argv[1] = new char[strlen(_cgiScript.c_str()) + 1];
@@ -80,11 +91,15 @@ char **Cgi::arg() {
 		std::strcpy(argv[1], _cgiScript.c_str());
 		argv[2] = 0;
 	} else {
-		argv = new char *[2];
-		argv[0] = new char[_cgiScript.size() + 1];
+		argv = new char *[3];
+		argv[0] = new char[_cgiPath.size() + 1];
 		std::strcpy(argv[0], _cgiPath.c_str());
-		argv[1] = 0;
+
+		argv[1] = new char[strlen(_cgiScript.c_str()) + 1];
+		std::strcpy(argv[1], _cgiScript.c_str());
+		argv[2] = 0;
 	}
+
 	return (argv);
 }
 
