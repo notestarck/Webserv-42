@@ -9,11 +9,11 @@ Cgi::Cgi(Client &client, std::string cgipath)
 {
 
 	(void)cgipath;
-	_cgiScript = "www/cgi/test.php";
-	_cgiPath = "/usr/bin/php";
+//_cgiScript = "www/cgi/test.php";
+//_cgiPath = "/usr/bin/php";
 
-	//_cgiScript = "www/cgi/"
-
+	_cgiScript = "www/cgi/cgi.py";
+	_cgiPath = "/usr/bin/python3";
 	_cgiBody << client._bodyReq;
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
 	_envCgi["SERVER_SOFTWARE"] = "Webserv";
@@ -86,10 +86,13 @@ char **Cgi::arg(Client &client) {
 
 		argv = new char *[3];
 		argv[0] = new char[strlen(_cgiPath.c_str()) + 1];
-		argv[1] = new char[strlen(_cgiScript.c_str()) + 1];
+		argv[1] = new char[strlen(_login.c_str()) + 1];
+
 		std::strcpy(argv[0], _cgiPath.c_str());
-		std::strcpy(argv[1], _cgiScript.c_str());
+		std::strcpy(argv[1], _login.c_str());
+
 		argv[2] = 0;
+
 	} else {
 		argv = new char *[3];
 		argv[0] = new char[_cgiPath.size() + 1];

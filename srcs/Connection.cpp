@@ -513,7 +513,8 @@ void Connection::handlePOST(Client& client)
 	{
 		// Lancer le cgiPath avec les données reçues
 
-		std::cout << location->getCgiPath() << std::endl;
+		std::cout <<" le PATH CGI LOCATION " << location->getCgiPath() << std::endl;
+
 		executeCGI(client, location->getCgiPath());
 	}
 }
@@ -586,15 +587,15 @@ ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, con
 
 void Connection::executeCGI(Client &client, const std::string &cgiPath)
 {
-	std::cout << "je leance cgi\n";
+
 	Cgi cgi(client,  cgiPath);
 
 	char **argv = cgi.arg(client);
-	std::cout << " ici tout va bien\n";
-	char **env = cgi.getenv();
-	std::cout << "ici aussi\n";
-	std::cout << "argv 0" <<  argv[0] << std::endl;
-	//std::cout << "argv 1" << argv[1] << std::endl;
+	// 0 si python, 1 si php
+	int type = 1;
+
+
+
 	int cgiInput[2];  // Pipe envoyer les données POST au script CGI
 	int cgiOutput[2]; // Pipe pour lire la sortie du script CGI
 
@@ -621,20 +622,25 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 
 
 
-		//std::string truc = client._bodyReq.str();
-		//std::string _login = truc.substr(truc.find('=') + 1);
+		std::string truc = client._bodyReq.str();
+		std::string _login = truc.substr(truc.find('=') + 1);
         // ici on lance CGI pour crreee env et argv
+		if( type == 1) {
+			char **env = cgi.getenv();
+			if (execve(argv[0], argv, env) == -1)
 
-
-
-         //char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
-		//if (execve(cgiPath.c_str(), argv, _env) == -1)
-
-		if (execve(argv[0], argv, env) == -1)
-				//	1 er chemin py, argv = chemin script et arg
-		{
-			sendErrorResponse(client, 500);
-			exit(EXIT_FAILURE);
+			{
+				sendErrorResponse(client, 500);
+				exit(EXIT_FAILURE);
+			}
+		}
+		if(type == 0) {
+			char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
+			if (execve(cgiPath.c_str(), argv, _env) == -1)
+			{
+				sendErrorResponse(client, 500);
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
 	else
