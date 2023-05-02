@@ -399,7 +399,7 @@ bool Connection::hanglGetLocation(Client &client)
 		}
 		else
 		{
-		std::cout << "Je suis la : " << location->getDeny() << std::endl;
+
 			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
@@ -512,6 +512,9 @@ void Connection::handlePOST(Client& client)
 	else
 	{
 		// Lancer le cgiPath avec les données reçues
+
+		std::cout <<" le PATH CGI LOCATION " << location->getCgiPath() << std::endl;
+
 		executeCGI(client, location->getCgiPath());
 	}
 }
@@ -584,6 +587,15 @@ ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, con
 
 void Connection::executeCGI(Client &client, const std::string &cgiPath)
 {
+
+	Cgi cgi(client,  cgiPath);
+
+	char **argv = cgi.arg(client);
+	// 0 si python, 1 si php
+	int type = 1;
+
+
+
 	int cgiInput[2];  // Pipe envoyer les données POST au script CGI
 	int cgiOutput[2]; // Pipe pour lire la sortie du script CGI
 
@@ -608,14 +620,27 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		dup2(cgiInput[0], STDIN_FILENO);
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
+
+
 		std::string truc = client._bodyReq.str();
 		std::string _login = truc.substr(truc.find('=') + 1);
+        // ici on lance CGI pour crreee env et argv
+		if( type == 1) {
+			char **env = cgi.getenv();
+			if (execve(argv[0], argv, env) == -1)
 
-		char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
-		if (execve(cgiPath.c_str(), argv, _env) == -1)
-		{
-			sendErrorResponse(client, 500);
-			exit(EXIT_FAILURE);
+			{
+				sendErrorResponse(client, 500);
+				exit(EXIT_FAILURE);
+			}
+		}
+		if(type == 0) {
+			char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
+			if (execve(cgiPath.c_str(), argv, _env) == -1)
+			{
+				sendErrorResponse(client, 500);
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
 	else
@@ -624,6 +649,7 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		close(cgiOutput[1]);
 
 		write(cgiInput[1], client._requestStr.str().c_str(), client._requestStr.str().length());
+		//write(cgiInput[1], NULL, 0);
 		close(cgiInput[1]);
 
 		// Lire la sortie du script CGI depuis le pipe de sortie
@@ -635,6 +661,7 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 			buffer[bytesRead] = '\0';
 			cgiResponse += buffer;
 		}
+		std::cout << " reponse cgi "<< cgiResponse << std::endl;
 		close(cgiOutput[0]);
 
 		int status;

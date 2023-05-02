@@ -44,7 +44,19 @@ void HTTPRequest::parseRequest(Client &client)
 	{
 		std::istringstream	lineStream(line);
 		std::string			methodStr;
+
 		lineStream >> methodStr >> client._uri >> client._httpVersion;
+
+
+		// recuperation du qery si existe
+		std::string::size_type pos = client._uri.find("?");
+		if(pos != std::string::npos)
+		{
+			client._query = client._uri.substr(pos);
+			client._uri.erase(pos);
+		}
+
+		//std::cout << "uri :" << client._uri << " query : " << client._query << std::endl;
 
 		if (methodStr == "GET")
 			client._method = GET;
@@ -66,6 +78,11 @@ void HTTPRequest::parseRequest(Client &client)
 			if (headerName == "Content-Length")
 				client._contentLenght = std::atoi(headerValue.c_str());
 			client._headers[headerName] = headerValue;
+			if(headerName == "Cookie") {
+				client._cookie = headerValue.c_str();
+				//std::cout << "cookie recu: " << client._cookie << std::endl;
+
+			}
 		}
 	}
 	if (client._method != POST)

@@ -25,6 +25,7 @@
 #include "./HTTPRequest.hpp"
 #include "./Response.hpp"
 #include "./Autodindex.hpp"
+#include "./Cgi.hpp"
 
 #include <vector>
 #define BSIZE 1024
