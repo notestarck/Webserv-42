@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/05/02 16:01:37 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 19:33:49 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -357,11 +357,11 @@ bool Connection::hanglGetLocation(Client &client)
 	{
 		if (!(location->getCgiPath().empty()))
 		{
-			std::cout <<" le PATH CGI LOCATION GET : " << location->getCgiPath() << std::endl;
-			executeCGI(client, location->getCgiPath(), location);
+			executeCGI(client, location);
 			return (true);
 		}
 
+		
 		if (location->getDeny())
 		{
 			std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
@@ -406,7 +406,7 @@ bool Connection::hanglGetLocation(Client &client)
 		}
 		else
 		{
-
+		std::cout << "Je suis la : " << location->getDeny() << std::endl;
 			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
@@ -519,8 +519,7 @@ void Connection::handlePOST(Client& client)
 	else
 	{
 		// Lancer le cgiPath avec les données reçues
-		std::cout <<" le PATH CGI LOCATION " << location->getCgiPath() << std::endl;
-		executeCGI(client, location->getCgiPath(), location);
+		executeCGI(client, location);
 	}
 }
 
@@ -590,16 +589,10 @@ ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, con
 	return (nullptr);
 }
 
-void Connection::executeCGI(Client &client, const std::string &cgiPath, ParsConfig::Location *location)
+void Connection::executeCGI(Client &client, ParsConfig::Location *location)
 {
-
 	Cgi cgi(client, location);
-
-	char **argv = cgi.arg(client);
-	// 0 si python, 1 si php
-	int type = 0;
-
-
+	//char **argv = cgi.arg(client);
 
 	int cgiInput[2];  // Pipe envoyer les données POST au script CGI
 	int cgiOutput[2]; // Pipe pour lire la sortie du script CGI
@@ -626,26 +619,13 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath, ParsConf
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
 
-
-		std::string truc = client._bodyReq.str();
-		std::string _login = truc.substr(truc.find('=') + 1);
-        // ici on lance CGI pour crreee env et argv
-		if( type == 1) {
+		//char *argv[] = {const_cast<char *>(location->getCgiScript().c_str()), const_cast<char *>(_login.c_str()), NULL};
+		char **argv = cgi.arg(client);
 		char **env = cgi.getenv();
-			if (execve(argv[0], argv, env) == -1)
-
-			{
-				sendErrorResponse(client, 500);
-				exit(EXIT_FAILURE);
-			}
-		}
-		if(type == 0) {
-			char *argv[] = {const_cast<char *>(cgiPath.c_str()), const_cast<char *>(_login.c_str()), NULL};
-			if (execve(cgiPath.c_str(), argv, _env) == -1)
-			{
-				sendErrorResponse(client, 500);
-				exit(EXIT_FAILURE);
-			}
+		if (execve(argv[0], argv, env) == -1)
+		{
+			sendErrorResponse(client, 500);
+			exit(EXIT_FAILURE);
 		}
 	}
 	else
@@ -654,37 +634,26 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath, ParsConf
 		close(cgiOutput[1]);
 
 		write(cgiInput[1], client._requestStr.str().c_str(), client._requestStr.str().length());
-		//write(cgiInput[1], NULL, 0);
 		close(cgiInput[1]);
 
 		// Lire la sortie du script CGI depuis le pipe de sortie
 		char buffer[4096];
-		std::string cgiResponse;
 		ssize_t bytesRead;
 		while ((bytesRead = read(cgiOutput[0], buffer, sizeof(buffer) - 1)) > 0)
 		{
 			buffer[bytesRead] = '\0';
-			cgiResponse += buffer;
+			client._bodyRep += buffer;
 		}
-		std::cout << " reponse cgi "<< cgiResponse << std::endl;
 		close(cgiOutput[0]);
 
 		int status;
 		waitpid(pid, &status, 0);
 
+  
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		{
-			int sentBytes = send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
-			if (sentBytes == 0)
-   			{
-   			    std::cerr << "\033[31mErreur send90 n'a pas envoye de donnee client : \033[0m" << client._csock << std::endl;
-   			    client._keepAlive = false;
-   			}
-   			else if (sentBytes == -1)
-   			{
-   			    std::cerr << "\033[31mErreur de send() client : \00[0m" << client._csock << std::endl;
-   			    client._keepAlive = false;
-   			}
+			createHttpResponse(client, 200, "text/html");
+			sendHttpResponse(client);
 		}
 		else
 			sendErrorResponse(client, 500);

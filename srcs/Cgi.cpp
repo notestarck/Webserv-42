@@ -11,6 +11,7 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 	_cgiScript = location->getCgiScript();
 	_cgiPath = location->getCgiPath();
 	_cgiBody = client._bodyReq.str();
+
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
 	_envCgi["SERVER_SOFTWARE"] = "Webserv";
 	_envCgi["SERVER_PORT"] =    client._server.getPort();
@@ -20,7 +21,8 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 	_envCgi["PATH_INFO"] = _cgiPath;
 	_envCgi["PATH_TRANSLATED"] =  _cgiScript;     //chemin absolue du scritp
 	_envCgi["SCRIPT_NAME"] = _cgiPath;     // chemin d acces relatif
-	_envCgi["QUERY_STRING"] = client._query;
+	_envCgi["QUERY_STRING"] = client._query.substr(1, client._query.size());
+	std::cout << "_query : " << client._query << std::endl;
 	_envCgi["REDIR_STATUS"] = "200";   // pour cgi-php
 	//_envCgi["REMOTE_HOST"] = client._server.getHost();
 	_envCgi["GETEWAY_INTERFACE"] = "CGI/1.1";
@@ -31,26 +33,25 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 	if (client._method == POST) {
 		_envCgi["CONTENT_TYPE"] = client._headers["Content-Type"].c_str();  //content type """ a tester""
 		_envCgi["CONTENT_LENGTH"] = client._contentLenght;
+		for (int i = 0; _env[i]; i++)
+		{
+			std::string line;
+			line = _env[i];
+			size_t separator = line.find("=");
+			if (separator != std::string::npos)
+			{
+				std::string headerName = line.substr(0, separator);
+				std::string headerValue = line.substr(separator + 1, line.size() - separator - 1);
+				// std::cout << headerName << " - " << headerValue << std::endl;
+				_envCgi[headerName] = headerValue;
+			}
+		}
 	}
 	//_envCgi["HTTP_ACCEPT"] = "1";
 	//_envCgi["HTTP_ACCEPT_LANGUAGE"] = "1";
 	//_envCgi["HTTP_USER_AGENT"] = "1";
 	_envCgi["HTTP_COOKIE"] = client._cookie;
 	//_envCgi["HTTP_REFERER"] = "1";
-
-	for (int i = 0; _env[i]; i++)
-	{
-		std::string line;
-		line = _env[i];
-		size_t separator = line.find("=");
-		if (separator != std::string::npos)
-		{
-			std::string headerName = line.substr(0, separator);
-			std::string headerValue = line.substr(separator + 1, line.size() - separator - 1);
-			// std::cout << headerName << " - " << headerValue << std::endl;
-			_envCgi[headerName] = headerValue;
-		}
-	}
 }
 
 Cgi::~Cgi() {}
@@ -90,7 +91,6 @@ char **Cgi::getenv() const
 char **Cgi::arg(Client &client)
 {
 	char **argv;
-	std::cout << "je lance fonction arg\n";
 	if (_cgiScript.find(".py") != std::string::npos)
 	{
 		std::string truc = client._bodyReq.str();
@@ -98,10 +98,10 @@ char **Cgi::arg(Client &client)
 
 
 		argv = new char *[3];
-		argv[0] = new char[strlen(_cgiPath.c_str()) + 1];
+		argv[0] = new char[strlen(_cgiScript.c_str()) + 1];
 		argv[1] = new char[strlen(_login.c_str()) + 1];
 
-		std::strcpy(argv[0], _cgiPath.c_str());
+		std::strcpy(argv[0], _cgiScript.c_str());
 		std::strcpy(argv[1], _login.c_str());
 
 		argv[2] = 0;

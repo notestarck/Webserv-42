@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/05/02 12:24:33 by estarck          ###   ########.fr       */
+/*   Updated: 2023/04/19 14:08:28 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,6 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
     }
 
     response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
-
-	if(client._cookie.empty())
-		response.append("Set-Cookie: delicieux_cookie=choco\r\n");
     response.append("Content-Type: " + contentType + "\r\n");
     response.append("Content-Length: " + std::to_string(client._bodyRep.size()) + "\r\n");
     response.append("Accept-Charset: utf-8\r\n");
@@ -47,8 +44,6 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
 
     //On enregistre l'ensemble de la reponse dans le client pour l'envoyer en plusieurs fois.
     client._response = response;
-
-
 }
 
 void sendHttpResponse(Client &client)
@@ -154,8 +149,5 @@ void sendErrorResponse(Client &client, int code)
     response += "</html>";
 
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
-    {
         perror("Erreur lors de l'envoi de la réponse d'erreur");
-        client._keepAlive = false;
-    }
 }

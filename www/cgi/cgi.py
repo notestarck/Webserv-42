@@ -350,8 +350,10 @@ if (__name__ == "__main__"):
 
 	corrs = sorted(corrs, key=lambda x: x.total, reverse=True)
 
+	print (f"<!DOCTYPE html>\r\n<html>\r\n<body>\r\n")
 	for i in corrs[:3]:
 		indice = i.total / __total * 100
-		print(f"{i.stud} t'as corrige {i.total} fois sur {__total}. Ca represente {round(indice)}% de toute tes corrections !!")
+		print(f"<p>{i.stud} t'as corrige {i.total} fois sur {__total}. Ca represente {round(indice)}% de toute tes corrections !!</p>")
+	print (f"</body>\r\n</html>")
 
 

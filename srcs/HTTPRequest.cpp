@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/05/02 15:40:32 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 18:41:15 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,7 @@ void HTTPRequest::parseRequest(Client &client)
 	{
 		std::istringstream	lineStream(line);
 		std::string			methodStr;
-
 		lineStream >> methodStr >> client._uri >> client._httpVersion;
-
 
 		// recuperation du qery si existe
 		std::string::size_type pos = client._uri.find("?");
@@ -55,8 +53,6 @@ void HTTPRequest::parseRequest(Client &client)
 			client._query = client._uri.substr(pos);
 			client._uri.erase(pos);
 		}
-
-		//std::cout << "uri :" << client._uri << " query : " << client._query << std::endl;
 
 		if (methodStr == "GET")
 			client._method = GET;
@@ -78,10 +74,6 @@ void HTTPRequest::parseRequest(Client &client)
 			if (headerName == "Content-Length")
 				client._contentLenght = std::atoi(headerValue.c_str());
 			client._headers[headerName] = headerValue;
-			if(headerName == "Cookie") {
-				client._cookie = headerValue.c_str();
-				//std::cout << "cookie recu: " << client._cookie << std::endl;
-			}
 		}
 	}
 	if (client._method != POST)
