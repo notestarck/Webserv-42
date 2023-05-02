@@ -3,17 +3,13 @@
 //
 #include "../include/Cgi.hpp"
 #include "../include/Client.hpp"
+#include "../include/utils.hpp"
 
 
-Cgi::Cgi(Client &client, std::string cgipath)
+Cgi::Cgi(Client &client, ParsConfig::Location *location)
 {
-
-	(void)cgipath;
-//_cgiScript = "www/cgi/test.php";
-//_cgiPath = "/usr/bin/php";
-
-	_cgiScript = "www/cgi/cgi.py";
-	_cgiPath = "/usr/bin/python3";
+	_cgiScript = location->getCgiScript();
+	_cgiPath = location->getCgiPath();
 	_cgiBody << client._bodyReq;
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
 	_envCgi["SERVER_SOFTWARE"] = "Webserv";
@@ -42,10 +38,27 @@ Cgi::Cgi(Client &client, std::string cgipath)
 	_envCgi["HTTP_COOKIE"] = client._cookie;
 	//_envCgi["HTTP_REFERER"] = "1";
 
-
+	for (int i = 0; _env[i]; i++)
+	{
+		std::string line;
+		line = _env[i];
+		size_t separator = line.find("=");
+		if (separator != std::string::npos)
+		{
+			std::string headerName = line.substr(0, separator);
+			std::string headerValue = line.substr(separator + 1, line.size() - separator - 1);
+			std::cout << headerName << " - " << headerValue << std::endl;
+			_envCgi[headerName] = headerValue;
+		}
+	}
 }
 
 Cgi::~Cgi() {}
+
+Cgi::Cgi(const Cgi &srcs)
+{
+	*this = srcs;
+}
 
 Cgi &Cgi::operator=(Cgi const &src){
 	if(this != &src)
@@ -58,10 +71,6 @@ Cgi &Cgi::operator=(Cgi const &src){
 	}
 	return *this;
 }
-
-//std::string Cgi::exec_cgi() {
-//
-//}
 
 char **Cgi::getenv() const{
 	char **env = new char*[_envCgi.size() + 1];

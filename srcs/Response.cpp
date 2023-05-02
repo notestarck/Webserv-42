@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 14:08:28 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 12:24:33 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,5 +154,8 @@ void sendErrorResponse(Client &client, int code)
     response += "</html>";
 
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
+    {
         perror("Erreur lors de l'envoi de la réponse d'erreur");
+        client._keepAlive = false;
+    }
 }

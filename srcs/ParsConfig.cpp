@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 17:38:12 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 11:19:30 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 15:05:30 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,8 @@ std::string	ParsConfig::getLocationUrl(size_t pos) const
 		std::cerr << "\033[1;31mgetLocationUrl : Bad size !\033[0m" << std::endl;
 		exit (-4);
 	} 
-	return (_location[pos].getUrl()); }
+	return (_location[pos].getUrl());
+}
 
 std::vector<std::string>	ParsConfig::getLocationAllow(std::string url) const
 {
@@ -307,6 +308,8 @@ ParsConfig::Location::Location(std::ifstream &file_config, std::string url) :
 				_return = value.substr(0, value.size() - 1);
             else if(key == "cgi_path")
                 _cgiPath = value.substr(0, value.size() - 1);
+			else if(key == "cgi_script")
+                _cgiScript = value.substr(0, value.size() - 1);
 			else if(key == "client_max_body_size")
                 _maxSize = std::atoi(value.substr(0, value.size() - 1).c_str());
 			else if (key == "deny")
@@ -341,6 +344,7 @@ ParsConfig::Location & ParsConfig::Location::operator=(const Location & srcs)
 		_autoIndex = srcs._autoIndex;
 		_return = srcs._return;
         _cgiPath = srcs._cgiPath;
+        _cgiScript = srcs._cgiScript;
 		_maxSize = srcs._maxSize;
 		_deny = srcs._deny;
 	}
@@ -370,6 +374,9 @@ const std::string & ParsConfig::Location::getReturn() const
 
 const std::string & ParsConfig::Location::getCgiPath() const
 { return (_cgiPath); }
+
+const std::string & ParsConfig::Location::getCgiScript() const
+{ return (_cgiScript); }
 
 const int & ParsConfig::Location::getMaxSize() const
 { return (_maxSize); }

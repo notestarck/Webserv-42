@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 17:49:56 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 15:48:53 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ class Connection
 		std::string getFilePath(const Client &client, const ParsConfig::Location *location);
 		std::string getMimeType(const std::string& filePath);
 		ParsConfig::Location *findLocationForUri(const std::string& uri, const std::vector<ParsConfig::Location>& locations);
-		void executeCGI(Client &client, const std::string &cgiPath);
+		void executeCGI(Client &client, const std::string &cgiPath, ParsConfig::Location *location);
 		
 		bool deadOrAlive(Client client, bool alive);
 

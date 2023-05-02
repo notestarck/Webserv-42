@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/16 14:28:13 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 11:00:13 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 15:03:59 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ class ParsConfig
 				const bool &						getAutoIndex() const;
 				const std::string &					getReturn() const;
 				const std::string &					getCgiPath() const;
+				const std::string &					getCgiScript() const;
 				const int &							getMaxSize() const;
 				const bool &						getDeny() const;
 
@@ -57,6 +58,7 @@ class ParsConfig
 				std::string					_path;
 				bool						_autoIndex;
 				std::string					_return;
+                std::string                 _cgiScript;
                 std::string                 _cgiPath;
 				int							_maxSize;
 				bool						_deny;

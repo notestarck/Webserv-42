@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 16:14:45 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 16:01:37 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -355,6 +355,13 @@ bool Connection::hanglGetLocation(Client &client)
 	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
 	if (location)
 	{
+		if (!(location->getCgiPath().empty()))
+		{
+			std::cout <<" le PATH CGI LOCATION GET : " << location->getCgiPath() << std::endl;
+			executeCGI(client, location->getCgiPath(), location);
+			return (true);
+		}
+
 		if (location->getDeny())
 		{
 			std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
@@ -512,10 +519,8 @@ void Connection::handlePOST(Client& client)
 	else
 	{
 		// Lancer le cgiPath avec les données reçues
-
 		std::cout <<" le PATH CGI LOCATION " << location->getCgiPath() << std::endl;
-
-		executeCGI(client, location->getCgiPath());
+		executeCGI(client, location->getCgiPath(), location);
 	}
 }
 
@@ -585,14 +590,14 @@ ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, con
 	return (nullptr);
 }
 
-void Connection::executeCGI(Client &client, const std::string &cgiPath)
+void Connection::executeCGI(Client &client, const std::string &cgiPath, ParsConfig::Location *location)
 {
 
-	Cgi cgi(client,  cgiPath);
+	Cgi cgi(client, location);
 
 	char **argv = cgi.arg(client);
 	// 0 si python, 1 si php
-	int type = 1;
+	int type = 0;
 
 
 
@@ -626,7 +631,7 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 		std::string _login = truc.substr(truc.find('=') + 1);
         // ici on lance CGI pour crreee env et argv
 		if( type == 1) {
-			char **env = cgi.getenv();
+		char **env = cgi.getenv();
 			if (execve(argv[0], argv, env) == -1)
 
 			{
