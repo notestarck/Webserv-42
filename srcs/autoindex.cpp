@@ -6,11 +6,11 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:44:04 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/19 12:24:08 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 16:12:44 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/Autodindex.hpp"
+#include "../include/Autoindex.hpp"
 
 typedef std::vector<std::pair<std::pair<std::string, std::string>, int> > t_dir;
 typedef std::pair<std::string, std::string> t_spair;

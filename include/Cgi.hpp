@@ -24,10 +24,10 @@ class Cgi
 
 	private:
 		Cgi();
-		std::map<std::string, std::string>  _envCgi;
-		std::stringstream                   _cgiBody;
-		std::string                         _cgiPath;    // chemin du bin
-		std::string                         _cgiScript;  // chemin du script cgi
+		std::map<std::string, std::string> 	_envCgi;
+		std::string							_cgiBody;
+		std::string							_cgiPath;    // chemin du bin
+		std::string							_cgiScript;  // chemin du script cgi
 };
 
 

@@ -10,7 +10,7 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 {
 	_cgiScript = location->getCgiScript();
 	_cgiPath = location->getCgiPath();
-	_cgiBody << client._bodyReq;
+	_cgiBody = client._bodyReq.str();
 	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
 	_envCgi["SERVER_SOFTWARE"] = "Webserv";
 	_envCgi["SERVER_PORT"] =    client._server.getPort();
@@ -47,7 +47,7 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 		{
 			std::string headerName = line.substr(0, separator);
 			std::string headerValue = line.substr(separator + 1, line.size() - separator - 1);
-			std::cout << headerName << " - " << headerValue << std::endl;
+			// std::cout << headerName << " - " << headerValue << std::endl;
 			_envCgi[headerName] = headerValue;
 		}
 	}
@@ -60,19 +60,21 @@ Cgi::Cgi(const Cgi &srcs)
 	*this = srcs;
 }
 
-Cgi &Cgi::operator=(Cgi const &src){
+Cgi &Cgi::operator=(Cgi const &src)
+{
 	if(this != &src)
 	{
 		_cgiPath   = src._cgiPath;
 
 		_cgiScript = src._cgiScript;
-		_cgiBody << src._cgiBody;
+		_cgiBody = src._cgiBody;
 		_envCgi = src._envCgi;
 	}
 	return *this;
 }
 
-char **Cgi::getenv() const{
+char **Cgi::getenv() const
+{
 	char **env = new char*[_envCgi.size() + 1];
 	int i = 0;
 	for(std::map<std::string, std::string>::const_iterator j = _envCgi.begin(); j != _envCgi.end(); j++) {
@@ -85,10 +87,12 @@ char **Cgi::getenv() const{
 	return env;
 }
 
-char **Cgi::arg(Client &client) {
+char **Cgi::arg(Client &client)
+{
 	char **argv;
 	std::cout << "je lance fonction arg\n";
-	if (_cgiScript.find(".py") != std::string::npos) {
+	if (_cgiScript.find(".py") != std::string::npos)
+	{
 		std::string truc = client._bodyReq.str();
 		std::string _login = truc.substr(truc.find('=') + 1);
 
@@ -101,8 +105,9 @@ char **Cgi::arg(Client &client) {
 		std::strcpy(argv[1], _login.c_str());
 
 		argv[2] = 0;
-
-	} else {
+	}
+	else
+	{
 		argv = new char *[3];
 		argv[0] = new char[_cgiPath.size() + 1];
 		std::strcpy(argv[0], _cgiPath.c_str());

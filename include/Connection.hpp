@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:43:22 by estarck           #+#    #+#             */
-/*   Updated: 2023/05/02 15:48:53 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/02 16:12:59 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 #include "./Client.hpp"
 #include "./HTTPRequest.hpp"
 #include "./Response.hpp"
-#include "./Autodindex.hpp"
+#include "./Autoindex.hpp"
 #include "./Cgi.hpp"
 
 #include <vector>
