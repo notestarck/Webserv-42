@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/05/02 19:33:49 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/03 11:10:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -505,7 +505,7 @@ void Connection::handlePOST(Client& client)
 		if (outFile.is_open())
 		{
 			outFile << fileData;
-			client._bodyRep = "Fichier créé avec succès";
+			client._bodyRep = "Successfully created file";
 			createHttpResponse(client, 201, "text/html");
 			sendHttpResponse(client);
 		}
@@ -592,6 +592,8 @@ ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, con
 void Connection::executeCGI(Client &client, ParsConfig::Location *location)
 {
 	Cgi cgi(client, location);
+	char **argv = cgi.arg(client);
+	char **env = cgi.getenv();
 	//char **argv = cgi.arg(client);
 
 	int cgiInput[2];  // Pipe envoyer les données POST au script CGI
@@ -618,10 +620,6 @@ void Connection::executeCGI(Client &client, ParsConfig::Location *location)
 		dup2(cgiInput[0], STDIN_FILENO);
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
-
-		//char *argv[] = {const_cast<char *>(location->getCgiScript().c_str()), const_cast<char *>(_login.c_str()), NULL};
-		char **argv = cgi.arg(client);
-		char **env = cgi.getenv();
 		if (execve(argv[0], argv, env) == -1)
 		{
 			sendErrorResponse(client, 500);

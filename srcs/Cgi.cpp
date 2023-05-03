@@ -12,25 +12,8 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 	_cgiPath = location->getCgiPath();
 	_cgiBody = client._bodyReq.str();
 
-	_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
-	_envCgi["SERVER_SOFTWARE"] = "Webserv";
-	_envCgi["SERVER_PORT"] =    client._server.getPort();
-	_envCgi["SERVER_NAME"] = "toto";
-	_envCgi["REQUEST_METHOD"] = client._method;
-	_envCgi["REQUEST_URI"] = _cgiPath;
-	_envCgi["PATH_INFO"] = _cgiPath;
-	_envCgi["PATH_TRANSLATED"] =  _cgiScript;     //chemin absolue du scritp
-	_envCgi["SCRIPT_NAME"] = _cgiPath;     // chemin d acces relatif
-	_envCgi["QUERY_STRING"] = client._query.substr(1, client._query.size());
-	std::cout << "_query : " << client._query << std::endl;
-	_envCgi["REDIR_STATUS"] = "200";   // pour cgi-php
-	//_envCgi["REMOTE_HOST"] = client._server.getHost();
-	_envCgi["GETEWAY_INTERFACE"] = "CGI/1.1";
-	_envCgi["REMOTE_ADDR"] = "1";
-	//_envCgi["AUTH_TYPE"] = "1";
-	//_envCgi["REMOTE_USER"] = "1";
-	//_envCgi["REMOTE_IDENT"] = "1";
-	if (client._method == POST) {
+	if (client._method == POST)
+	{
 		_envCgi["CONTENT_TYPE"] = client._headers["Content-Type"].c_str();  //content type """ a tester""
 		_envCgi["CONTENT_LENGTH"] = client._contentLenght;
 		for (int i = 0; _env[i]; i++)
@@ -47,11 +30,18 @@ Cgi::Cgi(Client &client, ParsConfig::Location *location)
 			}
 		}
 	}
-	//_envCgi["HTTP_ACCEPT"] = "1";
-	//_envCgi["HTTP_ACCEPT_LANGUAGE"] = "1";
-	//_envCgi["HTTP_USER_AGENT"] = "1";
+	else
+	{
+		_envCgi["SERVER_PROTOCOL"] = client._httpVersion;
+		_envCgi["SERVER_SOFTWARE"] = "Webserv";
+		_envCgi["SERVER_PORT"] =    client._server.getPort();
+		_envCgi["SERVER_NAME"] = client._server.getNameServer();
+		_envCgi["REQUEST_METHOD"] = client._method;
+		_envCgi["REDIR_STATUS"] = "200";
+		_envCgi["GETEWAY_INTERFACE"] = "CGI/1.1";
+		_envCgi["QUERY_STRING"] = client._query.substr(1, client._query.size());
+	}
 	_envCgi["HTTP_COOKIE"] = client._cookie;
-	//_envCgi["HTTP_REFERER"] = "1";
 }
 
 Cgi::~Cgi() {}

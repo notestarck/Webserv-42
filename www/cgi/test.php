@@ -1,4 +1,5 @@
 <?php
+//phpinfo();
 $params = array();
 parse_str($_SERVER['QUERY_STRING'], $params);
 $login = $params['login'];
