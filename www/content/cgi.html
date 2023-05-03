@@ -1,50 +1,59 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<link rel="stylesheet" href="../style/style.css">
-		<link rel="stylesheet" href="../style/cgi.css">
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
-		<title>Test-WebServ</title>
-	</head>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../style/style.css">
+    <link rel="stylesheet" href="../style/cgi.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&family=Noto+Sans:wght@100&display=swap" rel="stylesheet">
+    <title>Test-WebServ</title>
+</head>
 
-	<body>
-		<header>
-			<div class="barre_nav">
-				<img src="../image/logoWebServ-42.png" alt="Logo WebServ-42">
-				<p>WebServ-42</p>
-				<nav>
-					<a href="../index.html">Accueil</a>
-					<a href="team.html">Team</a>
-					<a href="documentation.html">Documentation</a>
-				</nav>
-			</div>
-		</header>
+<body>
+<header>
+    <div class="barre_nav">
+        <img src="../image/logoWebServ-42.png" alt="Logo WebServ-42">
+        <p>WebServ-42</p>
+        <nav>
+            <a href="../index.html">Accueil</a>
+            <a href="team.html">Team</a>
+            <a href="documentation.html">Documentation</a>
+        </nav>
+    </div>
+</header>
 
-		<main>
-			<h1>Upload</h1>
-			<div class="definition">
-				<h2>Comment ca marche ?</h2>
-				<p>
-					Lorsque l'utilisateur soumet le formulaire, le script Python spécifié dans l'attribut action, du code html, 
-					est appelé avec le champ de saisie 'Login 42' comme entrée. Le script Python peut alors utiliser 
-					cette entrée pour exécuter son action.
-				</p>
-			</div>
-			<div class="test">
-				<h2>Les tests</h2>
-				<form action="test_login.py" method="post">
-					<label for="login">Login 42:</label>
-					<input type="text" id="login" name="login"><br><br>
-					<input type="submit" value="Lancer le test" class="envoyer">
-				</form>
-			</div>
-		</main>
+<main>
+    <h1>Test du CGI</h1>
+    <div class="definition">
+        <h2>Comment ca marche ?</h2>
+        <p>
+            Lorsque l'utilisateur soumet le formulaire, le script Python spécifié dans l'attribut action, du code html,
+            est appelé avec le champ de saisie 'Login 42' comme entrée. Le script Python peut alors utiliser
+            cette entrée pour exécuter son action.
+        </p>
+    </div>
+    <div class="test">
+        <h2>Les tests</h2>
+        <form action="/cgi_post" method="post">
+            <h3>Test cgi Post</h3>
+            <label for="login">Login 42:</label>
+            <input type="text" class="login" id="login" name="login"><br><br>
+            <input type="submit" value="Lancer le test" class="envoyer">
+        </form> <br>
 
-		<footer>
 
-		</footer>
-	</body>
+        <form action="/cgi_get" method="get">
+            <h3>Test cgi Get</h3>
+            <label for="login">Prenom :</label>
+            <input type="text" class="login" id="login" name="login"><br><br>
+            <input type="submit" value="Lancer le test" class="envoyer">
+        </form>
+    </div>
+</main>
+
+<footer>
+
+</footer>
+</body>
 </html>

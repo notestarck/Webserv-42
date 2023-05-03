@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 12:30:52 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 11:19:59 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/03 10:43:08 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,14 @@ void HTTPRequest::parseRequest(Client &client)
 		std::string			methodStr;
 		lineStream >> methodStr >> client._uri >> client._httpVersion;
 
+		// recuperation du qery si existe
+		std::string::size_type pos = client._uri.find("?");
+		if(pos != std::string::npos)
+		{
+			client._query = client._uri.substr(pos);
+			client._uri.erase(pos);
+		}
+
 		if (methodStr == "GET")
 			client._method = GET;
 		else if (methodStr == "POST")
@@ -66,6 +74,8 @@ void HTTPRequest::parseRequest(Client &client)
 			if (headerName == "Content-Length")
 				client._contentLenght = std::atoi(headerValue.c_str());
 			client._headers[headerName] = headerValue;
+			if (headerName == "Cookie")
+				client._cookie = headerValue.c_str();
 		}
 	}
 	if (client._method != POST)
@@ -74,7 +84,6 @@ void HTTPRequest::parseRequest(Client &client)
 		line.clear();
 		return;
 	}
-
 	size_t posBody = client._requestStr.str().find("\r\n\r\n");
 	client._bodyReq << client._requestStr.str().substr(posBody + 4);
 	client._sizeBody = client._bodyReq.str().size();

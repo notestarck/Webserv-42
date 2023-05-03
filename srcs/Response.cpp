@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/06 15:50:59 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 11:38:26 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/03 11:17:48 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,10 @@ void createHttpResponse(Client &client, int statusCode, const std::string &conte
     }
 
     response.append("HTTP/1.1 " + std::to_string(statusCode) + " " + statusMessage + "\r\n");
+    if(client._cookie.empty())
+		response.append("Set-Cookie: delicieux_cookie=choco\r\n");
     response.append("Content-Type: " + contentType + "\r\n");
     response.append("Content-Length: " + std::to_string(client._bodyRep.size()) + "\r\n");
-    response.append("Accept-Charset: utf-8\r\n");
     response.append("Connection: Closed\r\n");
     response.append("\r\n");
     response.append(client._bodyRep);
@@ -66,9 +67,14 @@ void sendHttpResponse(Client &client)
 
     ssize_t sentBytes = send(client._csock, response.data(), response.size(), 0);
     client._sizeSend += sentBytes;
-    if (sentBytes == -1)
+    if (sentBytes == 0)
     {
-        perror("Erreur lors de l'envoi de la réponse");
+        std::cerr << "\033[31mErreur send90 n'a pas envoye de donnee client : \033[0m" << client._csock << std::endl;
+        client._keepAlive = false;
+    }
+    else if (sentBytes == -1)
+    {
+        std::cerr << "\033[31mErreur de send() client : \00[0m" << client._csock << std::endl;
         client._keepAlive = false;
     }
 }
@@ -93,13 +99,13 @@ void sendErrorResponse(Client &client, int code)
             message = "Method Not Allowed";
             break;
 		case 408:
-			message = "Request Timeout";
+			message = "Request Time-out";
 			break;
 		case 413:
-			message = "Content Too Large";
+			message = "Request Entity Too Large";
 			break;
 		case 414:
-			message = "URI Too Long";
+			message = "Request-URI Too Long";
 			break;
         case 500:
             message = "Internal Server Error";
@@ -123,10 +129,29 @@ void sendErrorResponse(Client &client, int code)
     response += "    <title>" + std::to_string(code) + " " + message + "</title>\n";
     response += "</head>\n";
     response += "<body>\n";
-    response += "    <h1>Error " + std::to_string(code) + ": " + message + "</h1>\n";
+    std::string errorPage = client._config.getErrorPage(code);
+    if (errorPage != "notFound")
+    {
+        std::cout << client._config.getRoot() << errorPage << std::endl;
+        std::ifstream file(client._config.getRoot() + errorPage, std::ios::in | std::ios::binary);
+        if (file.is_open())
+        {
+            std::stringstream buf;
+            buf << file.rdbuf();
+            response += buf.str();
+            file.close();
+        }
+        else
+            std::cerr << "Page not open !\n";    
+    }
+    else
+        response += "    <h1>Error " + std::to_string(code) + ": " + message + "</h1>\n";
     response += "</body>\n";
     response += "</html>";
 
     if (send(client._csock, response.c_str(), response.length(), 0) == -1)
-        perror("Erreur lors de l'envoi de la réponse d'erreur");
+    {
+        std::cerr << "\033[31Error : sendErrorResponse() lors de l'envoi de la réponse d'erreur\033[0m" << std::endl;
+        client._keepAlive = false;
+    }
 }

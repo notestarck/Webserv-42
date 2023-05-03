@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/17 15:02:57 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/03 11:37:38 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/03 12:03:23 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,11 @@ void signal_handler(int signal)
     	std::cout << "Signal SIGINT reçu. Fermeture du programme..." << std::endl;
 		boolStart = 0;
 	}
+	if (signal == SIGPIPE)
+	{
+		std::cout << "Signal SIGPIPE recu. Fermeture du programme..." << std::endl;
+		boolStart = 0;
+	}
 }
 
 int countServer(std::ifstream &config_file)
@@ -53,6 +58,8 @@ int countServer(std::ifstream &config_file)
 
 bool	checkExtension(std::string extension)
 {
+	if (extension.size() < 5)
+		return (false);
 	std::string tmp = extension.substr(extension.size() - 5, extension.size());
 	if(tmp != ".conf")
 		return (false);

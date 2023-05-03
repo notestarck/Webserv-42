@@ -6,11 +6,13 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 13:50:45 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/18 12:37:41 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/03 11:10:31 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/Connection.hpp"
+#include "./utils.hpp"
+
 
 #include <stdexcept>
 #include <iostream>
@@ -259,6 +261,16 @@ bool Connection::receiveClientRequest(Client &client)
 			std::memset(&buffer, 0, optval);
 			return true;
 		}
+		if (client._uri == "/test_max")
+		{
+			ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
+			if (location->getMaxSize() < client._contentLenght)
+			{
+				sendErrorResponse(client, 413);
+				client._keepAlive = false;
+				return false;
+			}
+		}
 	}
 	else
 	{
@@ -343,13 +355,35 @@ bool Connection::hanglGetLocation(Client &client)
 	ParsConfig::Location *location = findLocationForUri(client._uri, client._location);
 	if (location)
 	{
+		if (!(location->getCgiPath().empty()))
+		{
+			executeCGI(client, location);
+			return (true);
+		}
+
+		
+		if (location->getDeny())
+		{
+			std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
+			sendErrorResponse(client, 403);
+			return (true);
+		}
+		
 		if (!(location->isMethodAllowed("GET")))
 		{
 			std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 405);
 			return (true);
 		}
+
+		if (location->getAutoIndex())
+		{
+			std::cout << location->getPath();
+			startAutoIndex(client, location->getPath());
+			return (true);
+		}
 		std::string filePath = getFilePath(client, location);
+		std::cout << "path : " << filePath << std::endl;
 		std::ifstream file(filePath, std::ios::in | std::ios::binary);
 		
 		if (file.is_open() && location->getReturn().empty())
@@ -372,6 +406,7 @@ bool Connection::hanglGetLocation(Client &client)
 		}
 		else
 		{
+		std::cout << "Je suis la : " << location->getDeny() << std::endl;
 			std::cerr << "\033[0;31mError : 404 Not Found from client:\033[0m " << client._csock << std::endl;
 			sendErrorResponse(client, 404);
 		}
@@ -390,6 +425,18 @@ void Connection::handlePOST(Client& client)
 	{
 		std::cerr << "\033[0;31mError : 405 Method Not Allowed from client:\033[0m " << client._csock << std::endl;
 		sendErrorResponse(client, 405);
+		return;
+	}
+	if (location->getDeny())
+	{
+		std::cerr << "\033[0;31mError : 403 Forbidden:\033[0m " << client._csock << std::endl;
+		sendErrorResponse(client, 403);
+		return;
+	}
+	if (location->getUrl() == "/test_max")
+	{
+		createHttpResponse(client, 200, "text/html");
+		sendHttpResponse(client);
 		return;
 	}
 	
@@ -458,7 +505,7 @@ void Connection::handlePOST(Client& client)
 		if (outFile.is_open())
 		{
 			outFile << fileData;
-			client._bodyRep = "Fichier créé avec succès";
+			client._bodyRep = "Successfully created file";
 			createHttpResponse(client, 201, "text/html");
 			sendHttpResponse(client);
 		}
@@ -472,7 +519,7 @@ void Connection::handlePOST(Client& client)
 	else
 	{
 		// Lancer le cgiPath avec les données reçues
-		executeCGI(client, location->getCgiPath());
+		executeCGI(client, location);
 	}
 }
 
@@ -542,8 +589,13 @@ ParsConfig::Location *Connection::findLocationForUri(const std::string& uri, con
 	return (nullptr);
 }
 
-void Connection::executeCGI(Client &client, const std::string &cgiPath)
+void Connection::executeCGI(Client &client, ParsConfig::Location *location)
 {
+	Cgi cgi(client, location);
+	char **argv = cgi.arg(client);
+	char **env = cgi.getenv();
+	//char **argv = cgi.arg(client);
+
 	int cgiInput[2];  // Pipe envoyer les données POST au script CGI
 	int cgiOutput[2]; // Pipe pour lire la sortie du script CGI
 
@@ -561,15 +613,14 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 	}
 	if (pid == 0)
 	{
+		signal(SIGPIPE, signal_handler);
 		close(cgiInput[1]);
 		close(cgiOutput[0]);
 
 		dup2(cgiInput[0], STDIN_FILENO);
 		dup2(cgiOutput[1], STDOUT_FILENO);
 
-		char *argv[] = {const_cast<char *>(cgiPath.c_str()), NULL};
-		char *envp[] = {NULL};
-		if (execve(cgiPath.c_str(), argv, envp) == -1)
+		if (execve(argv[0], argv, env) == -1)
 		{
 			sendErrorResponse(client, 500);
 			exit(EXIT_FAILURE);
@@ -585,26 +636,24 @@ void Connection::executeCGI(Client &client, const std::string &cgiPath)
 
 		// Lire la sortie du script CGI depuis le pipe de sortie
 		char buffer[4096];
-		std::string cgiResponse;
 		ssize_t bytesRead;
 		while ((bytesRead = read(cgiOutput[0], buffer, sizeof(buffer) - 1)) > 0)
 		{
 			buffer[bytesRead] = '\0';
-			cgiResponse += buffer;
+			client._bodyRep += buffer;
 		}
 		close(cgiOutput[0]);
 
 		int status;
 		waitpid(pid, &status, 0);
 
+  
 		if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
 		{
-			// Envoyer la réponse CGI au client
-			send(client._csock, cgiResponse.c_str(), cgiResponse.length(), 0);
+			createHttpResponse(client, 200, "text/html");
+			sendHttpResponse(client);
 		}
 		else
-		{
 			sendErrorResponse(client, 500);
-		}
 	}
 }

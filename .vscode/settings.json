@@ -67,6 +67,7 @@
 		"utility": "cpp",
 		"vector": "cpp",
 <<<<<<< HEAD
+<<<<<<< HEAD
 		"filesystem": "c"
 =======
 		"filesystem": "c",
@@ -76,6 +77,9 @@
 		"concepts": "cpp",
 		"variant": "cpp",
 		"__verbose_abort": "cpp"
+>>>>>>> manu
+=======
+		"filesystem": "c"
 >>>>>>> manu
 	}
 }

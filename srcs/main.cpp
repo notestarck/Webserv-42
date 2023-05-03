@@ -6,7 +6,7 @@
 /*   By: estarck <estarck@student.42mulhouse.fr>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/15 12:22:31 by estarck           #+#    #+#             */
-/*   Updated: 2023/04/14 11:25:29 by estarck          ###   ########.fr       */
+/*   Updated: 2023/05/03 12:09:56 by estarck          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ std::vector<Server *>		_server;
 std::vector<ParsConfig *>	_config;
 Connection					_connection;
 volatile bool				boolStart = 1;
+char						**_env;
 
 void	creatFileDeleteMethod()
 {
@@ -30,17 +31,17 @@ void	creatFileDeleteMethod()
 		{
             outFile << "Contenu du fichier " << i << std::endl;
             outFile.close();
-            std::cout << "Fichier " << fileName.str() << " créé avec succès." << std::endl;
         }
 		else
             std::cerr << "Impossible de créer le fichier " << fileName.str() << std::endl;
     }
 }
 
-int main(int argc, char ** argv)
+int main(int argc, char ** argv, char **env)
 {
 	signal(SIGINT, signal_handler);
 	std::string  config_file_path;
+	_env = env;
 
 	//On verifie la presence du fichier .conf
 	if (argc > 2)
@@ -70,7 +71,10 @@ int main(int argc, char ** argv)
 
 	std::ifstream config_file(config_file_path.c_str());
 	if (!config_file.is_open())
-		std::cerr << "\033[1;31mError : Opening " << config_file_path << "\003[0m" << std::endl;
+	{
+		std::cerr << "\033[1;31mError : Opening\033[0m " << config_file_path << std::endl;
+		exit (-1);
+	}
 
 	unsigned int _nbrServer = countServer(config_file);
 

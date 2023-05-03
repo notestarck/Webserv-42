@@ -21,6 +21,8 @@ Client::Client(ParsConfig &config, Server &server, std::vector<ParsConfig::Locat
 	_uri(""),
 	_method(UNKNOWN),
 	_bodyReq(""),
+	_cookie(""),
+	_query(""),
 	_filePath(""),
 	_bodyRep(""),
 	_response(""),
@@ -62,6 +64,8 @@ Client &Client::operator=(const Client &srcs)
 		_method = srcs._method;
 		_headers = srcs._headers;
 		_bodyReq << srcs._bodyReq.str();
+		_cookie = srcs._cookie;
+		_query = srcs._query;
 		_filePath = srcs._filePath;
 		_bodyRep = srcs._bodyRep;
 		_response = srcs._response;
